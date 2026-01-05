@@ -580,7 +580,7 @@
 
 
 
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -628,7 +628,7 @@
       const header = document.querySelector('header');
       const postJobBtn = document.getElementById('postJobBtn');
       const DURATION = 600; // 1s
-      // const EASING = 'cubicBezier(0.6, 0, 0.4, 1)';
+      const EASING = 'cubicBezier(0.6, 0, 0.4, 1)';
       // const TARGET_WIDTH = 1180; // px when scrolled
 
       // Helper: full width minus 16px (8px margin on each side)
@@ -678,7 +678,7 @@
   </script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const boxes = Array.from(document.querySelectorAll('.box'));
+      const boxes = Array.from(document.querySelectorAll('.box, .category-item, .hero-section, .welcome-header'));
       if (!boxes.length) return;
 
       // Set initial state to avoid flash
