@@ -172,7 +172,9 @@
     }
 
     .quick-categories {
-      display: flex;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(max-content, 1fr);
       gap: 16px;
       overflow-x: auto;
       padding-bottom: 8px;
@@ -194,9 +196,10 @@
       background-color: white;
       transition: all 0.2s;
       cursor: pointer;
-      min-width: 140px;
       text-align: left;
-      flex-shrink: 0;
+      text-align: left;
+      min-width: 160px; 
+
     }
 
     .category-item:hover {
@@ -222,15 +225,9 @@
     }
 
     @media (max-width: 1200px) {
-      .quick-categories {
-        grid-template-columns: repeat(3, 1fr);
-      }
     }
 
     @media (max-width: 768px) {
-      .quick-categories {
-        grid-template-columns: repeat(2, 1fr);
-      }
       .hero-section {
         padding: 40px 20px;
       }
@@ -328,11 +325,6 @@
 
       </section>
 
-
-
-
-
-
       <div class="quick-categories">
         <div class="category-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
@@ -374,6 +366,7 @@
     </div>
     
     <spacer></spacer>
+    <spacer></spacer> <spacer></spacer> <spacer></spacer> <spacer></spacer>
     <!-- Footer -->
     <footer class="site-footer">
       <div class="footer-content">
@@ -678,7 +671,7 @@
   </script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const boxes = Array.from(document.querySelectorAll('.box, .category-item, .hero-section, .welcome-header'));
+      const boxes = Array.from(document.querySelectorAll('.box, .quick-categories, .hero-section, .welcome-header'));
       if (!boxes.length) return;
 
       // Set initial state to avoid flash
