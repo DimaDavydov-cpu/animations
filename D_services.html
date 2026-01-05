@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body
+  style="display: flex; gap: 40px; flex-direction: column; width: calc(100% - var(--sidebar-w, 0px)); box-sizing: border-box; height: 100vh;justify-content: flex-start; align-items: center;">
+  <img src="Assets/magic_effector.svg" height="64px" style="margin-bottom: 40px; align-self: flex-start;" />
+
+
+
+  <div class="box grey inglow open_sidebar"
+    style="background-image: url(&quot;Assets/fl7@2x.png&quot;);min-height: 440px; justify-content:space-between; background-position: right center;background-repeat: no-repeat; background-size: contain; width: 80%; max-width: 1200px;">
+    <div style="width:50%; z-index: 1; max-width:600px; display: flex; flex-direction: column; gap: 20px;">
+      <h2>This is box example</h2>
+      <p>Product designers may explore available design services in Penta’s
+        storybook
+        to play and explore available parameters and customisation.</p>
+    </div>
+    <div class="bluredglass horizontal" style="padding:20px;">
+      <div>
+        <h3>Social media marketing</h3><br>
+        <img src="Assets/vettedpro.svg">
+      </div>
+      <div class="button icon round"><button><svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5313 12.2188L14.75 8M14.75 8L10.5312 3.78125M14.75 8H1.25" stroke="white" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button></div>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="box shadow" style="gap: 120px; width: 80%; max-width: 1200px; display: none;">
+    <h2>Other elements example</h2>
+    <div class="horizontal">
+
+      <div class="input">
+        <input type="text" id="name" name="name" placeholder="e.g. Mike Shinoda" />
+      </div>
+      <div class="button"><button>Submit that</button></div>
+
+      <div class="button border" id="postJobBtn"><button><img src="Assets/brief.svg" /> Post a job</button></div>
+
+    </div>
+
+  </div>
+
+
+
+
+  <div id="sidebar"
+    style="position: fixed; top: 12px; bottom: 12px; right: 12px; width: var(--sidebar-w, 0px); background-color: #F5F5F5; z-index: 1000; border-radius: 16px; overflow-y: auto;">
+    <div class="content"
+      style="display: flex; flex-direction: column; padding: 24px; gap: 20px; box-sizing: border-box; opacity: 1; transform: translateY(0px);">
+      <div class="control-panel">
+        <!-- Effect Type Selector -->
+        <div class="control-group">
+
+          <div class="segmented-control">
+            <button data-effect="glow">Glow</button>
+            <button data-effect="inglow" class="active">Inner Glow</button>
+          </div>
+        </div>
+
+
+
+        <!-- Glow Controls -->
+        <div id="glow-controls" style="display: none; flex-direction: column; gap: 24px;">
+          <h3>Customize Glow</h3>
+
+          <!-- Glow Colors -->
+          <div class="control-group">
+            <div class="color-picker">
+              <input type="color" id="glow-color1" value="#ffffff">
+              <label for="glow-color1">COLOR 1</label>
+            </div>
+            <div class="color-picker">
+              <input type="color" id="glow-color2" value="#446EE7">
+              <label for="glow-color2">COLOR 2</label>
+            </div>
+            <div class="color-picker">
+              <input type="color" id="glow-color3" value="#794ae8">
+              <label for="glow-color3">COLOR 3</label>
+            </div>
+            <div class="color-picker">
+              <input type="color" id="glow-color4" value="#ffffff">
+              <label for="glow-color4">COLOR 4</label>
+            </div>
+          </div>
+
+          <!-- Glow Angle & Opacity -->
+          <div class="control-row">
+            <div class="control-item">
+              <label>ANGLE</label>
+              <div class="input-wrapper">
+                <input type="number" id="glow-angle" value="0">
+                <span>deg</span>
+              </div>
+            </div>
+            <div class="control-item">
+              <label>OPACITY</label>
+              <div class="input-wrapper">
+                <input type="number" id="glow-opacity" value="100">
+                <span>%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>BLUR</label>
+            <input type="range" id="glow-blur" min="0" max="100" value="20" style="width: 100%; accent-color: #222325;">
+            <div
+              style="display: flex; justify-content: space-between; font-size: 12px; color: #74767E; margin-top: 4px;">
+              <span>0px</span>
+              <span id="glow-blur-value">20px</span>
+              <span>100px</span>
+            </div>
+          </div>
+
+          <!-- Color Positions -->
+          <div class="control-row">
+            <div class="control-item">
+              <label>POS 1</label>
+              <div class="input-wrapper">
+                <input type="number" id="glow-pos1" value="0">
+                <span>deg</span>
+              </div>
+            </div>
+            <div class="control-item">
+              <label>POS 2</label>
+              <div class="input-wrapper">
+                <input type="number" id="glow-pos2" value="109">
+                <span>deg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-item">
+              <label>POS 3</label>
+              <div class="input-wrapper">
+                <input type="number" id="glow-pos3" value="239">
+                <span>deg</span>
+              </div>
+            </div>
+            <div class="control-item">
+              <label>POS 4</label>
+              <div class="input-wrapper">
+                <input type="number" id="glow-pos4" value="360">
+                <span>deg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Inner Glow Controls -->
+        <div id="inglow-controls" style="display: flex; flex-direction: column; gap: 24px;">
+          <h3>Customize Inner Glow</h3>
+
+          <!-- Colors -->
+          <div class="control-group">
+            <div class="color-picker">
+              <input type="color" id="color1" value="#d0e500">
+              <label for="color1">COLOR 1</label>
+            </div>
+            <div class="color-picker">
+              <input type="color" id="color2" value="#1DBF73">
+              <label for="color2">COLOR 2</label>
+            </div>
+          </div>
+
+
+
+
+
+          <!-- Blur Slider -->
+          <div class="control-group">
+            <label>BLUR</label>
+            <input type="range" id="blur" min="0" max="200" value="80" style="width: 100%; accent-color: #222325;">
+            <div
+              style="display: flex; justify-content: space-between; font-size: 12px; color: #74767E; margin-top: 4px;">
+              <span>0px</span>
+              <span id="blur-value">80px</span>
+              <span>200px</span>
+            </div>
+          </div>
+
+          <!-- Position -->
+          <div class="control-group">
+            <label>POSITION</label>
+            <div class="segmented-control">
+              <button data-pos="bottom" class="active">Bottom</button>
+              <button data-pos="top">Top</button>
+              <button data-pos="left">Left</button>
+              <button data-pos="right">Right</button>
+            </div>
+          </div>
+
+          <!-- Angle & Opacity -->
+          <div class="control-row">
+            <div class="control-item">
+              <label>ANGLE</label>
+              <div class="input-wrapper">
+                <input type="number" id="angle" value="8">
+                <span>deg</span>
+              </div>
+            </div>
+            <div class="control-item">
+              <label>OPACITY</label>
+              <div class="input-wrapper">
+                <input type="number" id="opacity" value="100">
+                <span>%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Height -->
+          <div class="control-group">
+            <label>HEIGHT</label>
+            <div class="input-group">
+              <input type="number" id="height" value="20">
+              <select id="height-unit">
+                <option value="%">%</option>
+                <option value="px">PX</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+        <!-- End of Inner Glow Controls -->
+
+
+
+        <hr style="border: 0; border-top: 1px solid #E4E5E7; width: 100%;">
+
+        <!-- Animate (Shared for both effects) -->
+        <div class="control-group toggle-group">
+          <label class="switch">
+            <input type="checkbox" id="animate" checked>
+            <span class="slider round"></span>
+          </label>
+          <span>Animate</span>
+        </div>
+
+        <!-- Time & Easing -->
+        <div class="control-row" id="animation-settings">
+          <div class="control-item">
+            <label>TIME</label>
+            <div class="input-wrapper">
+              <input type="number" id="time" value="2">
+              <span>s</span>
+            </div>
+          </div>
+          <div class="control-item">
+            <label>EASING</label>
+            <select id="easing">
+              <option value="linear">Linear</option>
+              <option value="ease-in-out">EaseInOut</option>
+              <option value="cubic-bezier(.24, .48, 0, .98)">Cubic</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Loop & Delay -->
+
+
+        <hr style="border: 0; border-top: 1px solid #E4E5E7; width: 100%;">
+
+        <h3>Glass Settings</h3>
+
+        <!-- Glass Color -->
+        <div class="control-group">
+          <div class="color-picker">
+            <input type="color" id="glass-color" value="#ffffff">
+            <label for="glass-color">GLASS COLOR</label>
+          </div>
+        </div>
+
+        <!-- Glass Blur & Opacity -->
+        <div class="control-row">
+          <div class="control-item">
+            <label>BLUR</label>
+            <div class="input-wrapper">
+              <input type="number" id="glass-blur" value="12">
+              <span>px</span>
+            </div>
+          </div>
+          <div class="control-item">
+            <label>OPACITY</label>
+            <div class="input-wrapper">
+              <input type="number" id="glass-opacity" value="80">
+              <span>%</span>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #E4E5E7; width: 100%;">
+
+        <!-- CSS Code Export Section -->
+        <div class="css-export-section">
+          <h3>Generated CSS</h3>
+          <div class="export-container">
+            <textarea id="css-output"></textarea>
+            <div class="button">
+              <button id="copy-css-btn">Copy CSS</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const title = document.querySelector('h1');
+      if (!title) return;
+
+      const text = title.textContent;
+      title.setAttribute('aria-label', text);
+      title.innerHTML = '';
+
+      // Wrap each character in a span
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch; // preserve spaces
+        title.appendChild(span);
+      }
+
+      // Make "let’s get rollin’" lighter
+      const phrase = 'let\u2019s get rollin\u2019';
+      const start = text.indexOf(phrase);
+      if (start !== -1) {
+        for (let i = start; i < start + phrase.length; i++) {
+          title.children[i].classList.add('light');
+        }
+      }
+
+      // Animate characters from blurred, transparent, and shifted right
+      anime({
+        targets: 'h1 .char',
+        opacity: [0, 1],
+        translateX: [0, 0],
+        translateY: [60, 0],
+        skewY: [30, 0],
+        /* scale:[2, 1], */
+        /* filter: ['blur(44px)', 'blur(0px)'], */
+        easing: 'cubicBezier(.24, .48, 0, .98)',
+        duration: 400,
+        delay: anime.stagger(20) // letter-by-letter
+      });
+    });
+  </script>
+  <script>
+
+
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const containers = document.querySelectorAll('.image_bg');
+      if (!containers.length) return;
+
+      containers.forEach(function (container) {
+        const slides = container.querySelectorAll('.bg');
+        if (!slides.length) return;
+
+        // Initialize all slides hidden and zoomed
+        slides.forEach(function (s) {
+          s.style.opacity = 0;
+          s.style.transform = 'scale(1.2)';
+        });
+
+        let current = 0;
+        // Show first slide
+        slides[current].style.opacity = 1;
+        slides[current].style.transform = 'scale(1)';
+
+        function showNext() {
+          const prev = slides[current];
+          current = (current + 1) % slides.length;
+          const next = slides[current];
+
+          anime({
+            targets: prev,
+            opacity: [1, 0],
+            scale: [1, 1.1],
+            duration: 1000,
+            easing: 'cubicBezier(.24, .48, 0, .98)'
+          });
+
+          anime({
+            targets: next,
+            opacity: [0, 1],
+            scale: [1.2, 1],
+            duration: 1000,
+            easing: 'cubicBezier(.24, .48, 0, .98)'
+          });
+        }
+
+        // Run slideshow every 2 seconds
+        setInterval(showNext, 2400);
+      });
+    });
+  </script>
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const boxes = Array.from(document.querySelectorAll('.box'));
+      if (!boxes.length) return;
+
+      // Set initial state to avoid flash
+      boxes.forEach(function (el) {
+        el.style.opacity = 0;
+        el.style.transform = 'translateY(28px)';
+        if (el.classList.contains('texture_element')) {
+          const first = el.querySelector('div:first-child');
+          if (first) first.style.opacity = 0;
+        }
+      });
+
+      anime({
+        targets: boxes,
+        opacity: [0, 1],
+        translateY: [28, 0],
+        duration: 700,
+        easing: 'cubicBezier(.24, .48, 0, .98)',
+        delay: anime.stagger(120, { start: 150 }),
+        complete: function (anim) {
+          anim.animatables.forEach(function (a) {
+            setTimeout(function () {
+              a.target.style.removeProperty('opacity');
+              a.target.style.removeProperty('transform');
+              if (a.target.classList.contains('texture_element')) {
+                const first = a.target.querySelector('div:first-child');
+                if (first) {
+                  anime({
+                    targets: first,
+                    opacity: [0, 1],
+                    duration: 300,
+                    easing: 'easeInOutQuad'
+                  });
+                }
+              }
+            }, 0);
+          });
+        }
+      });
+    });
+  </script>
+  <script>
+    (function () {
+      const title = document.querySelector('h1');
+      if (!title) return;
+
+      const START_WEIGHT = 700;  // current in CSS
+      const END_WEIGHT = 300;  // lightest available weight loaded
+      const MIN_SCALE = 0.60; // shrink more on scroll
+      const RANGE_PX = 320;  // scroll distance to reach full effect
+
+      let ticking = false;
+
+      function clamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
+
+      function update() {
+        const t = clamp01(window.scrollY / RANGE_PX);
+        const scale = 1 - (1 - MIN_SCALE) * t;
+        const weight = Math.round(START_WEIGHT + (END_WEIGHT - START_WEIGHT) * t);
+
+        title.style.transform = `scale(${scale})`;
+        title.style.fontWeight = String(weight);
+
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      }
+
+      // Prime the state on load
+      update();
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
+
+
+
+
+
+
+    $(function () {
+      var $menu = $('#drop1\\.1');
+
+      $('#drop1').on('click', function (e) {
+        e.preventDefault();
+
+        if (!$menu.hasClass('show')) {
+          // SHOW: set visible and animate container then links
+          $menu.addClass('show');
+          $menu.css({ opacity: 0, transform: 'translateY(-8px) scale(0.9)', filter: 'blur(12px)' });
+
+          // Prepare links for staggered reveal
+          var $links = $menu.find('a');
+          $links.css({ opacity: 0, transform: 'translateY(4px)' });
+
+          var tl = anime.timeline({ easing: 'cubicBezier(.24, .48, 0, .98)' });
+
+          tl.add({
+            targets: $menu.get(0),
+            opacity: [0, 1],
+            translateY: [-8, 0],
+            scale: [0.9, 1],
+            filter: ['blur(12px)', 'blur(0px)'],
+            duration: 220
+          }).add({
+            targets: $links.toArray(),
+            opacity: [0, 1],
+            translateY: [4, 0],
+            duration: 180,
+            delay: anime.stagger(40)
+          }, '-=60');
+
+          tl.finished.then(function () {
+            $menu.css({ opacity: '', transform: '', filter: '' });
+            $links.css({ opacity: '', transform: '' });
+          });
+
+        } else {
+          // HIDE: animate links out then container, finally hide
+          var $links = $menu.find('a');
+
+          var tl = anime.timeline({ easing: 'cubicBezier(.24, .48, 0, .98)' });
+
+          tl.add({
+            targets: $links.toArray(),
+            opacity: [1, 0],
+            translateY: [0, 4],
+            duration: 80,
+            delay: anime.stagger(20, { direction: 'reverse' })
+          }).add({
+            targets: $menu.get(0),
+            opacity: [1, 0],
+            translateY: [0, -12],
+            scale: [1, 0.9],
+            filter: ['blur(0px)', 'blur(12px)'],
+            duration: 180
+          });
+
+          tl.finished.then(function () {
+            $menu.removeClass('show');
+            $menu.css({ opacity: '', transform: '', filter: '' });
+            $links.css({ opacity: '', transform: '' });
+          });
+        }
+      });
+    });
+
+
+  </script>
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const h = document.querySelector('h1.ls-animate');
+      if (!h) return;
+
+      // Set initial state
+      h.style.opacity = 0;
+      h.style.letterSpacing = '0.2em';
+
+      const io = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            // Ensure single-line and hide overflow during animation
+            h.style.overflow = 'hidden';
+            h.style.whiteSpace = 'nowrap';
+            anime({
+              targets: h,
+              opacity: [0, 1],
+              letterSpacing: ['0.2em', '-0.04em'],
+              duration: 1200,
+              easing: 'cubicBezier(.24, .48, 0, .98)',
+              complete: function () {
+                h.style.overflow = '';
+                h.style.whiteSpace = '';
+              }
+            });
+            obs.unobserve(h);
+          }
+        });
+      }, { threshold: 0.4 });
+
+      io.observe(h);
+    });
+  </script>
+  </script>
+  <script>
+    (function () {
+      const triggers = document.querySelectorAll('.open_sidebar');
+      const sidebar = document.getElementById('sidebar');
+      const content = sidebar ? sidebar.querySelector('.content') : null;
+      const root = document.documentElement; // CSS var host
+      if (!triggers.length || !sidebar) return;
+
+      const DURATION = 600;                 // ms for sidebar width animation
+      const CONTENT_FADE = 400;             // ms for content fade
+      const EASING = 'cubicBezier(.24, .48, 0, .98)';
+      const TARGET = 600; // px                 // px target width
+      const START_CONTENT_AT = Math.floor(DURATION * 0.85); // start at ~85%
+
+      function readVar() {
+        const v = getComputedStyle(root).getPropertyValue('--sidebar-w').trim();
+        return v ? parseFloat(v) : 0;
+      }
+      function setVar(px) { root.style.setProperty('--sidebar-w', px + 'px'); }
+
+      // Initialize closed state
+      setVar(0);
+      if (content) { content.style.opacity = '0'; content.style.display = 'none'; }
+
+      function animateOpen() {
+        const from = readVar();
+        const tl = anime.timeline({ autoplay: false });
+
+        // 1) Animate width first
+        tl.add({
+          targets: { t: from },
+          t: TARGET,
+          duration: DURATION,
+          easing: EASING,
+          update: function (anim) {
+            const v = anim.animations[0].currentValue;
+            setVar(v);
+          }
+        });
+
+        // 2) Near the end (~85%), reveal and fade-in content with translateX and scale
+        if (content) {
+          tl.add({
+            targets: content,
+            opacity: [0, 1],
+            translateY: [8, 0],
+            // scale: [0.98, 1],
+            duration: CONTENT_FADE,
+            easing: EASING,
+            begin: function () {
+              content.style.display = 'flex';
+              content.style.opacity = '0';
+            }
+          }, START_CONTENT_AT);
+        }
+
+        tl.play();
+      }
+
+      function animateClose() {
+        const from = readVar();
+        const tl = anime.timeline({ autoplay: false });
+
+        // 1) Fade content out first, then hide it, with rightward motion and scale down, slower
+        if (content) {
+          tl.add({
+            targets: content,
+            opacity: [parseFloat(getComputedStyle(content).opacity) || 1, 0],
+            translateY: [0, 8],
+            // scale: [1, 0.98],
+            duration: CONTENT_FADE / 2,
+            easing: EASING,
+            complete: function () { content.style.display = 'none'; }
+          });
+        }
+
+        // 2) Collapse width to zero
+        tl.add({
+          targets: { t: from },
+          t: 0,
+          duration: DURATION,
+          easing: EASING,
+          update: function (anim) {
+            const v = anim.animations[0].currentValue;
+            setVar(v);
+          }
+        });
+
+        tl.play();
+      }
+
+      function isOpen() { return readVar() >= (TARGET - 1); }
+      function toggle() { isOpen() ? animateClose() : animateOpen(); }
+
+      triggers.forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          toggle();
+        });
+      });
+    })();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // --- Effect Type Switcher ---
+      const effectBtns = document.querySelectorAll('[data-effect]');
+      const glowControls = document.getElementById('glow-controls');
+      const inglowControls = document.getElementById('inglow-controls');
+      const targetElement = document.querySelector('.box.grey');
+
+      effectBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          effectBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const effect = btn.dataset.effect;
+
+          if (effect === 'glow') {
+            glowControls.style.display = 'flex';
+            inglowControls.style.display = 'none';
+            if (targetElement) {
+              targetElement.classList.remove('inglow');
+              targetElement.classList.add('glow', 'animated');
+            }
+          } else {
+            glowControls.style.display = 'none';
+            inglowControls.style.display = 'flex';
+            if (targetElement) {
+              targetElement.classList.remove('glow', 'animated');
+              targetElement.classList.add('inglow');
+            }
+          }
+        });
+      });
+
+      // Initialize the correct effect based on active button
+      const activeEffectBtn = document.querySelector('[data-effect].active');
+      if (activeEffectBtn && targetElement) {
+        const activeEffect = activeEffectBtn.dataset.effect;
+        if (activeEffect === 'glow') {
+          glowControls.style.display = 'flex';
+          inglowControls.style.display = 'none';
+          targetElement.classList.remove('inglow');
+          targetElement.classList.add('glow', 'animated');
+        } else {
+          glowControls.style.display = 'none';
+          inglowControls.style.display = 'flex';
+          targetElement.classList.remove('glow', 'animated');
+          targetElement.classList.add('inglow');
+        }
+      }
+
+      // --- Glow Effect Controls ---
+      const glowColor1 = document.getElementById('glow-color1');
+      const glowColor2 = document.getElementById('glow-color2');
+      const glowColor3 = document.getElementById('glow-color3');
+      const glowColor4 = document.getElementById('glow-color4');
+      const glowAngle = document.getElementById('glow-angle');
+      const glowBlur = document.getElementById('glow-blur');
+      const glowBlurValue = document.getElementById('glow-blur-value');
+      const glowPos1 = document.getElementById('glow-pos1');
+      const glowPos2 = document.getElementById('glow-pos2');
+      const glowPos3 = document.getElementById('glow-pos3');
+      const glowPos4 = document.getElementById('glow-pos4');
+
+      function updateGlowGradient() {
+        const c1 = glowColor1.value;
+        const c2 = glowColor2.value;
+        const c3 = glowColor3.value;
+        const c4 = glowColor4.value;
+        const p1 = glowPos1.value + 'deg';
+        const p2 = glowPos2.value + 'deg';
+        const p3 = glowPos3.value + 'deg';
+        const p4 = glowPos4.value + 'deg';
+        const angle = glowAngle.value + 'deg';
+        const blur = glowBlur.value + 'px';
+
+        // Update blur value display
+        if (glowBlurValue) glowBlurValue.textContent = blur;
+
+        const gradient = `conic-gradient(from calc(var(--a) + ${angle}) at 50% 50%, ${c1} ${p1}, ${c2} ${p2}, ${c3} ${p3}, ${c4} ${p4})`;
+
+        // Update CSS for .glow:after
+        const styleId = 'dynamic-glow-gradient';
+        let styleEl = document.getElementById(styleId);
+        if (!styleEl) {
+          styleEl = document.createElement('style');
+          styleEl.id = styleId;
+          document.head.appendChild(styleEl);
+        }
+
+        styleEl.textContent = `
+            .glow:after {
+              background: ${gradient} !important;
+              filter: blur(${blur}) !important;
+            }
+            .outline:before {
+              background: ${gradient} !important;
+            }
+          `;
+      }
+
+      const glowOpacity = document.getElementById('glow-opacity');
+
+      if (glowColor1) glowColor1.addEventListener('input', updateGlowGradient);
+      if (glowColor2) glowColor2.addEventListener('input', updateGlowGradient);
+      if (glowColor3) glowColor3.addEventListener('input', updateGlowGradient);
+      if (glowColor4) glowColor4.addEventListener('input', updateGlowGradient);
+      if (glowAngle) glowAngle.addEventListener('input', updateGlowGradient);
+      if (glowBlur) glowBlur.addEventListener('input', updateGlowGradient);
+      if (glowPos1) glowPos1.addEventListener('input', updateGlowGradient);
+      if (glowPos2) glowPos2.addEventListener('input', updateGlowGradient);
+      if (glowPos3) glowPos3.addEventListener('input', updateGlowGradient);
+      if (glowPos4) glowPos4.addEventListener('input', updateGlowGradient);
+
+      // Glow opacity control
+      if (glowOpacity) {
+        glowOpacity.addEventListener('input', (e) => {
+          if (targetElement) {
+            targetElement.style.setProperty('--glow-after-opacity', e.target.value / 100);
+          }
+        });
+      }
+
+      // Initialize glow gradient
+      updateGlowGradient();
+
+      // --- Inner Glow Logic ---
+      const glowTarget = targetElement;
+
+      // Declare all control variables at the top level so they're accessible to generateCSS
+      const color1 = document.getElementById('color1');
+      const color2 = document.getElementById('color2');
+      const blur = document.getElementById('blur');
+      const blurValue = document.getElementById('blur-value');
+      const opacity = document.getElementById('opacity');
+      const angle = document.getElementById('angle');
+      const height = document.getElementById('height');
+      const heightUnit = document.getElementById('height-unit');
+      const animateToggle = document.getElementById('animate');
+      const time = document.getElementById('time');
+      const easing = document.getElementById('easing');
+      const loop = document.getElementById('loop');
+      const delay = document.getElementById('delay');
+      const posBtns = document.querySelectorAll('[data-pos]');
+
+      if (glowTarget) {
+        const setGlowVar = (name, val) => glowTarget.style.setProperty(name, val);
+
+        if (color1) color1.addEventListener('input', (e) => setGlowVar('--glow-c1', e.target.value));
+        if (color2) color2.addEventListener('input', (e) => setGlowVar('--glow-c2', e.target.value));
+        if (blur) {
+          blur.addEventListener('input', (e) => {
+            const value = e.target.value + 'px';
+            setGlowVar('--glow-blur', value);
+            if (blurValue) blurValue.textContent = value;
+          });
+        }
+        if (opacity) opacity.addEventListener('input', (e) => setGlowVar('--glow-opacity', e.target.value / 100));
+        if (angle) angle.addEventListener('input', (e) => setGlowVar('--glow-angle', e.target.value + 'deg'));
+
+        const updateHeight = () => {
+          setGlowVar('--glow-height', height.value + heightUnit.value);
+        };
+        if (height) height.addEventListener('input', updateHeight);
+        if (heightUnit) heightUnit.addEventListener('change', updateHeight);
+
+        // Position
+        posBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            posBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const pos = btn.dataset.pos;
+
+            setGlowVar('--glow-top', 'auto');
+            setGlowVar('--glow-bottom', 'auto');
+            setGlowVar('--glow-left', 'auto');
+            setGlowVar('--glow-right', 'auto');
+            setGlowVar('--glow-width', '100%');
+            setGlowVar('--glow-height', height.value + heightUnit.value);
+
+            if (pos === 'bottom') {
+              setGlowVar('--glow-bottom', '0%');
+              setGlowVar('--glow-right', '0%');
+            } else if (pos === 'top') {
+              setGlowVar('--glow-top', '0%');
+              setGlowVar('--glow-right', '0%');
+            } else if (pos === 'left') {
+              setGlowVar('--glow-left', '0%');
+              setGlowVar('--glow-top', '0%');
+              setGlowVar('--glow-width', '44%');
+              setGlowVar('--glow-height', '100%');
+            } else if (pos === 'right') {
+              setGlowVar('--glow-right', '0%');
+              setGlowVar('--glow-top', '0%');
+              setGlowVar('--glow-width', '44%');
+              setGlowVar('--glow-height', '100%');
+            }
+          });
+        });
+
+        if (animateToggle) {
+          const animationSettings = document.getElementById('animation-settings');
+          const loopDelaySetting = document.getElementById('loop-delay-settings');
+          const delaySetting = document.getElementById('delay-setting');
+
+          // Function to toggle visibility
+          const toggleAnimationSettings = (show) => {
+            if (animationSettings) animationSettings.style.display = show ? 'flex' : 'none';
+            if (loopDelaySetting) loopDelaySetting.style.display = show ? 'flex' : 'none';
+            if (delaySetting) delaySetting.style.display = show ? 'flex' : 'none';
+          };
+
+          // Set initial state
+          toggleAnimationSettings(animateToggle.checked);
+
+          animateToggle.addEventListener('change', (e) => {
+            setGlowVar('--glow-play-state', e.target.checked ? 'running' : 'paused');
+            toggleAnimationSettings(e.target.checked);
+          });
+        }
+
+        if (time) time.addEventListener('input', (e) => setGlowVar('--glow-duration', e.target.value + 's'));
+        if (easing) easing.addEventListener('change', (e) => setGlowVar('--glow-easing', e.target.value));
+        if (loop) loop.addEventListener('change', (e) => {
+          setGlowVar('--glow-iteration', e.target.checked ? 'infinite' : '1');
+        });
+        if (delay) delay.addEventListener('change', (e) => {
+          setGlowVar('--glow-delay', e.target.checked ? '2s' : '0s');
+        });
+      }
+
+      // --- Glass Logic ---
+      const glassTargets = document.querySelectorAll('.bluredglass');
+      const glassColor = document.getElementById('glass-color');
+      const glassBlur = document.getElementById('glass-blur');
+      const glassOpacity = document.getElementById('glass-opacity');
+
+      function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : null;
+      }
+
+      function updateGlass() {
+        const hex = glassColor.value;
+        const rgb = hexToRgb(hex);
+        const op = glassOpacity.value / 100;
+        const blurVal = glassBlur.value + 'px';
+
+        if (rgb) {
+          const bgVal = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${op})`;
+          glassTargets.forEach(el => {
+            el.style.setProperty('--glass-bg', bgVal);
+            el.style.setProperty('--glass-blur', blurVal);
+          });
+        }
+      }
+
+      if (glassColor) glassColor.addEventListener('input', updateGlass);
+      if (glassBlur) glassBlur.addEventListener('input', updateGlass);
+      if (glassOpacity) glassOpacity.addEventListener('input', updateGlass);
+
+      // --- CSS Code Generator ---
+      const cssOutput = document.getElementById('css-output');
+      const copyCssBtn = document.getElementById('copy-css-btn');
+
+      function generateCSS() {
+        const isGlow = targetElement && targetElement.classList.contains('glow');
+        const isInnerGlow = targetElement && targetElement.classList.contains('inglow');
+        const isAnimated = animateToggle && animateToggle.checked;
+
+        let css = '';
+
+        if (isInnerGlow) {
+          // Generate Inner Glow CSS
+          const c1 = color1 ? color1.value : '#d0e500';
+          const c2 = color2 ? color2.value : '#1DBF73';
+          const blurVal = blur ? blur.value + 'px' : '80px';
+          const opacityVal = opacity ? opacity.value / 100 : 1;
+          const angleVal = angle ? angle.value + 'deg' : '8deg';
+          const heightVal = height && heightUnit ? height.value + heightUnit.value : '20%';
+          const durationVal = time ? time.value + 's' : '2s';
+          const easingVal = easing ? easing.value : 'linear';
+
+          // Get position
+          const activePos = document.querySelector('[data-pos].active');
+          const pos = activePos ? activePos.dataset.pos : 'bottom';
+
+          let topVal = 'auto', bottomVal = 'auto', leftVal = 'auto', rightVal = 'auto';
+          let widthVal = '100%', heightToken = heightVal;
+
+          if (pos === 'bottom') {
+            bottomVal = '0%';
+            rightVal = '0%';
+          } else if (pos === 'top') {
+            topVal = '0%';
+            rightVal = '0%';
+          } else if (pos === 'left') {
+            leftVal = '0%';
+            topVal = '0%';
+            widthVal = '44%';
+            heightToken = '100%';
+          } else if (pos === 'right') {
+            rightVal = '0%';
+            topVal = '0%';
+            widthVal = '44%';
+            heightToken = '100%';
+          }
+
+          css = `/* Inner Glow Effect */\n`;
+          css += `.inglow {\n`;
+          css += `  position: relative;\n`;
+          css += `  overflow: hidden;\n`;
+          css += `  --glow-c1: ${c1};\n`;
+          css += `  --glow-c2: ${c2};\n`;
+          css += `  --glow-blur: ${blurVal};\n`;
+          css += `  --glow-opacity: ${opacityVal};\n`;
+          css += `  --glow-angle: ${angleVal};\n`;
+          css += `  --glow-height: ${heightToken};\n`;
+          css += `  --glow-width: ${widthVal};\n`;
+          css += `  --glow-top: ${topVal};\n`;
+          css += `  --glow-bottom: ${bottomVal};\n`;
+          css += `  --glow-left: ${leftVal};\n`;
+          css += `  --glow-right: ${rightVal};\n`;
+          if (isAnimated) {
+            css += `  --glow-duration: ${durationVal};\n`;
+            css += `  --glow-easing: ${easingVal};\n`;
+            css += `  --glow-delay: 0s;\n`;
+            css += `  --glow-iteration: infinite;\n`;
+            css += `  --glow-play-state: running;\n`;
+          }
+          css += `}\n\n`;
+
+          css += `.inglow::before {\n`;
+          css += `  content: '';\n`;
+          css += `  display: block;\n`;
+          css += `  position: absolute;\n`;
+          css += `  background-color: #fff;\n`;
+          css += `  width: var(--glow-width);\n`;
+          css += `  height: var(--glow-height);\n`;
+          css += `  top: var(--glow-top);\n`;
+          css += `  bottom: var(--glow-bottom);\n`;
+          css += `  left: var(--glow-left);\n`;
+          css += `  right: var(--glow-right);\n`;
+          css += `  z-index: 0;\n`;
+          css += `  background: linear-gradient(\n`;
+          css += `    var(--glow-angle),\n`;
+          css += `    #ffffff20 16.5%,\n`;
+          css += `    var(--glow-c1) 52%,\n`;
+          css += `    #ffffff10 70%,\n`;
+          css += `    var(--glow-c2) 80%,\n`;
+          css += `    #ffffff00 100%\n`;
+          css += `  ) 0 100% / 100% 200%;\n`;
+          css += `  filter: blur(var(--glow-blur));\n`;
+          css += `  opacity: var(--glow-opacity);\n`;
+          if (isAnimated) {
+            css += `  animation: btn-glow var(--glow-duration) var(--glow-easing) var(--glow-delay) var(--glow-iteration);\n`;
+            css += `  animation-play-state: var(--glow-play-state);\n`;
+          }
+          css += `}\n`;
+
+          if (isAnimated) {
+            css += `\n@keyframes btn-glow {\n`;
+            css += `  0% {\n`;
+            css += `    background-position: 0 300%;\n`;
+            css += `  }\n`;
+            css += `  100% {\n`;
+            css += `    background-position: 0 100%;\n`;
+            css += `  }\n`;
+            css += `}\n`;
+          }
+
+        } else if (isGlow) {
+          // Generate Glow CSS
+          const c1 = glowColor1 ? glowColor1.value : '#ffffff';
+          const c2 = glowColor2 ? glowColor2.value : '#446EE7';
+          const c3 = glowColor3 ? glowColor3.value : '#794ae8';
+          const c4 = glowColor4 ? glowColor4.value : '#ffffff';
+          const p1 = glowPos1 ? glowPos1.value + 'deg' : '0deg';
+          const p2 = glowPos2 ? glowPos2.value + 'deg' : '109deg';
+          const p3 = glowPos3 ? glowPos3.value + 'deg' : '239deg';
+          const p4 = glowPos4 ? glowPos4.value + 'deg' : '360deg';
+          const angleVal = glowAngle ? glowAngle.value + 'deg' : '0deg';
+          const blurVal = glowBlur ? glowBlur.value + 'px' : '20px';
+          const opacityVal = glowOpacity ? glowOpacity.value / 100 : 1;
+          const durationVal = time ? time.value + 's' : '4s';
+          const easingVal = easing ? easing.value : 'linear';
+
+          css = `/* Glow Effect */\n`;
+          css += `.glow {\n`;
+          css += `  position: relative;\n`;
+          css += `  background-color: #fff;\n`;
+          css += `  border-radius: 16px;\n`;
+          css += `  --glow-c1: ${c1};\n`;
+          css += `  --glow-c2: ${c2};\n`;
+          css += `  --glow-c3: ${c3};\n`;
+          css += `  --glow-c4: ${c4};\n`;
+          css += `  --glow-p1: ${p1};\n`;
+          css += `  --glow-p2: ${p2};\n`;
+          css += `  --glow-p3: ${p3};\n`;
+          css += `  --glow-p4: ${p4};\n`;
+          css += `  --glow-angle: ${angleVal};\n`;
+          css += `  --glow-blur: ${blurVal};\n`;
+          css += `  --glow-opacity: ${opacityVal};\n`;
+          if (isAnimated) {
+            css += `  --glow-duration: ${durationVal};\n`;
+            css += `  --glow-easing: ${easingVal};\n`;
+            css += `  --glow-iteration: infinite;\n`;
+            css += `  --glow-play-state: running;\n`;
+          }
+          css += `}\n\n`;
+
+          css += `.glow::after {\n`;
+          css += `  content: "";\n`;
+          css += `  z-index: -1;\n`;
+          css += `  inset: -2px;\n`;
+          css += `  position: absolute;\n`;
+          css += `  border-radius: 18px;\n`;
+          css += `  background: conic-gradient(\n`;
+          css += `    from calc(var(--a) + var(--glow-angle)) at 50% 50%,\n`;
+          css += `    var(--glow-c1) var(--glow-p1),\n`;
+          css += `    var(--glow-c2) var(--glow-p2),\n`;
+          css += `    var(--glow-c3) var(--glow-p3),\n`;
+          css += `    var(--glow-c4) var(--glow-p4)\n`;
+          css += `  );\n`;
+          css += `  filter: blur(var(--glow-blur));\n`;
+          css += `  opacity: var(--glow-opacity);\n`;
+          if (isAnimated) {
+            css += `  animation: animate var(--glow-duration) var(--glow-iteration) var(--glow-easing);\n`;
+            css += `  animation-play-state: var(--glow-play-state);\n`;
+          }
+          css += `}\n`;
+
+          if (isAnimated) {
+            css += `\n@property --a {\n`;
+            css += `  syntax: '<angle>';\n`;
+            css += `  initial-value: 0deg;\n`;
+            css += `  inherits: false;\n`;
+            css += `}\n\n`;
+            css += `@keyframes animate {\n`;
+            css += `  to {\n`;
+            css += `    --a: 1turn;\n`;
+            css += `  }\n`;
+            css += `}\n`;
+          }
+        }
+
+        if (cssOutput) {
+          cssOutput.value = css;
+        }
+      }
+
+      // Copy CSS to clipboard
+      // Copy CSS to clipboard
+      if (copyCssBtn) {
+        copyCssBtn.addEventListener('click', () => {
+          if (cssOutput) {
+            cssOutput.select();
+            cssOutput.setSelectionRange(0, 99999); // For mobile devices
+
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(cssOutput.value).then(() => {
+                showCopyFeedback();
+              }).catch(err => {
+                console.error('Failed to copy via Clipboard API: ', err);
+                fallbackCopyTextToClipboard();
+              });
+            } else {
+              fallbackCopyTextToClipboard();
+            }
+          }
+        });
+      }
+
+      function fallbackCopyTextToClipboard() {
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            showCopyFeedback();
+          } else {
+            console.error('Fallback: Copying text command was unsuccessful');
+          }
+        } catch (err) {
+          console.error('Fallback: Oops, unable to copy', err);
+        }
+      }
+
+      function showCopyFeedback() {
+        const originalText = copyCssBtn.textContent;
+        copyCssBtn.textContent = 'Copied!';
+        setTimeout(() => {
+          copyCssBtn.textContent = originalText;
+        }, 2000);
+      }
+
+      // Update CSS on any control change
+      function updateCSSOutput() {
+        generateCSS();
+      }
+
+      // Attach listeners to all controls
+      if (color1) color1.addEventListener('input', updateCSSOutput);
+      if (color2) color2.addEventListener('input', updateCSSOutput);
+      if (blur) blur.addEventListener('input', updateCSSOutput);
+      if (opacity) opacity.addEventListener('input', updateCSSOutput);
+      if (angle) angle.addEventListener('input', updateCSSOutput);
+      if (height) height.addEventListener('input', updateCSSOutput);
+      if (heightUnit) heightUnit.addEventListener('change', updateCSSOutput);
+      if (animateToggle) animateToggle.addEventListener('change', updateCSSOutput);
+      if (time) time.addEventListener('input', updateCSSOutput);
+      if (easing) easing.addEventListener('change', updateCSSOutput);
+
+      // Glow controls
+      if (glowColor1) glowColor1.addEventListener('input', updateCSSOutput);
+      if (glowColor2) glowColor2.addEventListener('input', updateCSSOutput);
+      if (glowColor3) glowColor3.addEventListener('input', updateCSSOutput);
+      if (glowColor4) glowColor4.addEventListener('input', updateCSSOutput);
+      if (glowAngle) glowAngle.addEventListener('input', updateCSSOutput);
+      if (glowBlur) glowBlur.addEventListener('input', updateCSSOutput);
+      if (glowOpacity) glowOpacity.addEventListener('input', updateCSSOutput);
+      if (glowPos1) glowPos1.addEventListener('input', updateCSSOutput);
+      if (glowPos2) glowPos2.addEventListener('input', updateCSSOutput);
+      if (glowPos3) glowPos3.addEventListener('input', updateCSSOutput);
+      if (glowPos4) glowPos4.addEventListener('input', updateCSSOutput);
+
+      // Position buttons
+      posBtns.forEach(btn => {
+        btn.addEventListener('click', updateCSSOutput);
+      });
+
+      // Effect type switcher
+      effectBtns.forEach(btn => {
+        btn.addEventListener('click', updateCSSOutput);
+      });
+
+      // Initial CSS generation
+      updateCSSOutput();
+    });
+  </script>
+</body>
+
+</html>

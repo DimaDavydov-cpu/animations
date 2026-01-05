@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font" crossorigin="anonymous"/>
+    <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font" crossorigin="anonymous"/>
+    <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font" crossorigin="anonymous"/>
+    <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font" crossorigin="anonymous"/>
+
+    <style>
+
+      html{
+        height: 100%;
+      }
+      body {
+        font-family: 'Macan', Helvetica, Arial, sans-serif;
+        background: #fff;
+        margin: 0;
+        padding: 16px;
+        color: #222325;
+        height: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+  
+      @font-face {
+        font-family: 'Macan';
+        src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Macan';
+        src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2') format('woff2');
+        font-weight: 300;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Macan';
+        src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2') format('woff2');
+        font-weight: 600;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Macan';
+        src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+
+      }
+      #flogo{
+        position: absolute;
+        top: 60px;
+        left: 60px;
+   
+      }
+      slideshow, slide{
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      slideshow{ position: relative; }
+      #slide2{
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        filter: blur(6px);
+        z-index: 1; /* above slide1 while it moves out */
+        pointer-events: none;
+        display: none;
+        visibility: hidden;
+      }
+      slide{
+          display: flex;
+          flex-direction: row;
+          align-items: flex-end;
+          justify-content: space-between;
+      }
+      h1{
+        font-size: 100px;
+        font-weight: 100;
+        letter-spacing: -0.08em;
+        margin: 34px;
+      }
+      h1 span{
+        display: inline-block;
+        transform-origin: center right;
+        will-change: transform, opacity, filter;
+        opacity: 0;
+        transform: translateX(40px);
+        filter: blur(4px);
+      }
+      h1 span:first-child,h1 span:nth-child(2) {
+        font-weight: 400;
+        color: #95979D
+      }
+      h2{
+        color: #254200;
+        font-size: 80px;
+        letter-spacing: -0.08em;
+        font-weight: 100;
+      }
+      h2 span:first-child{
+        color: #687200;
+      }
+      h2 b{
+        font-weight: 600;
+      }
+      #logo{
+        position: absolute;
+        bottom: 60px;
+        right: 60px;
+      }
+      #flogo, #logo {
+        opacity: 0;
+      }
+      #slide1 h1 {
+        max-width: 940px;
+      }
+     
+
+      #slide1 h2{
+        position: relative;
+        align-self: flex-start;
+        width: calc(40% - 40px);
+        opacity: 0;
+      }
+      #slide1 h2 span, #slide1 h2 b{
+        display: block;
+      }
+
+      /* h2 word containers (use existing elements: span & b) */
+      #slide1 h2 span,
+      #slide1 h2 b{
+        transform-origin: bottom left;
+        will-change: transform, opacity;
+      }
+
+      
+      p{
+        font-size: 40px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 130%; /* 52px */
+        letter-spacing: -1.6px;
+        color: var(--Greys-1200, #222325);
+        max-width: 70%;
+      }
+
+      #slide2{
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+      #slide2 p{
+        width: 44%;
+        padding: 0 44px;
+      }
+      #slide2 ul{
+        font-size: 40px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 130%; /* 52px */
+        letter-spacing: -1.6px;
+        color: var(--Greys-1200, #222325);
+        width: 44%;
+        padding: 0 44px;
+        margin: 0;
+        list-style: disc;
+        opacity: 0;
+        list-style-position: inside;
+        visibility: hidden;
+        display: none;
+      }
+      #slide2 ul li{
+        margin-bottom: 12px;
+        opacity: 0;
+        transform: translateY(40px);
+        filter: blur(20px);
+        will-change: opacity, transform, filter;
+      }
+      #slide2 p .line{
+        display: block;
+        opacity: 0;
+        transform: translateY(40px);
+        filter: blur(20px);
+        will-change: opacity, transform, filter;
+      }
+      #slide2 p .word{
+        display: inline-block;
+      }
+
+
+      .texture_element{
+          display: block;
+          /* background-image: url('Prez/grad@2x.png'); */
+          background-color: #E8F094;
+          position: absolute;
+          height: calc(100% - 32px);
+          width: 0;
+          top:16px;
+          right: 16px;
+          z-index: -1;
+          border-radius: 20px;
+          overflow: hidden;
+          /* display: flex; */
+          /* justify-content: flex-end; */
+          text-align: right;
+      }
+      .texture_element > div{
+        float: right;
+      }
+
+
+      
+    </style>
+  </head>
+  <body>
+    <img src="Prez/fiverr_logo.svg" id="flogo"/>
+    <img src="Prez/logo.svg" id="logo"/>
+<slideshow>
+ <slide id="slide1">
+  <h1><span>Product design</span>
+    Animations, transitions motion & interactions on web</h1>
+    <h2><span>Beyond</span> <b>Penta.</b> <span>Sessions</span></h2>
+ </slide>
+ <slide id="slide2">
+  <h1>Intro</h1>
+  <p>Web interactions and animations are not decoration, they are communication and part of the ux. They guide attention, provide feedback, reduce confusion, and create emotional connection. When used well, they transform static interfaces into intuitive, engaging, and memorable experiences.</p>
+  <ul>
+    <li>Web interactions</li>
+    <li>Animations</li>
+    <li>Transitions</li>
+    <li>Motion</li>
+    <li>Interactions on web</li>
+  </ul>
+ </slide>
+ <slide id="slide3" style="display: none;">
+  <h1>Animation & motion</h1>
+  <p>Web interactions and animations are not decoration, they are communication and part of the ux. They guide attention, provide feedback, reduce confusion, and create emotional connection. When used well, they transform static interfaces into intuitive, engaging, and memorable experiences.</p>
+ </slide>
+ 
+</slideshow>
+
+
+
+
+
+
+<div class="texture_element">
+  <div data-us-project="jO5VlaxpXsvyZ80Mo1Mg" style="width:1080px; height:100%"></div><script type="text/javascript">!function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.30/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();</script>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var h2 = document.querySelector('#slide1 h2');
+    var h1 = document.querySelector('#slide1 h1');
+    if (h1) {
+      var words = h1.innerText.trim().split(/\s+/);
+      h1.innerHTML = words.map(function(w){ return '<span>'+w+'</span>'; }).join(' ');
+    }
+    if(!h2) return;
+
+    // Defer animations until all assets (fonts, images, embeds) are fully loaded
+    window.addEventListener('load', function(){
+      anime({
+        targets: ['#logo'],
+        opacity: [0, 1],
+        translateX: [-40, 0],
+        duration: 500,
+        easing: 'easeOutCubic'
+      });
+      anime({
+        targets: ['#flogo'],
+        opacity: [0, 1],
+        duration: 500,
+        translateX: [40, 0],
+        easing: 'easeOutCubic'
+      });
+      anime({
+        targets: '.texture_element',
+        width: ['0', '40%'],
+        duration: 800,
+        delay: 400,
+        easing: 'easeOutCubic',
+        complete: function(){
+          // 2) Reveal and animate h2 only after texture completes
+          anime({
+            targets: '#slide1 h2 span, #slide1 h2 b',
+            translateY: [40, 0],
+            opacity: [0, 1],
+            skewY: [8, 0],
+            duration: 700,
+            filter: ['blur(4px)', 'blur(0px)'],
+            delay: anime.stagger(70),
+            easing: 'easeOutCubic',
+            begin: function(){
+              var el = document.querySelector('#slide1 h2');
+              if (el) el.style.opacity = '1';
+            },
+            complete: function(){
+              anime({
+                targets: '#slide1 h1 span',
+                translateX: [40, 0],
+                opacity: [0, 1],
+                filter: ['blur(4px)', 'blur(0px)'],
+                duration: 800,
+                delay: anime.stagger(40),
+                easing: 'easeOutCubic'
+              });
+              // On click: move slide1 down with blur & fade, while morphing texture into a circle
+              var slide1 = document.getElementById('slide1');
+              if (slide1) {
+                slide1.style.cursor = 'pointer';
+                slide1.addEventListener('click', function(){
+                  var tex = document.querySelector('.texture_element');
+                  if (!tex) return;
+
+                  // Lock current size of texture to px to avoid unit-mix issues, then compute target circle size
+                  var rect = tex.getBoundingClientRect();
+                  tex.style.width = rect.width + 'px';
+                  tex.style.height = rect.height + 'px';
+                  var targetW = Math.round(window.innerWidth * 0.44) + 'px';
+                  var targetH = targetW; // circle
+
+                  // Animate slide1 moving DOWN with slight blur and fade
+                  anime({
+                    targets: '#slide1',
+                    translateY: ['0%', '-25%'],
+                    opacity: [1, 0],
+                    filter: ['blur(0px)', 'blur(20px)'],
+                    duration: 400,
+                    easing: 'easeInOutCubic',
+                    complete: function(){
+                      var s2 = document.getElementById('slide2');
+                      if (!s2) return;
+                      // Reveal slide2 into slide1's previous location
+                      s2.style.pointerEvents = 'auto';
+                      s2.style.display = 'flex';
+                      s2.style.visibility = 'visible';
+
+                          var p = document.querySelector('#slide2 p');
+                          if (p) {
+                            // 1) Wrap each word in a span.word
+                            var original = p.innerText.trim().replace(/\s+/g, ' ');
+                            var words = original.split(' ');
+                            p.innerHTML = words.map(function(w){ return '<span class="word">'+w+'</span>'; }).join(' ');
+
+                            // 2) Group words into visual lines based on their offsetTop
+                            var wordNodes = Array.from(p.querySelectorAll('.word'));
+                            var lines = [];
+                            var currentLine = [];
+                            var currentTop = null;
+
+                            wordNodes.forEach(function(node, i){
+                              var top = node.offsetTop;
+                              if (currentTop === null) currentTop = top;
+                              if (Math.abs(top - currentTop) > 2) { // new visual line
+                                lines.push(currentLine);
+                                currentLine = [node];
+                                currentTop = top;
+                              } else {
+                                currentLine.push(node);
+                              }
+                              if (i === wordNodes.length - 1) lines.push(currentLine);
+                            });
+
+                            // 3) Rebuild into .line blocks
+                            var frag = document.createDocumentFragment();
+                            lines.forEach(function(line){
+                              var lineEl = document.createElement('span');
+                              lineEl.className = 'line';
+                              line.forEach(function(w, idx){
+                                lineEl.appendChild(w);
+                                if (idx < line.length - 1) lineEl.appendChild(document.createTextNode(' '));
+                              });
+                              frag.appendChild(lineEl);
+                            });
+                            p.innerHTML = '';
+                            p.appendChild(frag);
+                          }
+
+                      anime({
+                        targets: '#slide2',
+                        opacity: [0, 1],
+                        filter: ['blur(40px)', 'blur(0px)'],
+                        translateY: ['25%', '0%'],
+                        duration: 400,
+                        easing: 'easeOutCubic',
+                        complete: function(){
+                          anime({
+                            targets: '#slide2 p .line',
+                            opacity: [0, 1],
+                            translateY: [20, 0],
+                            filter: ['blur(8px)', 'blur(0px)'],
+                            duration: 600,
+                            delay: anime.stagger(100, {start: 20}),
+                            easing: 'easeOutCubic'
+                          });
+                          var slide1El = document.getElementById('slide1');
+                          if (slide1El) {
+                            slide1El.style.display = 'none';
+                          }
+                          // Reveal UL on paragraph click, animate its items like the lines
+                          var s2p = document.querySelector('#slide2 p');
+                          var s2ul = document.querySelector('#slide2 ul');
+                          if (s2p && s2ul) {
+                            s2p.style.cursor = 'pointer';
+                            // ensure single binding
+                            s2p.addEventListener('click', function handleReveal(){
+                              // make UL visible
+                              s2ul.style.display = 'block';
+                              s2ul.style.visibility = 'visible';
+                              // animate container fade-in (optional subtle)
+                              anime({
+                                targets: s2ul,
+                                opacity: [0, 1],
+                                duration: 300,
+                                easing: 'easeOutCubic'
+                              });
+                              // animate LI items line-by-line like paragraph lines
+                              anime({
+                                targets: '#slide2 ul li',
+                                opacity: [0, 1],
+                                translateY: [20, 0],
+                                filter: ['blur(8px)', 'blur(0px)'],
+                                duration: 600,
+                                delay: anime.stagger(100, { start: 20 }),
+                                easing: 'easeOutCubic'
+                              });
+                              // remove handler to prevent re-trigger
+                              s2p.removeEventListener('click', handleReveal);
+                            });
+                          }
+                        }
+                      });
+                      // During slide2 reveal, move the logo to top:60px and fade in the Fiverr logo
+                      var logoEl = document.getElementById('logo');
+                      if (logoEl) {
+                        var logoRect = logoEl.getBoundingClientRect();
+                        logoEl.style.top = logoRect.top + 'px';
+                        logoEl.style.bottom = 'auto';
+                        anime({
+                          targets: '#logo',
+                          top: '60px',
+                          duration: 120,
+                          easing: 'easeOutCubic'
+                        });
+                      }
+                      var fLogoEl = document.getElementById('flogo');
+                      if (fLogoEl) {
+                        anime({
+                          targets: '#flogo',
+                          opacity: [1, 0],
+                          translateY: ['0%', '-25%'],
+                          duration: 400,
+                          easing: 'easeOutCubic'
+                        });
+                      }
+                    }
+                  });
+
+                  // Animate texture element at the same time (during slide animation)
+                  anime({
+                    targets: tex,
+                    width: targetW,
+                    height: targetH,
+                    borderRadius: '100%',
+                    top: '50%',
+                    right: '5%',
+                    translateY: '-50%',
+                    duration: 2000,
+                    easing: 'spring(1, 200, 10, 0)'
+                  });
+                });
+              }
+            }
+          });
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,3501 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font"
+    crossorigin="anonymous" />
+
+  <style>
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Macan', Helvetica, Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 16px;
+      color: #222325;
+      height: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    @font-face {
+      font-family: 'Macan';
+      src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Macan';
+      src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2') format('woff2');
+      font-weight: 300;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Macan';
+      src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Macan';
+      src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+
+    }
+
+    #flogo {
+      position: absolute;
+      top: 60px;
+      left: 60px;
+
+    }
+
+    slideshow,
+    slide {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    slideshow {
+      position: relative;
+    }
+
+    #slide2,
+    #slide3,
+    #slide4,
+    #slide5,
+    #slide6,
+    #slide7,
+    #slide8,
+    #slide9,
+    #slide10,
+    #slide11,
+    #slide12,
+    #slide13,
+    #slide14,
+    #slide15,
+    #slide16,
+    #slide17,
+    #slide18,
+    #slide19,
+    #slide20,
+    #slide21,
+    #slide22,
+    #slide23,
+    #slide24,
+    #slide25,
+    #slide26,
+    #slide27,
+    #slide28,
+    #slide29,
+    #slide30 {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      filter: blur(6px);
+      z-index: 1;
+      /* above slide1 while it moves out */
+      pointer-events: none;
+      display: none;
+      visibility: hidden;
+    }
+
+    slide {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+
+    }
+
+    h1 {
+      font-size: 100px;
+      font-weight: 100;
+      letter-spacing: -0.08em;
+      margin: 34px;
+    }
+
+    h1 span {
+      display: inline-block;
+      transform-origin: center right;
+      will-change: transform, opacity, filter;
+      opacity: 0;
+      transform: translateX(40px);
+      filter: blur(4px);
+    }
+
+    h1 span:first-child,
+    h1 span:nth-child(2) {
+      font-weight: 400;
+      color: #95979D
+    }
+
+    h2 {
+      color: #254200;
+      font-size: 80px;
+      letter-spacing: -0.08em;
+      font-weight: 100;
+    }
+
+    h2 span:first-child {
+      color: #687200;
+    }
+
+    h2 b {
+      font-weight: 600;
+    }
+
+    #logo {
+      position: absolute;
+      bottom: 60px;
+      right: 60px;
+    }
+
+    #flogo,
+    #logo {
+      opacity: 0;
+    }
+
+    #slide1 h1 {
+      max-width: 940px;
+    }
+
+
+    #slide1 h2 {
+      position: relative;
+      align-self: flex-start;
+      width: calc(40% - 40px);
+      opacity: 0;
+    }
+
+    #slide1 h2 span,
+    #slide1 h2 b {
+      display: block;
+    }
+
+    /* h2 word containers (use existing elements: span & b) */
+    #slide1 h2 span,
+    #slide1 h2 b {
+      transform-origin: bottom left;
+      will-change: transform, opacity;
+    }
+
+
+    p {
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 130%;
+      /* 52px */
+      letter-spacing: -1.6px;
+      color: var(--Greys-1200, #222325);
+      max-width: 70%;
+    }
+
+    #slide2 {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    #slide2 p {
+      width: 44%;
+      padding: 0 44px;
+    }
+
+    #slide2 ul {
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 130%;
+      /* 52px */
+      letter-spacing: -1.6px;
+      color: var(--Greys-1200, #222325);
+      width: 44%;
+      padding: 0 44px;
+      margin: 0;
+      list-style: disc;
+      opacity: 0;
+      list-style-position: inside;
+      visibility: hidden;
+      display: none;
+    }
+
+    #slide2 ul li {
+      margin-bottom: 12px;
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(20px);
+      will-change: opacity, transform, filter;
+    }
+
+    #slide2 p .line {
+      display: block;
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(20px);
+      will-change: opacity, transform, filter;
+    }
+
+    #slide2 p .word {
+      display: inline-block;
+    }
+
+
+    .texture_element {
+      display: block;
+      /* background-image: url('Prez/grad@2x.png'); */
+      background-color: #E8F094;
+      position: absolute;
+      height: calc(100% - 32px);
+      width: 0;
+      top: 16px;
+      right: 16px;
+      z-index: -1;
+      border-radius: 20px;
+      overflow: hidden;
+      /* display: flex; */
+      /* justify-content: flex-end; */
+      text-align: right;
+      transform-origin: 50% 50%;
+    }
+
+    .texture_element>div {
+      float: right;
+    }
+
+    /* Cluster container - positioned outside texture element to avoid clipping */
+    .shape_cluster_container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: visible;
+    }
+
+    /* Cluster layout for shapes - positioned at bottom-left to match Slide 3 texture */
+    .texture_cluster {
+      position: absolute;
+      top: 76%;
+      left: 8%;
+      width: 700px;
+      height: 450px;
+      pointer-events: none;
+      overflow: visible;
+      transform: translateY(-50%);
+      z-index: -2;
+    }
+
+    .texture_cluster_shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0);
+      will-change: opacity, transform;
+    }
+
+    /* s1: Top-left circle - light yellow-green */
+    .texture_cluster_shape.s1 {
+      width: 205px;
+      height: 205px;
+      background-color: #E8F094;
+      left: -105px;
+      top: -245px;
+    }
+
+    /* s2: Top-right circle - dark olive green */
+    .texture_cluster_shape.s2 {
+      width: 205px;
+      height: 205px;
+      background-color: #687200;
+      left: calc(100% + -580px);
+      top: 225px;
+    }
+
+    /* s3: Bottom-left long pill - bright yellow-green */
+    .texture_cluster_shape.s3 {
+      width: 410px;
+      height: 205px;
+      border-radius: 102.5px;
+      background-color: #DAEA3D;
+      left: -105px;
+      top: calc(100% + -460px);
+    }
+
+    /* s4: Bottom-right circle - off-white */
+    .texture_cluster_shape.s4 {
+      width: 205px;
+      height: 205px;
+      background-color: #F8F9E5;
+      left: calc(100% + 20px);
+      top: calc(100% + 20px);
+      display: none;
+      /* Hidden on slide 3 */
+    }
+  </style>
+  <style id="slides-like-slide2-defaults">
+    /* Make all slides styled like slide 2 by default */
+    slideshow>slide {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    /* Paragraph and list defaults for all slides */
+    slideshow p {
+      width: 70%;
+      padding: 0 44px;
+      box-sizing: border-box;
+    }
+
+    slideshow ul {
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 130%;
+      letter-spacing: -1.6px;
+      color: var(--Greys-1200, #222325);
+      width: 44%;
+      padding: 0 44px;
+      margin: 0;
+      list-style: disc;
+      list-style-position: inside;
+      opacity: 0;
+      visibility: hidden;
+      display: none;
+      /* hidden until revealed */
+    }
+
+    slideshow ul li {
+      margin-bottom: 12px;
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(20px);
+      will-change: opacity, transform, filter;
+    }
+
+    /* Revert slide 1 to its original layout */
+    #slide1 {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    #penta_logo {
+      width: 84%;
+      margin-left: -20px;
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(80px);
+      will-change: opacity, transform, filter;
+    }
+  </style>
+  <style id="line-anim-global">
+    /* Global line animation defaults for paragraphs in all slides */
+    slideshow p .line {
+      display: block;
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(20px);
+      will-change: opacity, transform, filter;
+    }
+
+    slideshow p .word {
+      display: inline-block;
+    }
+
+    /* Cards grid for slide 4 */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      padding: 0 44px 44px 44px;
+      margin-top: 100px;
+      width: calc(100% - 88px);
+      height: auto;
+      flex: 1;
+      opacity: 0;
+    }
+
+    .card {
+      background: #F7F8F9;
+      border-radius: 20px;
+      padding: 40px;
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(20px);
+      will-change: opacity, transform, filter;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card h3 {
+      color: var(--Greys-1200, #222325);
+      font-family: Macan;
+      font-size: 56px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 130%;
+      letter-spacing: -2.24px;
+      margin: 0 0 24px 0;
+    }
+
+    .card p,
+    .cards-grid .card p {
+      color: var(--Greys-1200, #222325);
+      font-family: Macan;
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 130%;
+      letter-spacing: -1.6px;
+      margin: 0;
+      padding: 0 !important;
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+
+    .card-highlight {
+      background: #E8F094;
+    }
+
+    .card-highlight h3 {
+      color: #687200;
+    }
+
+    .card-highlight p {
+      color: #687200;
+    }
+
+    /* Slide 5 Styles */
+    .slide5-content {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 0 100px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .list-left,
+    .list-right {
+      /* flex: 1; */
+      z-index: 2;
+    }
+
+    .list-left {
+      text-align: right;
+    }
+
+    .list-right {
+      text-align: left;
+    }
+
+    .list-left ul,
+    .list-right ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: 100%;
+    }
+
+    .list-left li {
+      color: #687200;
+      font-family: Macan;
+      font-size: 32px;
+      line-height: 1.4;
+      margin-bottom: 0;
+      font-weight: 100;
+    }
+
+    .list-right li {
+      color: #222325;
+      /* Black */
+      font-family: Macan;
+      font-size: 60px;
+      font-style: normal;
+      font-weight: 200;
+      line-height: 130%;
+      letter-spacing: -.06em;
+    }
+
+    .center-graphic {
+      width: 36vw;
+      height: 28vw;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+      left: 14%;
+    }
+
+    .connecting-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .line-path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      opacity: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <img src="Prez/fiverr_logo.svg" id="flogo" />
+  <img src="Prez/logo.svg" id="logo" />
+  <slideshow>
+    <slide id="slide1">
+      <h1><span>Product design</span>
+        <br />
+        Modern design system in AI driven age.
+      </h1>
+      <h2><b>Penta.</b> <span>Sessions</span></h2>
+    </slide>
+    <slide id="slide2">
+      <h1>What’s next for </h1>
+      <img src="Prez/penta.svg" id="penta_logo" />
+      <div></div>
+    </slide>
+    <slide id="slide3" style="display: none;">
+      <h1>What’s the purpose of the<br /> design systems - quick recap</h1>
+      <div>
+        <p style="margin-left: 30%;">Design systems give product designers a unified foundation to work from combining
+          visual standards, interaction patterns, reusable components, and clear guidelines. </p>
+        <p style="margin-left: 30%;">Their purpose is to create consistency, efficiency, and scalability across products
+          by reducing repetitive work and aligning designers and developers around the same building blocks. </p>
+      </div>
+    </slide>
+    <slide id="slide4" style="display: none;">
+      <h1>How does it work and what is <br />
+        it’s potential</h1>
+      <div class="cards-grid">
+        <div class="card">
+          <h3>Design tokens</h3>
+          <p><span class="line">Colors, Typography, Borders,</span> <span class="line">Spacing, Look and feel,
+              etc.</span></p>
+        </div>
+        <div class="card">
+          <h3>UX consistent design</h3>
+          <p><span class="line">Buttons, Inputs, Badges,</span> <span class="line">Statutes, Alerts, etc.</span></p>
+        </div>
+        <div class="card">
+          <h3>Technical base</h3>
+          <p><span class="line">Modals, Drawers, Popovers,</span> <span class="line">Drop-downs, Combo-boxes,</span>
+            <span class="line">Rich-text, etc.</span>
+          </p>
+        </div>
+        <div class="card card-highlight">
+          <h3>Design services delivery</h3>
+          <p><span class="line">Interactions presets,</span> <span class="line">Transitions, Animations,</span> <span
+              class="line">Effects, etc.</span></p>
+        </div>
+      </div>
+    </slide>
+    <slide id="slide5" style="display: none;">
+      <h1>Penta. acts as the core support <br /> for product building and dev</h1>
+      <div class="slide5-content">
+        <div class="list-left">
+          <ul>
+            <li>Tokens</li>
+            <li>Primitives</li>
+            <li>Semantics</li>
+            <li>Variants</li>
+            <li>States</li>
+            <li>Behaviors</li>
+            <li>Tech base</li>
+            <li>Transitions</li>
+            <li>Animations</li>
+            <li>Effects</li>
+            <li>Design assets</li>
+            <li>Layouts</li>
+          </ul>
+        </div>
+        <div class="center-graphic">
+          <svg class="connecting-lines" width="600" height="500" viewBox="0 0 600 500">
+            <path d="M 150 250 Q 300 250 450 50" fill="none" stroke="#BBCE00" stroke-width="2" class="line-path" />
+            <path d="M 150 250 Q 300 250 450 130" fill="none" stroke="#BBCE00" stroke-width="2" class="line-path" />
+            <path d="M 150 250 Q 300 250 450 210" fill="none" stroke="#BBCE00" stroke-width="2" class="line-path" />
+            <path d="M 150 250 Q 300 250 450 290" fill="none" stroke="#BBCE00" stroke-width="2" class="line-path" />
+            <path d="M 150 250 Q 300 250 450 370" fill="none" stroke="#BBCE00" stroke-width="2" class="line-path" />
+            <path d="M 150 250 Q 300 250 450 450" fill="none" stroke="#BBCE00" stroke-width="2" class="line-path" />
+          </svg>
+        </div>
+        <div class="list-right">
+          <ul>
+            <li>Agent enablement</li>
+            <li>Rapid prototyping</li>
+            <li>Vibe coding</li>
+            <li>Idea validation</li>
+            <li>User testing</li>
+            <li>Front end dev assistance</li>
+          </ul>
+        </div>
+      </div>
+    </slide>
+    <slide id="slide6" style="display: none;">
+      <h1>Enablement through the whole <br /> product dev flow</h1>
+      <div class="slide6-content">
+        <div class="row">
+          <div class="pills-container">
+            <div class="pill dark-green"><span>Ideation</span></div>
+            <div class="pill dark-green"><span>Prototyping</span></div>
+          </div>
+          <div class="row-text">Vibe coding with agent based on penta.</div>
+        </div>
+        <div class="row">
+          <div class="pills-container">
+            <div class="pill lime-green"><span>User testing</span></div>
+            <div class="pill lime-green"><span>Prod tests</span></div>
+          </div>
+          <div class="row-text">Rapid protypes and prod user tests (myop)</div>
+        </div>
+        <div class="row">
+          <div class="pills-container">
+            <div class="pill light-lime"><span>Design Polish</span></div>
+          </div>
+          <div class="row-text">Product design prep for dev in figma with penta.</div>
+        </div>
+        <div class="row">
+          <div class="pills-container">
+            <div class="pill pale-lime"><span>Front end dev</span></div>
+            <div class="pill pale-lime"><span>Refactor V2</span></div>
+          </div>
+          <div class="row-text">Figma to code with Ai magic flow</div>
+        </div>
+      </div>
+    </slide>
+    <slide id="slide7" style="display: none;">
+      <h1>Next level: design services.<br>What are they ?</h1>
+      <div class="slide7-content">
+        <div class="content-columns">
+          <div class="col">
+            <p>Design service delivered throw design system pipeline are extensions of it's the basics.</p>
+          </div>
+          <div class="col">
+            <p>They bring range of dynamic templates, ideas and functions to apply for the design system components and
+              custom design compositions and ux patterns</p>
+          </div>
+        </div>
+      </div>
+    </slide>
+    <slide id="slide8" style="display: none;">
+      <h1>Preview</h1>
+      <p>
+        <span class="line">Insteractions</span>
+        <span class="line">Presets of animations and transitions</span>
+        <span class="line">Visual effects</span>
+        <span class="line">Typography reveal effect</span>
+        <span class="line">Design elements</span>
+        <span class="line">Dynamic responsiveness and fluid grid</span>
+      </p>
+    </slide>
+    <slide id="slide9" style="display: none;">
+      <h1>Quick wins to elevate current <br>user experience on fiverr</h1>
+      <p>
+        <span class="line">Some existing and new Penta components will</span>
+        <span class="line">use design services out of the box</span>
+      </p>
+    </slide>
+
+    <style>
+      /* Slide 7 Styles */
+      #slide7 {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      #slide7 h1 {
+        color: #1E3D1E;
+        margin-bottom: 0;
+      }
+
+      .slide7-content {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        margin-top: auto;
+      }
+
+      #slide7 .content-columns {
+        display: flex;
+        flex-direction: row;
+        width: calc(100% - 220px);
+        /* Leave space for visual stack */
+        align-items: flex-end;
+        gap: 40px;
+      }
+
+
+      #slide7 .col p {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      /* s7 shapes in cluster */
+
+      /* Slide 8 Styles */
+      #slide8 {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between
+      }
+
+      #slide8 h1 {
+        margin-bottom: 60px;
+      }
+
+      #slide8 p {
+        width: 50%;
+        padding: 0 44px;
+        font-size: 40px;
+        line-height: 130%;
+        letter-spacing: -1.6px;
+      }
+
+      #slide8 p .line {
+        display: block;
+        margin-bottom: 8px;
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(8px);
+        will-change: opacity, transform, filter;
+      }
+
+      /* Slide 9 Styles */
+      #slide9 {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+
+      #slide9 h1 {
+        margin-bottom: 60px;
+      }
+
+      #slide9 p {
+        width: 50%;
+        padding: 0 44px;
+        font-size: 40px;
+        line-height: 130%;
+        letter-spacing: -1.6px;
+      }
+
+      #slide9 p .line {
+        display: block;
+        margin-bottom: 8px;
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(8px);
+        will-change: opacity, transform, filter;
+      }
+    </style>
+
+  </slideshow>
+
+  <!-- Separate container for cluster shapes to avoid clipping -->
+  <div class="shape_cluster_container" id="shape_cluster_container">
+    <div class="texture_cluster" id="texture_cluster">
+      <!-- Slide 3 shapes -->
+      <div class="texture_cluster_shape s1"></div>
+      <div class="texture_cluster_shape s2"></div>
+      <div class="texture_cluster_shape s3"></div>
+      <div class="texture_cluster_shape s4"></div>
+
+      <!-- Slide 7 shapes -->
+
+
+
+    </div>
+  </div>
+
+  <style>
+    /* Slide 6 Styles */
+    .slide6-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 0 40px;
+      box-sizing: border-box;
+      gap: 28px;
+      margin-top: 40px;
+    }
+
+    .slide6-content .row {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      opacity: 0;
+      /* Hidden initially for animation */
+      width: 100%;
+      justify-content: space-between;
+      /* Push text to right */
+    }
+
+    .pills-container {
+      display: flex;
+      gap: 20px;
+      flex-shrink: 0;
+      /* Prevent pills from shrinking */
+    }
+
+    .pill {
+      height: 160px;
+      padding: 0;
+      /* Remove padding so width can start from 0 */
+      border-radius: 100px;
+      font-family: Macan;
+      font-size: 80px;
+      font-weight: 200;
+      /* Lighter */
+      letter-spacing: -0.06em;
+      /* Less letter spacing */
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: left center;
+      box-sizing: border-box;
+    }
+
+    .pill span {
+      margin: 0 60px;
+      /* Move spacing to span margin instead of pill padding */
+      display: block;
+    }
+
+    .pill.dark-green {
+      background-color: #3F4912;
+      color: #FFFFFF;
+    }
+
+    .pill.lime-green {
+      background-color: #C2D62E;
+      color: #222325;
+    }
+
+    .pill.light-lime {
+      background-color: #E6F096;
+      color: #222325;
+    }
+
+    .pill.pale-lime {
+      background-color: #F2F7D5;
+      color: #222325;
+    }
+
+    .row-text {
+      font-family: Macan;
+      font-size: 40px;
+      /* Match global p style */
+      font-weight: 400;
+      line-height: 130%;
+      letter-spacing: -1.6px;
+      color: #222325;
+      text-align: right;
+      /* Align text to the right */
+      max-width: 50%;
+      /* Prevent it from hitting pills */
+    }
+  </style>
+
+
+
+
+
+  <div class="texture_element">
+    <div data-us-project="jO5VlaxpXsvyZ80Mo1Mg" style="width:1080px; height:100%"></div>
+    <script
+      type="text/javascript">!function () { if (!window.UnicornStudio) { window.UnicornStudio = { isInitialized: !1 }; var i = document.createElement("script"); i.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.30/dist/unicornStudio.umd.js", i.onload = function () { window.UnicornStudio.isInitialized || (UnicornStudio.init(), window.UnicornStudio.isInitialized = !0) }, (document.head || document.body).appendChild(i) } }();</script>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    // Shared external elements configuration and animation system
+    (function () {
+      window.externalElementsConfig = {
+        // Slide 0 (slide1)
+        0: {
+          flogo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: '60px',
+            left: '60px',
+            right: 'auto',
+            bottom: 'auto'
+          },
+          logo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: 'auto',
+            left: 'auto',
+            right: '60px',
+            bottom: '60px'
+          },
+          texture: {
+            width: '40%',
+            height: 'calc(100% - 32px)',
+            top: '16px',
+            right: '16px',
+            left: 'auto',
+            bottom: 'auto',
+            borderRadius: '20px',
+            translateX: 0,
+            translateY: 0,
+            backgroundColor: '#E8F094',
+            innerOpacity: 1,
+            clusterShapesOpacity: 0,
+            clusterShapesScale: 0.4
+          }
+        },
+        // Slide 1 (slide2)
+        1: {
+          flogo: {
+            opacity: 0,
+            translateX: 0,
+            translateY: '-25%',
+            top: '60px',
+            left: '60px',
+            right: 'auto',
+            bottom: 'auto'
+          },
+          logo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: '60px',
+            left: 'auto',
+            right: '60px',
+            bottom: 'auto'
+          },
+          texture: {
+            width: '205px',
+            height: '205px',
+            top: '65%',
+            right: '3%',
+            left: 'auto',
+            bottom: 'auto',
+            borderRadius: '100%',
+            translateX: 0,
+            translateY: '-50%',
+            backgroundColor: '#E8F094',
+            innerOpacity: 1,
+            clusterShapesOpacity: 0,
+            clusterShapesScale: 0.4
+          }
+        },
+        // Slide 2 (slide3) - dot moves to left side
+        2: {
+          flogo: {
+            opacity: 0,
+            translateX: 0,
+            translateY: '-25%',
+            top: '60px',
+            left: '60px',
+            right: 'auto',
+            bottom: 'auto'
+          },
+          logo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: '60px',
+            left: 'auto',
+            right: '60px',
+            bottom: 'auto'
+          },
+          texture: {
+            width: '205px',
+            height: '205px',
+            top: '76%',
+            right: 'auto',
+            left: '8%',
+            bottom: 'auto',
+            borderRadius: '100%',
+            translateX: '-50%',
+            translateY: '0%',
+            backgroundColor: '#E8F094',
+            innerOpacity: 0,
+            clusterShapesOpacity: 1,
+            clusterShapesScale: 1
+          }
+        },
+        // Slide 3+ (slide4, etc.) - same as slide 3
+        3: {
+          flogo: {
+            opacity: 0,
+            translateX: 0,
+            translateY: '-25%',
+            top: '60px',
+            left: '60px',
+            right: 'auto',
+            bottom: 'auto'
+          },
+          logo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: '60px',
+            left: 'auto',
+            right: '60px',
+            bottom: 'auto'
+          },
+          texture: {
+            width: '0px',
+            height: '0px',
+            top: '76%',
+            right: 'auto',
+            left: '8%',
+            bottom: 'auto',
+            borderRadius: '100%',
+            translateX: '-50%',
+            translateY: '0%',
+            backgroundColor: '#E8F094',
+            innerOpacity: 1,
+            clusterShapesOpacity: 0,
+            clusterShapesScale: 0.4
+          }
+        },
+        // Slide 5 (index 4)
+        4: {
+          flogo: {
+            opacity: 0,
+            translateX: 0,
+            translateY: '-25%',
+            top: '60px',
+            left: '60px',
+            right: 'auto',
+            bottom: 'auto'
+          },
+          logo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: '60px',
+            left: 'auto',
+            right: '60px',
+            bottom: 'auto'
+          },
+          texture: {
+            width: '400px',
+            height: '400px',
+            top: '61%',
+            left: '34%',
+            right: 'auto',
+            bottom: 'auto',
+            borderRadius: '50%',
+            translateX: '-50%',
+            translateY: '-50%',
+            backgroundColor: '#DAEA3D',
+            innerOpacity: 1,
+            clusterShapesOpacity: 0,
+            clusterShapesScale: 0.4,
+            zIndex: 10
+          }
+        },
+        // Slide 6 (index 5)
+        5: {
+          flogo: {
+            opacity: 0,
+            translateX: 0,
+            translateY: '-25%',
+            top: '60px',
+            left: '60px',
+            right: 'auto',
+            bottom: 'auto'
+          },
+          logo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: '60px',
+            left: 'auto',
+            right: '60px',
+            bottom: 'auto'
+          },
+          texture: {
+            width: '160px',
+            height: '160px',
+            top: '0', // Will be overridden by animation
+            left: '0', // Will be overridden by animation
+            right: 'auto',
+            bottom: 'auto',
+            borderRadius: '50%',
+            translateX: '0%',
+            translateY: '-50%', // Center vertically on the target line
+            backgroundColor: '#DAEA3D',
+            innerOpacity: 1,
+            clusterShapesOpacity: 0,
+            clusterShapesScale: 0.4,
+            zIndex: 10
+          }
+        },
+        // Slide 7 (index 6)
+        6: {
+          flogo: {
+            opacity: 0,
+            translateX: 0,
+            translateY: '-25%',
+            top: '60px',
+            left: '60px',
+            right: 'auto',
+            bottom: 'auto'
+          },
+          logo: {
+            opacity: 1,
+            translateX: 0,
+            translateY: 0,
+            top: '60px',
+            left: 'auto',
+            right: '60px',
+            bottom: 'auto'
+          },
+          texture: null
+        }
+      };
+
+      // Get config for slide index (use last defined config for slides beyond)
+      window.getConfigForSlide = function (slideIdx) {
+        if (window.externalElementsConfig[slideIdx]) {
+          return window.externalElementsConfig[slideIdx];
+        }
+        // Use the highest defined config for slides beyond
+        var maxIdx = Math.max.apply(null, Object.keys(window.externalElementsConfig).map(Number));
+        return window.externalElementsConfig[maxIdx];
+      };
+
+      // Ensure texture cluster exists in the separate container
+      window.ensureTextureCluster = function () {
+        var container = document.getElementById('shape_cluster_container');
+        if (!container) return null;
+        var cluster = document.getElementById('texture_cluster');
+        if (!cluster) {
+          cluster = document.createElement('div');
+          cluster.className = 'texture_cluster';
+          cluster.id = 'texture_cluster';
+          container.appendChild(cluster);
+        }
+
+        // Ensure shapes exist
+        if (cluster.children.length === 0) {
+          ['s1', 's2', 's3', 's4'].forEach(function (cls) {
+            var shape = document.createElement('div');
+            shape.className = 'texture_cluster_shape ' + cls;
+            cluster.appendChild(shape);
+          });
+        }
+        return cluster;
+      };
+
+      // Animate external elements to target state for a slide
+      window.animateExternalElementsToSlide = function (slideIdx, isReversing) {
+        var config = window.getConfigForSlide(slideIdx);
+        if (!config) return;
+
+        // Animate Fiverr logo
+        var flogo = document.getElementById('flogo');
+        if (flogo && config.flogo) {
+          var flogoConfig = config.flogo;
+          var flogoCurrent = {
+            opacity: parseFloat(window.getComputedStyle(flogo).opacity) || 0,
+            translateX: 0,
+            translateY: 0
+          };
+          anime({
+            targets: flogo,
+            opacity: [flogoCurrent.opacity, flogoConfig.opacity],
+            translateX: [flogoCurrent.translateX, flogoConfig.translateX],
+            translateY: [flogoCurrent.translateY, flogoConfig.translateY],
+            top: flogoConfig.top,
+            left: flogoConfig.left,
+            right: flogoConfig.right,
+            bottom: flogoConfig.bottom,
+            duration: isReversing ? 400 : 400,
+            easing: 'easeOutCubic'
+          });
+        }
+
+        // Animate brand logo
+        var logo = document.getElementById('logo');
+        if (logo && config.logo) {
+          var logoConfig = config.logo;
+          var logoCurrent = {
+            opacity: parseFloat(window.getComputedStyle(logo).opacity) || 0,
+            translateX: 0,
+            translateY: 0
+          };
+          // Special handling for slide 0→1 transition (logo moves from bottom to top)
+          if (slideIdx === 1 && !isReversing) {
+            var logoRect = logo.getBoundingClientRect();
+            logo.style.top = logoRect.top + 'px';
+            logo.style.bottom = 'auto';
+          }
+          anime({
+            targets: logo,
+            opacity: [logoCurrent.opacity, logoConfig.opacity],
+            translateX: [logoCurrent.translateX, logoConfig.translateX],
+            translateY: [logoCurrent.translateY, logoConfig.translateY],
+            top: logoConfig.top,
+            left: logoConfig.left,
+            right: logoConfig.right,
+            bottom: logoConfig.bottom,
+            duration: slideIdx === 1 && !isReversing ? 120 : 400,
+            easing: 'easeOutCubic'
+          });
+        }
+
+        // Animate texture element (skip if texture config is null)
+        // Also skip for Slide 6 (index 5) and Slide 7 (index 6) as they have custom timeline animations
+        var tex = document.querySelector('.texture_element');
+        if (tex && config.texture && slideIdx !== 5 && slideIdx !== 6) {
+          var texConfig = config.texture;
+          var rect = tex.getBoundingClientRect();
+          var computedStyle = window.getComputedStyle(tex);
+
+          // Lock current dimensions to prevent unit mixing
+          var currentWidth = rect.width + 'px';
+          var currentHeight = rect.height + 'px';
+          tex.style.width = currentWidth;
+          tex.style.height = currentHeight;
+
+          // Get current position values
+          var currentTop = computedStyle.top;
+          var currentLeft = computedStyle.left;
+          var currentRight = computedStyle.right;
+          var currentBottom = computedStyle.bottom;
+          var currentBorderRadius = computedStyle.borderRadius;
+
+          // Get current transform values from computed style
+          var currentTranslateX = 0;
+          var currentTranslateY = 0;
+
+          var transform = computedStyle.transform;
+          if (transform && transform !== 'none') {
+            // Parse transform string - handle both translateX/Y and matrix formats
+            // First try direct translateX/translateY
+            var translateXMatch = transform.match(/translateX\(([^)]+)\)/);
+            if (translateXMatch) {
+              var txValue = translateXMatch[1].trim();
+              var txNum = parseFloat(txValue);
+              if (!isNaN(txNum)) {
+                currentTranslateX = txNum;
+                // Handle percentage values
+                if (txValue.includes('%')) {
+                  currentTranslateX = (txNum / 100) * rect.width;
+                }
+              }
+            }
+
+            var translateYMatch = transform.match(/translateY\(([^)]+)\)/);
+            if (translateYMatch) {
+              var tyValue = translateYMatch[1].trim();
+              var tyNum = parseFloat(tyValue);
+              if (!isNaN(tyNum)) {
+                currentTranslateY = tyNum;
+                // Handle percentage values
+                if (tyValue.includes('%')) {
+                  currentTranslateY = (tyNum / 100) * rect.height;
+                }
+              }
+            }
+
+            // If no direct translate found, try matrix (anime.js often uses matrix)
+            if (currentTranslateX === 0 && currentTranslateY === 0) {
+              var matrixMatch = transform.match(/matrix\(([^)]+)\)/);
+              if (matrixMatch) {
+                var values = matrixMatch[1].split(',').map(function (v) { return parseFloat(v.trim()); });
+                if (values.length >= 6) {
+                  // matrix(a, b, c, d, e, f) where e = translateX, f = translateY
+                  currentTranslateX = values[4] || 0;
+                  currentTranslateY = values[5] || 0;
+                }
+              }
+            }
+          }
+
+          // Handle texture inner (Unicorn gradient)
+          var inner = tex.querySelector('[data-us-project]');
+          if (inner && texConfig.innerOpacity !== undefined) {
+            var innerComputed = window.getComputedStyle(inner);
+            var currentInnerOpacity = parseFloat(innerComputed.opacity);
+            if (isNaN(currentInnerOpacity)) currentInnerOpacity = 1;
+
+            anime({
+              targets: inner,
+              opacity: [currentInnerOpacity, texConfig.innerOpacity],
+              duration: 500,
+              easing: 'easeOutCubic'
+            });
+          }
+
+          // Handle background color (animate if needed, or set immediately)
+          if (texConfig.backgroundColor !== undefined) {
+            tex.style.backgroundColor = texConfig.backgroundColor;
+          }
+
+          // Handle z-index
+          if (texConfig.zIndex !== undefined) {
+            tex.style.zIndex = texConfig.zIndex;
+          } else {
+            tex.style.zIndex = -1;
+          }
+
+          // Ensure cluster exists before checking/animating shapes
+          if (texConfig.clusterShapesOpacity !== undefined) {
+            window.ensureTextureCluster();
+            var clusterShapes = document.querySelectorAll('.texture_cluster_shape');
+
+            if (clusterShapes.length > 0) {
+              // Get current scale from first shape (default to 0.4 if not set)
+              var firstShape = clusterShapes[0];
+              var firstShapeStyle = window.getComputedStyle(firstShape);
+              var currentScale = 0.4; // default
+
+              // Try to extract scale from transform
+              var transform = firstShapeStyle.transform;
+              if (transform && transform !== 'none') {
+                // First, try to find direct scale() function
+                var scaleMatch = transform.match(/scale\(([^)]+)\)/);
+                if (scaleMatch) {
+                  var scaleValue = parseFloat(scaleMatch[1].trim());
+                  if (!isNaN(scaleValue)) {
+                    currentScale = scaleValue;
+                  }
+                } else {
+                  // Fall back to extracting from matrix
+                  var matrix = transform.match(/matrix\(([^)]+)\)/);
+                  if (matrix) {
+                    var values = matrix[1].split(',').map(function (v) { return parseFloat(v.trim()); });
+                    if (values.length >= 4) {
+                      // Extract scale from matrix (assuming uniform scaling)
+                      // matrix(a, b, c, d, e, f) where scale = sqrt(a² + b²)
+                      currentScale = Math.sqrt(values[0] * values[0] + values[1] * values[1]);
+                    }
+                  }
+                }
+              }
+
+              var currentShapesOpacity = parseFloat(firstShapeStyle.opacity);
+              if (isNaN(currentShapesOpacity)) currentShapesOpacity = 0;
+
+              anime({
+                targets: clusterShapes,
+                opacity: [currentShapesOpacity, texConfig.clusterShapesOpacity],
+                scale: [currentScale, texConfig.clusterShapesScale],
+                delay: texConfig.clusterShapesOpacity === 1 ? anime.stagger(80, { start: 300, from: 'center' }) : 0,
+                duration: texConfig.clusterShapesOpacity === 1 ? 700 : 500,
+                easing: texConfig.clusterShapesOpacity === 1 ? 'spring(1, 120, 12, 0)' : 'easeOutCubic'
+              });
+            }
+          }
+
+          // Calculate target dimensions (handle functions)
+          var targetWidth = typeof texConfig.width === 'function' ? texConfig.width() : texConfig.width;
+          var targetHeight = typeof texConfig.height === 'function' ? texConfig.height() : texConfig.height;
+
+          // Clear conflicting position properties before setting new ones
+          if (texConfig.left !== undefined && texConfig.left !== 'auto') {
+            tex.style.right = 'auto';
+          }
+          if (texConfig.right !== undefined && texConfig.right !== 'auto') {
+            tex.style.left = 'auto';
+          }
+          if (texConfig.top !== undefined && texConfig.top !== 'auto') {
+            tex.style.bottom = 'auto';
+          }
+          if (texConfig.bottom !== undefined && texConfig.bottom !== 'auto') {
+            tex.style.top = 'auto';
+          }
+
+          // Build animation properties with proper from/to values
+          var textureProps = {
+            targets: tex,
+            width: [currentWidth, targetWidth],
+            height: [currentHeight, targetHeight],
+            borderRadius: [currentBorderRadius, texConfig.borderRadius],
+            translateX: [currentTranslateX, texConfig.translateX],
+            translateY: [currentTranslateY, texConfig.translateY],
+            duration: slideIdx === 1 ? 1000 : (slideIdx === 2 ? 900 : 1000),
+            easing: slideIdx === 1 ? 'spring(1, 120, 12, 0)' : 'easeInOutCubic'
+          };
+
+          // Add position properties (only if defined and not 'auto')
+          if (texConfig.top !== undefined) textureProps.top = texConfig.top;
+          if (texConfig.left !== undefined) textureProps.left = texConfig.left;
+          if (texConfig.right !== undefined) textureProps.right = texConfig.right;
+          if (texConfig.bottom !== undefined) textureProps.bottom = texConfig.bottom;
+
+          anime(textureProps);
+        }
+      };
+    })();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var h2 = document.querySelector('#slide1 h2');
+      var h1 = document.querySelector('#slide1 h1');
+      if (h1) {
+        var words = h1.innerText.trim().split(/\s+/);
+        h1.innerHTML = words.map(function (w) { return '<span>' + w + '</span>'; }).join(' ');
+      }
+      if (!h2) return;
+
+      // Defer animations until all assets (fonts, images, embeds) are fully loaded
+      window.addEventListener('load', function () {
+        anime({
+          targets: ['#logo'],
+          opacity: [0, 1],
+          translateX: [-40, 0],
+          duration: 500,
+          easing: 'easeOutCubic'
+        });
+        anime({
+          targets: ['#flogo'],
+          opacity: [0, 1],
+          duration: 500,
+          translateX: [40, 0],
+          easing: 'easeOutCubic'
+        });
+        anime({
+          targets: '.texture_element',
+          width: ['0', '40%'],
+          duration: 800,
+          delay: 400,
+          easing: 'easeOutCubic',
+          complete: function () {
+            // 2) Reveal and animate h2 only after texture completes
+            anime({
+              targets: '#slide1 h2 span, #slide1 h2 b',
+              translateY: [40, 0],
+              opacity: [0, 1],
+              skewY: [8, 0],
+              duration: 700,
+              filter: ['blur(4px)', 'blur(0px)'],
+              delay: anime.stagger(70),
+              easing: 'easeOutCubic',
+              begin: function () {
+                var el = document.querySelector('#slide1 h2');
+                if (el) el.style.opacity = '1';
+              },
+              complete: function () {
+                anime({
+                  targets: '#slide1 h1 span',
+                  translateX: [40, 0],
+                  opacity: [0, 1],
+                  filter: ['blur(4px)', 'blur(0px)'],
+                  duration: 800,
+                  delay: anime.stagger(40),
+                  easing: 'easeOutCubic'
+                });
+                // On click: move slide1 down with blur & fade, while morphing texture into a circle
+                var slide1 = document.getElementById('slide1');
+                if (slide1) {
+                  slide1.style.cursor = 'pointer';
+                  slide1.addEventListener('click', function () {
+                    // Animate external elements to slide 1 state
+                    window.animateExternalElementsToSlide(1, false);
+
+                    // Animate slide1 moving DOWN with slight blur and fade
+                    anime({
+                      targets: '#slide1',
+                      translateY: ['0%', '-25%'],
+                      opacity: [1, 0],
+                      filter: ['blur(0px)', 'blur(20px)'],
+                      duration: 400,
+                      easing: 'easeInOutCubic',
+                      complete: function () {
+                        var s2 = document.getElementById('slide2');
+                        if (!s2) return;
+                        // Reveal slide2 into slide1's previous location
+                        s2.style.pointerEvents = 'auto';
+                        s2.style.display = 'flex';
+                        s2.style.visibility = 'visible';
+
+                        var p = document.querySelector('#slide2 p');
+                        if (p) {
+                          // 1) Wrap each word in a span.word
+                          var original = p.innerText.trim().replace(/\s+/g, ' ');
+                          var words = original.split(' ');
+                          p.innerHTML = words.map(function (w) { return '<span class="word">' + w + '</span>'; }).join(' ');
+
+                          // 2) Group words into visual lines based on their offsetTop
+                          var wordNodes = Array.from(p.querySelectorAll('.word'));
+                          var lines = [];
+                          var currentLine = [];
+                          var currentTop = null;
+
+                          wordNodes.forEach(function (node, i) {
+                            var top = node.offsetTop;
+                            if (currentTop === null) currentTop = top;
+                            if (Math.abs(top - currentTop) > 2) { // new visual line
+                              lines.push(currentLine);
+                              currentLine = [node];
+                              currentTop = top;
+                            } else {
+                              currentLine.push(node);
+                            }
+                            if (i === wordNodes.length - 1) lines.push(currentLine);
+                          });
+
+                          // 3) Rebuild into .line blocks
+                          var frag = document.createDocumentFragment();
+                          lines.forEach(function (line) {
+                            var lineEl = document.createElement('span');
+                            lineEl.className = 'line';
+                            line.forEach(function (w, idx) {
+                              lineEl.appendChild(w);
+                              if (idx < line.length - 1) lineEl.appendChild(document.createTextNode(' '));
+                            });
+                            frag.appendChild(lineEl);
+                          });
+                          p.innerHTML = '';
+                          p.appendChild(frag);
+                        }
+
+                        anime({
+                          targets: '#slide2',
+                          opacity: [0, 1],
+                          filter: ['blur(40px)', 'blur(0px)'],
+                          translateY: ['25%', '0%'],
+                          duration: 400,
+                          easing: 'easeOutCubic',
+                          complete: function () {
+                            anime({
+                              targets: '#slide2 p .line',
+                              opacity: [0, 1],
+                              translateY: [20, 0],
+                              filter: ['blur(8px)', 'blur(0px)'],
+                              duration: 600,
+                              delay: anime.stagger(100, { start: 20 }),
+                              easing: 'easeOutCubic'
+                            });
+                            // Animate Penta logo with slight delay, blur-from-far and parallax-like motion
+                            anime({
+                              targets: '#penta_logo',
+                              opacity: [0, 1],
+                              translateY: [40, 0],
+                              translateX: [-20, 0],
+                              filter: ['blur(80px)', 'blur(0px)'],
+                              duration: 900,
+                              delay: 200,
+                              easing: 'easeOutCubic'
+                            });
+                            var slide1El = document.getElementById('slide1');
+                            if (slide1El) {
+                              slide1El.style.display = 'none';
+                            }
+                            // Reveal UL on paragraph click, animate its items like the lines
+                            var s2p = document.querySelector('#slide2 p');
+                            var s2ul = document.querySelector('#slide2 ul');
+                            if (s2p && s2ul) {
+                              s2p.style.cursor = 'pointer';
+                              // ensure single binding
+                              s2p.addEventListener('click', function handleReveal() {
+                                // make UL visible
+                                s2ul.style.display = 'block';
+                                s2ul.style.visibility = 'visible';
+                                // animate container fade-in (optional subtle)
+                                anime({
+                                  targets: s2ul,
+                                  opacity: [0, 1],
+                                  duration: 300,
+                                  easing: 'easeOutCubic'
+                                });
+                                // animate LI items line-by-line like paragraph lines
+                                anime({
+                                  targets: '#slide2 ul li',
+                                  opacity: [0, 1],
+                                  translateY: [20, 0],
+                                  filter: ['blur(8px)', 'blur(0px)'],
+                                  duration: 600,
+                                  delay: anime.stagger(100, { start: 20 }),
+                                  easing: 'easeOutCubic'
+                                });
+                                // remove handler to prevent re-trigger
+                                s2p.removeEventListener('click', handleReveal);
+                              });
+                            }
+                          }
+                        });
+                      }
+                    });
+                  });
+                }
+              }
+            });
+          }
+        });
+      });
+    });
+  </script>
+  <script>
+    // Extension: Reuse slide1→slide2 transition for any subsequent slides
+    (function () {
+      let animating = false;
+      function onLoad(fn) {
+        if (document.readyState === 'complete') { fn(); }
+        else window.addEventListener('load', fn);
+      }
+      onLoad(function () {
+        var slides = Array.from(document.querySelectorAll('slideshow > slide'));
+        if (!slides.length) return;
+
+        // Ensure slides beyond the first are hidden similarly to slide2 initial style
+        slides.forEach(function (sl, idx) {
+          if (idx > 0) {
+            sl.style.opacity = sl.style.opacity || 0;
+            sl.style.filter = sl.style.filter || 'blur(6px)';
+            sl.style.pointerEvents = 'none';
+            sl.style.display = sl.style.display || 'none';
+            sl.style.visibility = sl.style.visibility || 'hidden';
+            // Set initial transform state for smooth transitions
+            sl.style.transform = 'translateY(25%)'; // Start from bottom for forward transitions
+          }
+        });
+
+        function prepareParagraphLinesIn(container) {
+          if (!container) return;
+          var paragraphs = Array.from(container.querySelectorAll('p'));
+          if (!paragraphs.length) return;
+          paragraphs.forEach(function (p) {
+            // Always re-process to reset for replay
+            var original = p.innerText.trim().replace(/\s+/g, ' ');
+            if (!original) return;
+            // Split into sentence-like chunks so each can animate as a line
+            var parts = original.split(/(?<=[.!?])\s+/);
+            var frag = document.createDocumentFragment();
+            parts.forEach(function (chunk, idx) {
+              if (!chunk) return;
+              var lineEl = document.createElement('span');
+              lineEl.className = 'line';
+              lineEl.textContent = chunk;
+              frag.appendChild(lineEl);
+              if (idx < parts.length - 1) {
+                frag.appendChild(document.createTextNode(' '));
+              }
+            });
+            p.innerHTML = '';
+            p.appendChild(frag);
+          });
+        }
+
+        // Replay slide 1 animations
+        function replaySlide1Animations() {
+          var slide1 = document.getElementById('slide1');
+          if (!slide1) return;
+
+          // Reset h2 and h1 states
+          var h2 = slide1.querySelector('h2');
+          var h1 = slide1.querySelector('h1');
+
+          if (h2) {
+            h2.style.opacity = '0';
+            var h2Elements = h2.querySelectorAll('span, b');
+            h2Elements.forEach(function (el) {
+              el.style.opacity = '0';
+              el.style.transform = 'translateY(40px)';
+              el.style.filter = 'blur(4px)';
+            });
+          }
+
+          if (h1) {
+            var h1Spans = h1.querySelectorAll('span');
+            h1Spans.forEach(function (el) {
+              el.style.opacity = '0';
+              el.style.transform = 'translateX(40px)';
+              el.style.filter = 'blur(4px)';
+            });
+          }
+
+          // Reset texture element
+          var tex = document.querySelector('.texture_element');
+          if (tex) {
+            tex.style.width = '0';
+            tex.style.height = 'calc(100% - 32px)';
+            tex.style.top = '16px';
+            tex.style.right = '16px';
+            tex.style.left = 'auto';
+            tex.style.borderRadius = '20px';
+            tex.style.backgroundColor = '#E8F094';
+            var inner = tex.querySelector('[data-us-project]');
+            if (inner) inner.style.opacity = '1';
+          }
+
+          // Reset logos
+          var logo = document.getElementById('logo');
+          var flogo = document.getElementById('flogo');
+          if (logo) {
+            logo.style.opacity = '0';
+            logo.style.transform = 'translateX(-40px)';
+          }
+          if (flogo) {
+            flogo.style.opacity = '0';
+            flogo.style.transform = 'translateX(40px)';
+          }
+
+          // Animate logos
+          anime({
+            targets: ['#logo'],
+            opacity: [0, 1],
+            translateX: [-40, 0],
+            duration: 500,
+            easing: 'easeOutCubic'
+          });
+          anime({
+            targets: ['#flogo'],
+            opacity: [0, 1],
+            duration: 500,
+            translateX: [40, 0],
+            easing: 'easeOutCubic'
+          });
+
+          // Animate texture element
+          anime({
+            targets: '.texture_element',
+            width: ['0', '40%'],
+            duration: 800,
+            delay: 400,
+            easing: 'easeOutCubic',
+            complete: function () {
+              // Reveal and animate h2
+              if (h2) {
+                anime({
+                  targets: '#slide1 h2 span, #slide1 h2 b',
+                  translateY: [40, 0],
+                  opacity: [0, 1],
+                  skewY: [8, 0],
+                  duration: 700,
+                  filter: ['blur(4px)', 'blur(0px)'],
+                  delay: anime.stagger(70),
+                  easing: 'easeOutCubic',
+                  begin: function () {
+                    if (h2) h2.style.opacity = '1';
+                  },
+                  complete: function () {
+                    // Animate h1 words
+                    if (h1) {
+                      anime({
+                        targets: '#slide1 h1 span',
+                        translateX: [40, 0],
+                        opacity: [0, 1],
+                        filter: ['blur(4px)', 'blur(0px)'],
+                        duration: 800,
+                        delay: anime.stagger(40),
+                        easing: 'easeOutCubic'
+                      });
+                    }
+                  }
+                });
+              }
+            }
+          });
+        }
+
+        // Replay slide 2 animations
+        function replaySlide2Animations() {
+          var slide2 = document.getElementById('slide2');
+          if (!slide2) return;
+
+          // Reset penta logo
+          var pentaLogo = document.getElementById('penta_logo');
+          if (pentaLogo) {
+            pentaLogo.style.opacity = '0';
+            pentaLogo.style.transform = 'translateY(40px) translateX(-20px)';
+            pentaLogo.style.filter = 'blur(80px)';
+          }
+
+          // Reset paragraph lines
+          var p = slide2.querySelector('p');
+          if (p) {
+            // Re-process paragraph into lines
+            var original = p.innerText.trim().replace(/\s+/g, ' ');
+            var words = original.split(' ');
+            p.innerHTML = words.map(function (w) { return '<span class="word">' + w + '</span>'; }).join(' ');
+
+            var wordNodes = Array.from(p.querySelectorAll('.word'));
+            var lines = [];
+            var currentLine = [];
+            var currentTop = null;
+
+            wordNodes.forEach(function (node, i) {
+              var top = node.offsetTop;
+              if (currentTop === null) currentTop = top;
+              if (Math.abs(top - currentTop) > 2) {
+                lines.push(currentLine);
+                currentLine = [node];
+                currentTop = top;
+              } else {
+                currentLine.push(node);
+              }
+              if (i === wordNodes.length - 1) lines.push(currentLine);
+            });
+
+            var frag = document.createDocumentFragment();
+            lines.forEach(function (line) {
+              var lineEl = document.createElement('span');
+              lineEl.className = 'line';
+              line.forEach(function (w, idx) {
+                lineEl.appendChild(w);
+                if (idx < line.length - 1) lineEl.appendChild(document.createTextNode(' '));
+              });
+              frag.appendChild(lineEl);
+            });
+            p.innerHTML = '';
+            p.appendChild(frag);
+
+            // Reset line states
+            var lineElements = p.querySelectorAll('.line');
+            lineElements.forEach(function (line) {
+              line.style.opacity = '0';
+              line.style.transform = 'translateY(20px)';
+              line.style.filter = 'blur(8px)';
+            });
+
+            // Animate lines
+            anime({
+              targets: '#slide2 p .line',
+              opacity: [0, 1],
+              translateY: [20, 0],
+              filter: ['blur(8px)', 'blur(0px)'],
+              duration: 600,
+              delay: anime.stagger(100, { start: 20 }),
+              easing: 'easeOutCubic'
+            });
+          }
+
+          // Animate Penta logo
+          if (pentaLogo) {
+            anime({
+              targets: '#penta_logo',
+              opacity: [0, 1],
+              translateY: [40, 0],
+              translateX: [-20, 0],
+              filter: ['blur(80px)', 'blur(0px)'],
+              duration: 900,
+              delay: 200,
+              easing: 'easeOutCubic'
+            });
+          }
+
+          // Reset and setup list reveal
+          var s2p = slide2.querySelector('p');
+          var s2ul = slide2.querySelector('ul');
+          if (s2p && s2ul) {
+            s2ul.style.display = 'none';
+            s2ul.style.visibility = 'hidden';
+            s2ul.style.opacity = '0';
+            var listItems = s2ul.querySelectorAll('li');
+            listItems.forEach(function (li) {
+              li.style.opacity = '0';
+              li.style.transform = 'translateY(20px)';
+              li.style.filter = 'blur(8px)';
+            });
+
+            s2p.style.cursor = 'pointer';
+            s2p.addEventListener('click', function handleReveal() {
+              s2ul.style.display = 'block';
+              s2ul.style.visibility = 'visible';
+              anime({
+                targets: s2ul,
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutCubic'
+              });
+              anime({
+                targets: '#slide2 ul li',
+                opacity: [0, 1],
+                translateY: [20, 0],
+                filter: ['blur(8px)', 'blur(0px)'],
+                duration: 600,
+                delay: anime.stagger(100, { start: 20 }),
+                easing: 'easeOutCubic'
+              });
+              s2p.removeEventListener('click', handleReveal);
+            });
+          }
+        }
+
+        function revealListOnParagraphClick(container) {
+          var p = container.querySelector('p');
+          var ul = container.querySelector('ul');
+          if (!p || !ul) return;
+          function handleReveal() {
+            ul.style.display = 'block';
+            ul.style.visibility = 'visible';
+            anime({ targets: ul, opacity: [0, 1], duration: 300, easing: 'easeOutCubic' });
+            anime({ targets: container.querySelectorAll('ul li'), opacity: [0, 1], translateY: [20, 0], filter: ['blur(8px)', 'blur(0px)'], duration: 600, delay: anime.stagger(100, { start: 20 }), easing: 'easeOutCubic' });
+            p.removeEventListener('click', handleReveal);
+          }
+          p.style.cursor = 'pointer';
+          p.addEventListener('click', handleReveal);
+        }
+
+        // Special animation for slide 2→3: just move the dot from right to left
+        function animateCircleToCluster() {
+          var tex = document.querySelector('.texture_element');
+          if (!tex) return;
+
+          var rect = tex.getBoundingClientRect();
+          var dotSize = Math.round(window.innerWidth * 0.10);
+
+          // Lock current size to prevent unit mixing
+          tex.style.width = rect.width + 'px';
+          tex.style.height = rect.height + 'px';
+
+          // Calculate positions in pixels for smooth animation
+          // Current position: right: 3% (from right edge)
+          var currentRight = window.innerWidth * 0.03;
+          var currentLeft = window.innerWidth - currentRight - rect.width;
+
+          // Target position: left: 8% (from left edge)
+          var targetLeft = window.innerWidth * 0.08;
+
+          // Calculate the distance to move
+          var translateXDistance = targetLeft - currentLeft;
+
+          // Set initial position using left (convert from right-based to left-based)
+          tex.style.right = 'auto';
+          tex.style.left = currentLeft + 'px';
+
+          // Keep background color visible - don't make it transparent
+          // Animate using transform for smooth motion across screen
+          anime({
+            targets: tex,
+            width: [rect.width + 'px', dotSize + 'px'],
+            height: [rect.height + 'px', dotSize + 'px'],
+            top: ['65%', '76%'],
+            left: [currentLeft + 'px', targetLeft + 'px'],
+            borderRadius: ['100%', '100%'],
+            translateX: [0, '-50%'],
+            translateY: ['-50%', '0%'],
+            duration: 1000,
+            easing: 'spring(1, 120, 12, 0)'
+          });
+
+          // Reveal cluster shapes
+          window.ensureTextureCluster();
+          var clusterShapes = document.querySelectorAll('.texture_cluster_shape');
+          if (clusterShapes.length > 0) {
+            anime({
+              targets: clusterShapes,
+              opacity: [0, 1],
+              scale: [0.4, 1],
+              delay: anime.stagger(80, { start: 300, from: 'center' }),
+              duration: 700,
+              easing: 'spring(1, 120, 12, 0)'
+            });
+          }
+        }
+
+        // Reverse animation for slide 3→2: move the dot back from left to right
+        function animateClusterToCircle() {
+          var tex = document.querySelector('.texture_element');
+          if (!tex) return;
+
+          var rect = tex.getBoundingClientRect();
+          var dotSize = Math.round(window.innerWidth * 0.10);
+
+          // Lock current size
+          tex.style.width = rect.width + 'px';
+          tex.style.height = rect.height + 'px';
+
+          // Calculate positions in pixels for smooth animation
+          // Current position: left: 8%
+          var currentLeft = window.innerWidth * 0.08;
+
+          // Target position: right: 3% (convert to left position)
+          var targetRight = window.innerWidth * 0.03;
+          var targetLeft = window.innerWidth - targetRight - dotSize;
+
+          // Animate using left property for smooth motion across screen
+          anime({
+            targets: tex,
+            width: [rect.width + 'px', dotSize + 'px'],
+            height: [rect.height + 'px', dotSize + 'px'],
+            top: ['76%', '65%'],
+            left: [currentLeft + 'px', targetLeft + 'px'],
+            borderRadius: ['100%', '100%'],
+            translateX: ['-50%', 0],
+            translateY: ['0%', '-50%'],
+            duration: 1000,
+            easing: 'spring(1, 120, 12, 0)',
+            complete: function () {
+              // After animation, switch to right-based positioning for consistency
+              tex.style.left = 'auto';
+              tex.style.right = '3%';
+              tex.style.transform = 'translateY(-50%)';
+            }
+          });
+
+          // Hide cluster shapes
+          var clusterShapes = document.querySelectorAll('.texture_cluster_shape');
+          if (clusterShapes.length > 0) {
+            anime({
+              targets: clusterShapes,
+              opacity: 0,
+              scale: 0.4,
+              duration: 500,
+              easing: 'easeOutCubic'
+            });
+          }
+        }
+
+        function transitionTo(nextIdx) {
+          if (animating) return; animating = true;
+          var currentIdx = slides.findIndex(function (sl) { return sl.style.display !== 'none' && sl.style.visibility !== 'hidden'; });
+          if (currentIdx === -1) currentIdx = 0;
+          var current = slides[currentIdx];
+          var next = slides[nextIdx];
+          if (!next || current === next) { animating = false; return; }
+
+          // Special handling for slide 2→3 transition (circle to cluster animation)
+          if (currentIdx === 1 && nextIdx === 2) {
+            // Animate logos only, skip texture (handled by special animation)
+            var config = window.getConfigForSlide(nextIdx);
+            if (config) {
+              var flogo = document.getElementById('flogo');
+              if (flogo && config.flogo) {
+                var flogoConfig = config.flogo;
+                anime({
+                  targets: flogo,
+                  opacity: [parseFloat(window.getComputedStyle(flogo).opacity) || 0, flogoConfig.opacity],
+                  translateX: [0, flogoConfig.translateX],
+                  translateY: [0, flogoConfig.translateY],
+                  top: flogoConfig.top,
+                  left: flogoConfig.left,
+                  right: flogoConfig.right,
+                  bottom: flogoConfig.bottom,
+                  duration: 400,
+                  easing: 'easeOutCubic'
+                });
+              }
+              var logo = document.getElementById('logo');
+              if (logo && config.logo) {
+                var logoConfig = config.logo;
+                anime({
+                  targets: logo,
+                  opacity: [parseFloat(window.getComputedStyle(logo).opacity) || 0, logoConfig.opacity],
+                  translateX: [0, logoConfig.translateX],
+                  translateY: [0, logoConfig.translateY],
+                  top: logoConfig.top,
+                  left: logoConfig.left,
+                  right: logoConfig.right,
+                  bottom: logoConfig.bottom,
+                  duration: 400,
+                  easing: 'easeOutCubic'
+                });
+              }
+            }
+            // Trigger circle to cluster animation
+            animateCircleToCluster();
+          } else if (currentIdx === 4 && nextIdx === 5) {
+            // Special handling for slide 5→6 transition (texture moves to first pill)
+            // Make slide 6 temporarily visible (but transparent) to calculate positions
+            var slide6 = slides[5];
+            slide6.style.display = 'flex';
+            slide6.style.visibility = 'visible';
+            slide6.style.opacity = '0';
+            slide6.style.pointerEvents = 'none';
+
+            // Force layout calculation
+            slide6.offsetHeight;
+
+            var firstRow = slide6.querySelector('.row');
+            var firstPillsContainer = firstRow ? firstRow.querySelector('.pills-container') : null;
+            var firstPill = firstPillsContainer ? firstPillsContainer.querySelector('.pill') : null;
+
+            if (firstPill) {
+              // Get texture and its parent for coordinate calculation
+              var tex = document.querySelector('.texture_element');
+              var texParent = tex.offsetParent || document.body;
+              var parentRect = texParent.getBoundingClientRect();
+
+              // Get current position
+              var currentTexRect = tex.getBoundingClientRect();
+              var currentTexX = currentTexRect.left - parentRect.left;
+              var currentTexY = currentTexRect.top - parentRect.top;
+
+              // Calculate target position
+              var pillsRect = firstPill.getBoundingClientRect();
+              // Initial position: shifted to the right (-40 offset)
+              var targetX = (pillsRect.left - parentRect.left) - 40;
+              var targetY = (pillsRect.top - parentRect.top) - 280;
+
+              // Switch to transform positioning immediately
+              anime.remove(tex);
+              tex.style.top = '0px';
+              tex.style.left = '0px';
+              tex.style.right = 'auto';
+              tex.style.bottom = 'auto';
+              tex.style.width = '160px';
+              tex.style.height = '160px';
+              tex.style.transform = 'translateX(' + currentTexX + 'px) translateY(' + currentTexY + 'px)';
+
+              // Animate texture to target position immediately (during slide transition)
+              anime({
+                targets: tex,
+                translateX: targetX,
+                translateY: targetY,
+                width: 160,
+                height: 160,
+                borderRadius: '50%',
+                backgroundColor: '#DAEA3D',
+                opacity: 1,
+                zIndex: 10,
+                duration: 700,
+                easing: 'easeOutQuad'
+              });
+            }
+
+            // Hide slide 6 again
+            slide6.style.display = 'none';
+            slide6.style.visibility = 'hidden';
+            slide6.style.opacity = '1';
+
+            // Animate other external elements (texture skipped by modify in animateExternalElementsToSlide)
+            window.animateExternalElementsToSlide(nextIdx, false);
+          } else if (currentIdx === 5 && nextIdx === 6) {
+            // Special handling for slide 6→7 transition (texture moves to visual stack)
+            var slide7 = slides[6];
+            slide7.style.display = 'flex';
+            slide7.style.visibility = 'visible';
+            slide7.style.opacity = '0';
+            slide7.style.pointerEvents = 'none';
+            slide7.offsetHeight; // Force layout
+
+            // Reuse cluster shapes s1, s2, s3
+            var s1 = document.querySelector('.texture_cluster_shape.s1');
+            var s2 = document.querySelector('.texture_cluster_shape.s2');
+            var s3 = document.querySelector('.texture_cluster_shape.s3');
+
+            // Reset texture_cluster container for full screen positioning
+            var cluster = document.querySelector('.texture_cluster');
+            if (cluster) {
+              cluster.style.top = '0';
+              cluster.style.left = '0';
+              cluster.style.width = '100%';
+              cluster.style.height = '100%';
+              cluster.style.transform = 'none';
+            }
+
+            // Set initial state for animation
+            [s1, s2, s3].forEach(function (el) {
+              if (el) {
+                el.style.display = 'block';
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0)';
+                el.style.right = '60px';
+                el.style.left = 'auto';
+                el.style.bottom = 'auto';
+              }
+            });
+
+            // Calculate positions to center the stack vertically
+            var gap = 24;
+            var s1Height = 160;
+            var s2Height = 320;
+            var s3Height = 160;
+            var texHeight = 160;
+
+            // Total stack height
+            var totalHeight = s1Height + gap + s2Height + gap + s3Height + gap + texHeight;
+
+            // Calculate top offset to center the stack, then move 60px lower
+            var topOffset = (window.innerHeight - totalHeight) / 2 + 60;
+
+            // Calculate top positions for each element
+            var s1TargetTop = topOffset;
+            var s2TargetTop = topOffset + s1Height + gap;
+            var s3TargetTop = topOffset + s1Height + gap + s2Height + gap;
+            var texTargetTop = topOffset + s1Height + gap + s2Height + gap + s3Height + gap;
+
+            // Animate s1 (Cream Circle)
+            if (s1) {
+              anime({
+                targets: s1,
+                width: 160,
+                height: 160,
+                borderRadius: '50%',
+                backgroundColor: '#F8F9E5',
+                top: s1TargetTop,
+                opacity: 1,
+                scale: 1,
+                duration: 600,
+                easing: 'easeOutBack',
+                delay: 100
+              });
+            }
+
+            // Animate s2 (Lime Pill)
+            if (s2) {
+              anime({
+                targets: s2,
+                width: 160,
+                height: 320,
+                borderRadius: '80px',
+                backgroundColor: '#DAEA3D',
+                top: s2TargetTop,
+                opacity: 1,
+                scale: 1,
+                duration: 600,
+                easing: 'easeOutBack',
+                delay: 200
+              });
+            }
+
+            // Animate s3 (Olive Circle)
+            if (s3) {
+              anime({
+                targets: s3,
+                width: 160,
+                height: 160,
+                borderRadius: '50%',
+                backgroundColor: '#687200',
+                top: s3TargetTop,
+                opacity: 1,
+                scale: 1,
+                duration: 600,
+                easing: 'easeOutBack',
+                delay: 300
+              });
+            }
+
+            // Animate Texture
+            var tex = document.querySelector('.texture_element');
+            var texParent = tex.offsetParent || document.body;
+            var parentRect = texParent.getBoundingClientRect();
+
+            var currentTexRect = tex.getBoundingClientRect();
+            var currentTexX = currentTexRect.left - parentRect.left;
+            var currentTexY = currentTexRect.top - parentRect.top;
+
+            // Target: right 60px, vertically centered with the stack
+            var targetX = window.innerWidth - 60 - 160;
+
+            anime.remove(tex);
+            tex.style.top = '0px';
+            tex.style.left = '0px';
+            tex.style.transform = 'translateX(' + currentTexX + 'px) translateY(' + currentTexY + 'px)';
+
+            anime({
+              targets: tex,
+              translateX: targetX,
+              translateY: texTargetTop,
+              width: 160,
+              height: 160,
+              borderRadius: '50%',
+              duration: 700,
+              easing: 'easeOutQuad'
+            });
+
+            slide7.style.display = 'none';
+            slide7.style.visibility = 'hidden';
+            slide7.style.opacity = '1';
+
+            window.animateExternalElementsToSlide(nextIdx, false);
+          } else if (nextIdx === 7) {
+            // Special handling for transition to slide 8 (hide texture and cluster)
+            var tex = document.querySelector('.texture_element');
+            var clusterShapes = document.querySelectorAll('.texture_cluster_shape');
+
+            // Hide cluster shapes with inverse animation (fade out and scale down)
+            if (clusterShapes.length > 0) {
+              anime({
+                targets: clusterShapes,
+                opacity: [1, 0],
+                scale: [1, 0.4],
+                delay: anime.stagger(80, { start: 0, from: 'center', direction: 'reverse' }),
+                duration: 700,
+                easing: 'easeOutCubic'
+              });
+            }
+
+            // Hide texture element
+            if (tex) {
+              anime({
+                targets: tex,
+                opacity: [1, 0],
+                scale: [1, 0.4],
+                duration: 700,
+                delay: 200,
+                easing: 'easeOutCubic'
+              });
+            }
+
+            // Animate other external elements to target state for next slide
+            window.animateExternalElementsToSlide(nextIdx, false);
+          } else {
+            // Animate external elements to target state for next slide
+            window.animateExternalElementsToSlide(nextIdx, false);
+          }
+
+
+          // Ensure current slide is in initial state
+          current.style.transform = 'scale(1)';
+          current.style.opacity = '1';
+          current.style.filter = 'blur(0px)';
+          current.style.zIndex = '1';
+
+          // Prepare next slide
+          next.style.pointerEvents = 'auto';
+          next.style.display = 'flex';
+          next.style.visibility = 'visible';
+          next.style.zIndex = '2';
+
+          // Set next slide initial state before animation
+          next.style.transform = 'scale(1.5)';
+          next.style.opacity = '0';
+          next.style.filter = 'blur(20px)';
+
+          // Prepare content for animation (before transition starts)
+          if (nextIdx === 0) {
+            // Slide 1 - will replay animations after transition
+          } else if (nextIdx === 1) {
+            // Slide 2 - prepare paragraph lines
+            var p = next.querySelector('p');
+            if (p && !p.querySelector('.line')) {
+              prepareParagraphLinesIn(next);
+            }
+          } else if (nextIdx >= 2 && nextIdx !== 6) {
+            prepareParagraphLinesIn(next);
+          } else if (nextIdx === 6) {
+            // Slide 7: prepare h1 and paragraphs before transition
+            var h1 = next.querySelector('h1');
+            if (h1) {
+              h1.style.opacity = '1';
+              h1.style.transform = 'translateY(0px)';
+              h1.style.filter = 'blur(0px)';
+            }
+            prepareParagraphLinesIn(next);
+          }
+
+          // Parallel crossfade/zoom transition
+          var transitionTimeline = anime.timeline({
+            duration: 700,
+            easing: 'easeOutQuad',
+            complete: function () {
+              // Hide current slide
+              current.style.display = 'none';
+              current.style.visibility = 'hidden';
+              current.style.zIndex = '';
+              current.style.transform = '';
+              current.style.filter = '';
+              current.style.opacity = '1';
+
+              // Ensure final state is set for next
+              next.style.transform = 'scale(1)';
+              next.style.opacity = '1';
+              next.style.filter = 'blur(0px)';
+              next.style.zIndex = '';
+
+              // Replay slide-specific animations
+              if (nextIdx === 0) {
+                replaySlide1Animations();
+              } else if (nextIdx === 1) {
+                replaySlide2Animations();
+              } else if (nextIdx >= 2 && nextIdx !== 6) {
+                // Animate h1 title first for all slides >= 2 except slide 7
+                var h1 = next.querySelector('h1');
+                if (h1) {
+                  h1.style.opacity = '1';
+                  h1.style.transform = 'translateY(0px)';
+                  h1.style.filter = 'blur(0px)';
+                  anime({
+                    targets: h1,
+                    duration: 100,
+                    easing: 'easeOutCubic',
+                    complete: function () {
+                      // After h1 animates, animate content
+                      animateSlideContent();
+                    }
+                  });
+                } else {
+                  animateSlideContent();
+                }
+              } else if (nextIdx === 6) {
+                // Slide 7: h1 was prepared before transition, just animate content
+                animateSlideContent();
+              }
+
+              function animateSlideContent() {
+                // Check if this is slide 4 (cards grid)
+                var cardsGrid = next.querySelector('.cards-grid');
+                var slide5Content = next.querySelector('.slide5-content');
+                var slide6Content = next.querySelector('.slide6-content');
+                var slide7Content = next.querySelector('.slide7-content');
+
+                if (cardsGrid) {
+                  // Animate cards grid for slide 4
+                  var cards = next.querySelectorAll('.card');
+                  if (cards.length > 0) {
+                    // Reset card states
+                    cards.forEach(function (card, cardIndex) {
+                      card.style.opacity = '0';
+                      card.style.transform = 'translateY(40px)';
+                      card.style.filter = 'blur(20px)';
+
+                      // Reset line states within each card
+                      var lines = card.querySelectorAll('p .line');
+                      lines.forEach(function (line) {
+                        line.style.opacity = '0';
+                        line.style.transform = 'translateY(20px)';
+                        line.style.filter = 'blur(8px)';
+                      });
+                    });
+
+                    // Fade in grid container first
+                    anime({ targets: cardsGrid, opacity: [0, 1], duration: 400, easing: 'easeOutCubic' });
+
+                    // Then animate cards
+                    anime({
+                      targets: cards,
+                      opacity: [0, 1],
+                      translateY: [40, 0],
+                      filter: ['blur(20px)', 'blur(0px)'],
+                      duration: 600,
+                      delay: anime.stagger(100),
+                      easing: 'easeOutCubic',
+                      complete: function () {
+                        // After cards, collect all paragraph lines across all cards
+                        var allLines = [];
+                        cards.forEach(function (card) {
+                          var lines = card.querySelectorAll('p .line');
+                          lines.forEach(function (line) {
+                            allLines.push(line);
+                          });
+                        });
+
+                        // Animate all lines one by one with global staggering
+                        if (allLines.length > 0) {
+                          anime({
+                            targets: allLines,
+                            opacity: [0, 1],
+                            translateY: [20, 0],
+                            filter: ['blur(8px)', 'blur(0px)'],
+                            duration: 600,
+                            delay: anime.stagger(100),
+                            easing: 'easeOutCubic'
+                          });
+                        }
+
+                        revealListOnParagraphClick(next);
+                        current.style.display = 'none';
+                        animating = false;
+                      }
+                    });
+                  }
+                } else if (slide5Content) {
+                  // Slide 5 animation
+                  var leftItems = next.querySelectorAll('.list-left li');
+                  var rightItems = next.querySelectorAll('.list-right li');
+                  var lines = next.querySelectorAll('.line-path');
+
+                  // Reset states
+                  leftItems.forEach(function (el) {
+                    el.style.opacity = 0;
+                    el.style.transform = 'translateX(-20px)';
+                  });
+                  rightItems.forEach(function (el) {
+                    el.style.opacity = 0;
+                    el.style.transform = 'translateX(20px)';
+                  });
+                  lines.forEach(function (el) {
+                    el.style.opacity = 1;
+                    el.style.strokeDashoffset = 1000;
+                  });
+
+                  // Animate lists
+                  anime({
+                    targets: leftItems,
+                    opacity: [0, 1],
+                    translateX: [-20, 0],
+                    translateY: [40, 0],
+                    filter: ['blur(20px)', 'blur(0px)'],
+                    duration: 600,
+                    delay: anime.stagger(50),
+                    easing: 'easeOutCubic'
+                  });
+
+                  anime({
+                    targets: rightItems,
+                    opacity: [0, 1],
+                    translateX: [20, 0],
+                    translateY: [40, 0],
+                    filter: ['blur(20px)', 'blur(0px)'],
+                    duration: 600,
+                    delay: anime.stagger(50, { start: 300 }),
+                    easing: 'easeOutCubic'
+                  });
+
+                  // Animate connecting lines
+                  anime({
+                    targets: lines,
+                    strokeDashoffset: [1000, 0],
+                    duration: 1000,
+                    delay: 300,
+                    easing: 'easeOutCubic',
+                    complete: function () {
+                      current.style.display = 'none';
+                      animating = false;
+                    }
+                  });
+                } else if (slide6Content) {
+                  // Slide 6 animation
+                  var texture = document.querySelector('.texture_element');
+                  var rows = slide6Content.querySelectorAll('.row');
+                  if (rows.length === 0) {
+                    current.style.display = 'none';
+                    animating = false;
+                    return;
+                  }
+
+                  // Reset all rows and pills to their initial hidden states
+                  rows.forEach(function (row) {
+                    row.style.opacity = '1';
+                    var pills = row.querySelectorAll('.pill');
+                    var pillSpans = row.querySelectorAll('.pill span');
+                    var text = row.querySelector('.row-text');
+
+                    pills.forEach(function (pill) {
+                      if (!pill.dataset.originalWidth) {
+                        pill.dataset.originalWidth = pill.offsetWidth + 'px';
+                      }
+                      pill.style.width = '0px';
+                    });
+
+                    pillSpans.forEach(function (span) {
+                      span.style.opacity = '0';
+                      span.style.transform = 'translateX(40px)';
+                      span.style.filter = 'blur(15px)';
+                    });
+
+                    if (text) {
+                      text.style.opacity = '0';
+                      text.style.transform = 'translateY(20px)';
+                      text.style.filter = 'blur(8px)';
+                    }
+                  });
+
+                  // Ensure texture is visible and positioned correctly
+                  if (texture) {
+                    anime.remove(texture);
+
+                    // Get current texture position and properties
+                    var currentTexRect = texture.getBoundingClientRect();
+                    var texParent = texture.offsetParent || document.body;
+                    var parentRect = texParent.getBoundingClientRect();
+                    var currentTexX = currentTexRect.left - parentRect.left;
+                    var currentTexY = currentTexRect.top - parentRect.top;
+
+                    // Switch to transform positioning (ensure it's set if not already)
+                    texture.style.top = '0px';
+                    texture.style.left = '0px';
+                    texture.style.right = 'auto';
+                    texture.style.bottom = 'auto';
+                    texture.style.transform = 'translateX(' + currentTexX + 'px) translateY(' + currentTexY + 'px)';
+
+                    // Create master timeline
+                    var masterTimeline = anime.timeline({
+                      easing: 'linear',
+                      complete: function () {
+                        // Ensure texture remains visible after animation
+                        texture.style.opacity = '1';
+                        texture.style.zIndex = '10';
+                        texture.style.display = 'block';
+                      }
+                    });
+
+                    // Step 1 removed (handled in transitionTo)
+
+                    // Step 2: Emitter animation through all rows
+                    var currentTime = 0; // Start immediately
+                    var interRowDelay = 200;
+
+                    rows.forEach(function (row, index) {
+                      var pills = row.querySelectorAll('.pill');
+                      var text = row.querySelector('.row-text');
+
+                      var staggerDelay = 100;
+                      var pillDuration = 400;
+                      var textDuration = 300;
+
+                      // Calculate Row Coordinates
+                      var pillsContainer = row.querySelector('.pills-container');
+                      var pills = row.querySelectorAll('.pill');
+                      var firstPill = pills[0];
+                      var pillsRect = firstPill.getBoundingClientRect();
+
+                      // Calculate total width of pills
+                      var totalPillsWidth = 0;
+                      pills.forEach(function (p) { totalPillsWidth += parseInt(p.dataset.originalWidth); });
+                      var totalGaps = (pills.length > 0) ? (pills.length - 1) * 20 : 0;
+                      var finalWidth = totalPillsWidth + totalGaps;
+
+                      var startX = (pillsRect.left - parentRect.left) - 160; // Positioned left to follow expansion
+                      var startY = (pillsRect.top - parentRect.top) - (index === 0 ? 280 : 0);
+                      var endX = (pillsRect.left - parentRect.left) + finalWidth + 20;
+                      var rowPillsDuration = (pills.length > 0) ? ((pills.length - 1) * staggerDelay + pillDuration) : 0;
+
+                      // Move to row start (skip for first row since we're already there)
+                      if (index > 0) {
+                        masterTimeline.add({
+                          targets: texture,
+                          translateX: startX,
+                          translateY: startY,
+                          duration: interRowDelay,
+                          easing: 'easeOutQuad'
+                        }, currentTime);
+
+                        currentTime += interRowDelay;
+                      }
+
+                      var rowStartTime = currentTime;
+
+                      // Move texture across row
+                      masterTimeline.add({
+                        targets: texture,
+                        translateX: endX,
+                        duration: rowPillsDuration,
+                        easing: 'easeOutQuad'
+                      }, rowStartTime);
+
+                      // Pill Animations
+                      masterTimeline.add({
+                        targets: pills,
+                        width: function (el) { return el.dataset.originalWidth; },
+                        duration: pillDuration,
+                        delay: anime.stagger(staggerDelay),
+                        easing: 'easeOutQuad'
+                      }, rowStartTime);
+
+                      // Text Animations
+                      pills.forEach(function (pill, pillIndex) {
+                        var pillSpan = pill.querySelector('span');
+                        if (pillSpan) {
+                          var pillEndTime = rowStartTime + (pillIndex * staggerDelay) + pillDuration;
+
+                          masterTimeline.add({
+                            targets: pillSpan,
+                            opacity: [0, 1],
+                            translateX: [40, 0],
+                            filter: ['blur(15px)', 'blur(0px)'],
+                            duration: textDuration,
+                            easing: 'easeInQuad'
+                          }, pillEndTime);
+                        }
+                      });
+
+                      // Row Text Animation
+                      masterTimeline.add({
+                        targets: text,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        filter: ['blur(8px)', 'blur(0px)'],
+                        duration: 400,
+                        easing: 'easeOutQuad'
+                      }, rowStartTime + rowPillsDuration);
+
+                      currentTime += rowPillsDuration;
+                    });
+                  }
+                } else if (slide7Content) {
+                  // Slide 7 Animation
+                  // Prepare paragraph lines
+                  var ps = next.querySelectorAll('p');
+                  ps.forEach(function (p) {
+                    if (!p.querySelector('.line')) {
+                      var original = p.innerText.trim().replace(/\s+/g, ' ');
+                      var words = original.split(' ');
+                      p.innerHTML = words.map(function (w) { return '<span class="word">' + w + '</span>'; }).join(' ');
+
+                      var wordNodes = Array.from(p.querySelectorAll('.word'));
+                      var lines = [];
+                      var currentLine = [];
+                      var currentTop = null;
+
+                      wordNodes.forEach(function (node, i) {
+                        var top = node.offsetTop;
+                        if (currentTop === null) currentTop = top;
+                        if (Math.abs(top - currentTop) > 2) {
+                          lines.push(currentLine);
+                          currentLine = [node];
+                          currentTop = top;
+                        } else {
+                          currentLine.push(node);
+                        }
+                        if (i === wordNodes.length - 1) lines.push(currentLine);
+                      });
+
+                      var frag = document.createDocumentFragment();
+                      lines.forEach(function (line) {
+                        var lineEl = document.createElement('span');
+                        lineEl.className = 'line';
+                        line.forEach(function (w, idx) {
+                          lineEl.appendChild(w);
+                          if (idx < line.length - 1) lineEl.appendChild(document.createTextNode(' '));
+                        });
+                        frag.appendChild(lineEl);
+                      });
+                      p.innerHTML = '';
+                      p.appendChild(frag);
+                    }
+                  });
+
+                  var lines = next.querySelectorAll('p .line');
+                  if (lines.length > 0) {
+                    lines.forEach(function (line) {
+                      line.style.opacity = '0';
+                      line.style.transform = 'translateY(20px)';
+                      line.style.filter = 'blur(8px)';
+                    });
+                    anime({ targets: lines, opacity: [0, 1], translateY: [20, 0], filter: ['blur(8px)', 'blur(0px)'], duration: 600, delay: anime.stagger(100, { start: 20 }), easing: 'easeOutCubic' });
+                  }
+                } else {
+                  // Animate paragraph lines for slide 3+
+                  var lines = next.querySelectorAll('p .line');
+                  if (lines.length > 0) {
+                    lines.forEach(function (line) {
+                      line.style.opacity = '0';
+                      line.style.transform = 'translateY(20px)';
+                      line.style.filter = 'blur(8px)';
+                    });
+
+                    // Use 40ms stagger for slides 8 and 9, 100ms for others
+                    var staggerDelay = (nextIdx === 7 || nextIdx === 8) ? 40 : 100;
+
+                    anime({
+                      targets: lines,
+                      opacity: [0, 1],
+                      translateY: [20, 0],
+                      filter: ['blur(8px)', 'blur(0px)'],
+                      duration: 600,
+                      delay: anime.stagger(staggerDelay, { start: 20 }),
+                      easing: 'easeOutCubic'
+                    });
+                  }
+                  revealListOnParagraphClick(next);
+                }
+              }
+
+              // Hide previous slide after reveal
+              current.style.display = 'none';
+              animating = false;
+            } // end animateSlideContent
+          });
+
+          // Current slide: Fade out and blur (goes deeper with stronger scale)
+          transitionTimeline.add({
+            targets: current,
+            scale: [1, 0.6],
+            opacity: [1, 0],
+            filter: ['blur(0px)', 'blur(30px)'],
+            duration: 700,
+            easing: 'easeOutQuad'
+          }, 0);
+
+          // Next slide: Scale from 2.0 to 1, fade in, unblur
+          transitionTimeline.add({
+            targets: next,
+            scale: [2.0, 1],
+            opacity: [0, 1],
+            filter: ['blur(30px)', 'blur(0px)'],
+            duration: 700,
+            easing: 'easeOutQuad'
+          }, 0);
+        }
+
+        function transitionToPrev(prevIdx) {
+          var currentIdx = slides.findIndex(function (sl) { return sl.style.display !== 'none' && sl.style.visibility !== 'hidden'; });
+          if (currentIdx <= 0) { animating = false; return; }
+          var current = slides[currentIdx];
+          var prev = slides[prevIdx];
+          if (!prev || current === prev) { animating = false; return; }
+
+          // Special handling for slide 3→2 transition (cluster to circle animation)
+          if (currentIdx === 2 && prevIdx === 1) {
+            // Animate logos only, skip texture (handled by special animation)
+            var config = window.getConfigForSlide(prevIdx);
+            if (config) {
+              var flogo = document.getElementById('flogo');
+              if (flogo && config.flogo) {
+                var flogoConfig = config.flogo;
+                anime({
+                  targets: flogo,
+                  opacity: [parseFloat(window.getComputedStyle(flogo).opacity) || 0, flogoConfig.opacity],
+                  translateX: [0, flogoConfig.translateX],
+                  translateY: [0, flogoConfig.translateY],
+                  top: flogoConfig.top,
+                  left: flogoConfig.left,
+                  right: flogoConfig.right,
+                  bottom: flogoConfig.bottom,
+                  duration: 400,
+                  easing: 'easeOutCubic'
+                });
+              }
+              var logo = document.getElementById('logo');
+              if (logo && config.logo) {
+                var logoConfig = config.logo;
+                anime({
+                  targets: logo,
+                  opacity: [parseFloat(window.getComputedStyle(logo).opacity) || 0, logoConfig.opacity],
+                  translateX: [0, logoConfig.translateX],
+                  translateY: [0, logoConfig.translateY],
+                  top: logoConfig.top,
+                  left: logoConfig.left,
+                  right: logoConfig.right,
+                  bottom: logoConfig.bottom,
+                  duration: 400,
+                  easing: 'easeOutCubic'
+                });
+              }
+            }
+            // Trigger cluster to circle animation
+            animateClusterToCircle();
+          }
+
+          // Special handling for slide 7→6 reverse transition
+          if (currentIdx === 6 && prevIdx === 5) {
+            var slide6 = slides[5];
+            slide6.style.display = 'flex';
+            slide6.style.visibility = 'visible';
+            slide6.style.opacity = '0';
+            slide6.style.pointerEvents = 'none';
+            slide6.offsetHeight; // Force layout
+
+            var rows = slide6.querySelectorAll('.row');
+            var lastRow = rows[rows.length - 1];
+            var pills = lastRow.querySelectorAll('.pill');
+            var firstPill = pills[0];
+            var pillsRect = firstPill.getBoundingClientRect();
+
+            var totalPillsWidth = 0;
+            pills.forEach(function (p) { totalPillsWidth += parseInt(p.dataset.originalWidth); });
+            var totalGaps = (pills.length > 0) ? (pills.length - 1) * 20 : 0;
+            var finalWidth = totalPillsWidth + totalGaps;
+
+            var tex = document.querySelector('.texture_element');
+            var texParent = tex.offsetParent || document.body;
+            var parentRect = texParent.getBoundingClientRect();
+
+            var endX = (pillsRect.left - parentRect.left) + finalWidth + 20;
+            var endY = (pillsRect.top - parentRect.top);
+
+            var currentTexRect = tex.getBoundingClientRect();
+            var currentTexX = currentTexRect.left - parentRect.left;
+            var currentTexY = currentTexRect.top - parentRect.top;
+
+            anime.remove(tex);
+            tex.style.top = '0px';
+            tex.style.left = '0px';
+            tex.style.transform = 'translateX(' + currentTexX + 'px) translateY(' + currentTexY + 'px)';
+
+            anime({
+              targets: tex,
+              translateX: endX,
+              translateY: endY,
+              width: 160,
+              height: 160,
+              borderRadius: '50%',
+              duration: 700,
+              easing: 'easeOutQuad'
+            });
+
+            // Hide reused s7 shapes (s1, s2, s3)
+            var sShapes = document.querySelectorAll('.texture_cluster_shape.s1, .texture_cluster_shape.s2, .texture_cluster_shape.s3');
+            anime({
+              targets: sShapes,
+              opacity: 0,
+              scale: 0,
+              duration: 400,
+              easing: 'easeInBack',
+              complete: function () {
+                sShapes.forEach(function (el) {
+                  el.style.top = 'auto';
+                  el.style.right = 'auto';
+                });
+                // Restore texture_cluster container
+                var cluster = document.querySelector('.texture_cluster');
+                if (cluster) {
+                  cluster.style.top = '76%';
+                  cluster.style.left = '8%';
+                  cluster.style.width = '700px';
+                  cluster.style.height = '450px';
+                  cluster.style.transform = 'translateY(-50%)';
+                }
+              }
+            });
+
+            slide6.style.display = 'none';
+            slide6.style.visibility = 'hidden';
+            slide6.style.opacity = '1';
+
+            window.animateExternalElementsToSlide(prevIdx, true);
+          }
+
+          // Animate external elements to target state for previous slide (reversing)
+          // Skip if we already handled it above (slide 3→2 or slide 6→5 or slide 7→6)
+          if (!(currentIdx === 2 && prevIdx === 1) && !(currentIdx === 5 && prevIdx === 4) && !(currentIdx === 6 && prevIdx === 5)) {
+            window.animateExternalElementsToSlide(prevIdx, true);
+          }
+
+          // Special handling for slide 6→5 reverse transition
+          if (currentIdx === 5 && prevIdx === 4) {
+            window.animateExternalElementsToSlide(prevIdx, true);
+          }
+
+          // Hide all future slides (slides after the one we're going to)
+          for (var i = prevIdx + 1; i < slides.length; i++) {
+            slides[i].style.display = 'none';
+            slides[i].style.visibility = 'hidden';
+          }
+
+          // Ensure current slide is in initial state
+          current.style.transform = 'scale(1)';
+          current.style.opacity = '1';
+          current.style.filter = 'blur(0px)';
+          current.style.zIndex = '1';
+
+          // Prepare previous slide
+          prev.style.pointerEvents = 'auto';
+          prev.style.display = 'flex';
+          prev.style.visibility = 'visible';
+          prev.style.zIndex = '2';
+
+          // Set previous slide initial state before animation (reverse: zoom in)
+          prev.style.transform = 'scale(2.0)';
+          prev.style.opacity = '0';
+          prev.style.filter = 'blur(30px)';
+
+          // Prepare content for animation (before transition starts)
+          if (prevIdx === 0) {
+            // Slide 1 - will replay animations after transition
+          } else if (prevIdx === 1) {
+            // Slide 2 - prepare paragraph lines
+            var p = prev.querySelector('p');
+            if (p && !p.querySelector('.line')) {
+              prepareParagraphLinesIn(prev);
+            }
+          } else if (prevIdx >= 2) {
+            prepareParagraphLinesIn(prev);
+          }
+
+          // Parallel crossfade/zoom transition (reverse)
+          var transitionTimeline = anime.timeline({
+            duration: 700,
+            easing: 'easeOutQuad',
+            complete: function () {
+              // Hide current slide
+              current.style.display = 'none';
+              current.style.visibility = 'hidden';
+              current.style.zIndex = '';
+              current.style.transform = '';
+              current.style.filter = '';
+              current.style.opacity = '1';
+
+              // Ensure final state is set for prev
+              prev.style.transform = 'scale(1)';
+              prev.style.opacity = '1';
+              prev.style.filter = 'blur(0px)';
+              prev.style.zIndex = '';
+
+              // Replay slide-specific animations
+              if (prevIdx === 0) {
+                replaySlide1Animations();
+              } else if (prevIdx === 1) {
+                replaySlide2Animations();
+              } else if (prevIdx >= 2) {
+                // Animate h1 title first for all slides >= 2
+                var h1 = prev.querySelector('h1');
+                if (h1) {
+                  h1.style.opacity = '0';
+                  h1.style.transform = 'translateY(30px)';
+                  h1.style.filter = 'blur(10px)';
+                  anime({
+                    targets: h1,
+                    opacity: [0, 1],
+                    translateY: [30, 0],
+                    filter: ['blur(10px)', 'blur(0px)'],
+                    duration: 700,
+                    easing: 'easeOutCubic',
+                    complete: function () {
+                      // After h1 animates, animate content
+                      animatePrevSlideContent();
+                    }
+                  });
+                } else {
+                  animatePrevSlideContent();
+                }
+
+                function animatePrevSlideContent() {
+                  // Check if this is slide 4 (cards grid)
+                  var cardsGrid = prev.querySelector('.cards-grid');
+                  var slide5Content = prev.querySelector('.slide5-content');
+                  var slide6Content = prev.querySelector('.slide6-content');
+                  var slide7Content = prev.querySelector('.slide7-content');
+
+                  if (cardsGrid) {
+                    // Animate cards grid for slide 4
+                    var cards = prev.querySelectorAll('.card');
+                    if (cards.length > 0) {
+                      // Reset card states and prepare paragraph lines
+                      cards.forEach(function (card) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(40px)';
+                        card.style.filter = 'blur(20px)';
+
+                        // Prepare paragraph lines
+                        var p = card.querySelector('p');
+                        if (p && !p.querySelector('.line')) {
+                          var original = p.innerText.trim().replace(/\s+/g, ' ');
+                          var words = original.split(' ');
+                          p.innerHTML = words.map(function (w) { return '<span class="word">' + w + '</span>'; }).join(' ');
+
+                          var wordNodes = Array.from(p.querySelectorAll('.word'));
+                          var lines = [];
+                          var currentLine = [];
+                          var currentTop = null;
+
+                          wordNodes.forEach(function (node, i) {
+                            var top = node.offsetTop;
+                            if (currentTop === null) currentTop = top;
+                            if (Math.abs(top - currentTop) > 2) {
+                              lines.push(currentLine);
+                              currentLine = [node];
+                              currentTop = top;
+                            } else {
+                              currentLine.push(node);
+                            }
+                            if (i === wordNodes.length - 1) lines.push(currentLine);
+                          });
+
+                          var frag = document.createDocumentFragment();
+                          lines.forEach(function (line) {
+                            var lineEl = document.createElement('span');
+                            lineEl.className = 'line';
+                            line.forEach(function (w, idx) {
+                              lineEl.appendChild(w);
+                              if (idx < line.length - 1) lineEl.appendChild(document.createTextNode(' '));
+                            });
+                            frag.appendChild(lineEl);
+                          });
+                          p.innerHTML = '';
+                          p.appendChild(frag);
+                        }
+                      });
+
+                      // Fade in grid container first
+                      anime({
+                        targets: cardsGrid,
+                        opacity: [0, 1],
+                        duration: 300,
+                        easing: 'easeOutCubic'
+                      });
+
+                      // Then animate cards with stagger
+                      anime({
+                        targets: cards,
+                        opacity: [0, 1],
+                        translateY: [40, 0],
+                        filter: ['blur(20px)', 'blur(0px)'],
+                        duration: 700,
+                        delay: anime.stagger(40, { start: 200 }),
+                        easing: 'easeOutCubic',
+                        complete: function () {
+                          // After cards appear, animate paragraph lines
+                          var lines = prev.querySelectorAll('.card p .line');
+                          if (lines.length > 0) {
+                            lines.forEach(function (line) {
+                              line.style.opacity = '0';
+                              line.style.transform = 'translateY(20px)';
+                              line.style.filter = 'blur(8px)';
+                            });
+                            anime({
+                              targets: lines,
+                              opacity: [0, 1],
+                              translateY: [20, 0],
+                              filter: ['blur(8px)', 'blur(0px)'],
+                              duration: 600,
+                              delay: anime.stagger(80, { start: 100 }),
+                              easing: 'easeOutCubic'
+                            });
+                          }
+                        }
+                      });
+                    }
+                  } else if (slide5Content) {
+                    // Slide 5 animation
+                    var leftItems = prev.querySelectorAll('.list-left li');
+                    var rightItems = prev.querySelectorAll('.list-right li');
+                    var lines = prev.querySelectorAll('.line-path');
+
+                    // Reset states
+                    leftItems.forEach(function (el) {
+                      el.style.opacity = 0;
+                      el.style.transform = 'translateX(-20px)';
+                    });
+                    rightItems.forEach(function (el) {
+                      el.style.opacity = 0;
+                      el.style.transform = 'translateX(20px)';
+                    });
+                    lines.forEach(function (el) {
+                      el.style.opacity = 1;
+                      el.style.strokeDashoffset = 1000;
+                    });
+
+                    // Animate lists
+                    anime({
+                      targets: leftItems,
+                      opacity: [0, 1],
+                      translateX: [-20, 0],
+                      translateY: [40, 0],
+                      filter: ['blur(20px)', 'blur(0px)'],
+                      duration: 600,
+                      delay: anime.stagger(50),
+                      easing: 'easeOutCubic'
+                    });
+
+                    anime({
+                      targets: rightItems,
+                      opacity: [0, 1],
+                      translateX: [20, 0],
+                      translateY: [40, 0],
+                      filter: ['blur(20px)', 'blur(0px)'],
+                      duration: 600,
+                      delay: anime.stagger(50, { start: 300 }),
+                      easing: 'easeOutCubic'
+                    });
+
+                    // Animate lines
+                    anime({
+                      targets: lines,
+                      strokeDashoffset: [1000, 0],
+                      duration: 1000,
+                      delay: 300,
+                      easing: 'easeOutCubic'
+                    });
+                  } else if (slide6Content) {
+                    // Slide 6 animation
+                    var rows = prev.querySelectorAll('.row');
+                    var texture = document.querySelector('.texture_element');
+
+                    // Reset states
+                    rows.forEach(function (row) {
+                      row.style.opacity = 1;
+                      var pills = row.querySelectorAll('.pill');
+                      var pillSpans = row.querySelectorAll('.pill span');
+                      var text = row.querySelector('.row-text');
+
+                      pills.forEach(function (pill) {
+                        if (!pill.dataset.originalWidth) {
+                          pill.dataset.originalWidth = pill.offsetWidth + 'px';
+                        }
+                        pill.style.width = '0px';
+                        pill.style.overflow = 'hidden';
+                      });
+
+                      pillSpans.forEach(function (span) {
+                        span.style.opacity = 0;
+                        span.style.transform = 'translateX(40px)';
+                        span.style.filter = 'blur(15px)';
+                        span.style.display = 'block';
+                      });
+
+                      if (text) {
+                        text.style.opacity = 0;
+                        text.style.transform = 'translateY(20px)';
+                        text.style.filter = 'blur(8px)';
+                      }
+                    });
+
+                    // Create timeline
+                    var timeline = anime.timeline({
+                      easing: 'easeOutQuad',
+                      complete: function () {
+                        // Ensure texture remains visible after animation
+                        texture.style.opacity = '1';
+                        texture.style.zIndex = '10';
+                        texture.style.display = 'block';
+                      }
+                    });
+
+                    var accumulatedDelay = 0;
+                    var interRowDelay = 200;
+
+                    var texParent = texture.offsetParent || document.body;
+                    var parentRect = texParent.getBoundingClientRect();
+
+                    rows.forEach(function (row, index) {
+                      var pills = row.querySelectorAll('.pill');
+                      var pillSpans = row.querySelectorAll('.pill span');
+                      var text = row.querySelector('.row-text');
+
+                      var staggerDelay = 100; // Updated to 100ms
+                      var pillDuration = 400;
+                      var textDuration = 300;
+
+                      var pillsContainer = row.querySelector('.pills-container');
+                      var pills = row.querySelectorAll('.pill');
+                      var firstPill = pills[0];
+                      var pillsRect = firstPill.getBoundingClientRect();
+
+                      var totalPillsWidth = 0;
+                      pills.forEach(function (p) { totalPillsWidth += parseInt(p.dataset.originalWidth); });
+                      var totalGaps = (pills.length > 0) ? (pills.length - 1) * 20 : 0;
+                      var finalWidth = totalPillsWidth + totalGaps;
+
+                      var startX = (pillsRect.left - parentRect.left) - 160; // Positioned left to follow expansion
+                      var startY = (pillsRect.top - parentRect.top) - (index === 0 ? 280 : 0);
+                      var endX = (pillsRect.left - parentRect.left) + finalWidth + 20; // Stop 20px from the last pill
+
+                      var rowPillsDuration = (pills.length > 0) ? ((pills.length - 1) * staggerDelay + pillDuration) : 0;
+
+                      var rowStart = accumulatedDelay;
+
+                      if (index === 0) {
+                        // Set initial texture state for Slide 6
+                        texture.style.top = '0px';
+                        texture.style.left = '0px';
+                        texture.style.right = 'auto';
+                        texture.style.bottom = 'auto';
+                        texture.style.transform = 'translateX(' + startX + 'px) translateY(' + startY + 'px)';
+
+                        texture.style.width = '160px';
+                        texture.style.height = '160px';
+                        texture.style.borderRadius = '50%';
+                        texture.style.backgroundColor = '#DAEA3D';
+                        texture.style.opacity = 1;
+                      } else {
+                        timeline.add({
+                          targets: texture,
+                          translateX: startX,
+                          translateY: startY,
+                          duration: interRowDelay,
+                          easing: 'easeOutQuad'
+                        }, rowStart - interRowDelay);
+                      }
+
+                      timeline.add({
+                        targets: texture,
+                        translateX: endX,
+                        duration: rowPillsDuration,
+                        easing: 'easeOutQuad'
+                      }, rowStart);
+
+                      timeline.add({
+                        targets: pills,
+                        width: function (el) { return el.dataset.originalWidth; },
+                        duration: pillDuration,
+                        delay: anime.stagger(staggerDelay),
+                        easing: 'easeOutQuad'
+                      }, rowStart);
+
+                      // Text Animations
+                      pills.forEach(function (pill, pillIndex) {
+                        var pillSpan = pill.querySelector('span');
+                        if (pillSpan) {
+                          var pillEndTime = rowStart + (pillIndex * staggerDelay) + pillDuration;
+
+                          timeline.add({
+                            targets: pillSpan,
+                            opacity: [0, 1],
+                            translateX: [40, 0],
+                            filter: ['blur(15px)', 'blur(0px)'],
+                            duration: textDuration,
+                            easing: 'easeInQuad'
+                          }, pillEndTime);
+                        }
+                      });
+
+                      timeline.add({
+                        targets: text,
+                        opacity: [0, 1],
+                        translateY: [20, 0],
+                        filter: ['blur(8px)', 'blur(0px)'],
+                        duration: 400,
+                        easing: 'easeOutQuad'
+                      }, rowStart + rowPillsDuration);
+
+                      accumulatedDelay += rowPillsDuration + interRowDelay;
+                    });
+                  } else if (slide7Content) {
+                    // Slide 7 Animation (Replay)
+                    // Prepare paragraph lines
+                    var ps = prev.querySelectorAll('p');
+                    ps.forEach(function (p) {
+                      if (!p.querySelector('.line')) {
+                        var original = p.innerText.trim().replace(/\s+/g, ' ');
+                        var words = original.split(' ');
+                        p.innerHTML = words.map(function (w) { return '<span class="word">' + w + '</span>'; }).join(' ');
+
+                        var wordNodes = Array.from(p.querySelectorAll('.word'));
+                        var lines = [];
+                        var currentLine = [];
+                        var currentTop = null;
+
+                        wordNodes.forEach(function (node, i) {
+                          var top = node.offsetTop;
+                          if (currentTop === null) currentTop = top;
+                          if (Math.abs(top - currentTop) > 2) {
+                            lines.push(currentLine);
+                            currentLine = [node];
+                            currentTop = top;
+                          } else {
+                            currentLine.push(node);
+                          }
+                          if (i === wordNodes.length - 1) lines.push(currentLine);
+                        });
+
+                        var frag = document.createDocumentFragment();
+                        lines.forEach(function (line) {
+                          var lineEl = document.createElement('span');
+                          lineEl.className = 'line';
+                          line.forEach(function (w, idx) {
+                            lineEl.appendChild(w);
+                            if (idx < line.length - 1) lineEl.appendChild(document.createTextNode(' '));
+                          });
+                          frag.appendChild(lineEl);
+                        });
+                        p.innerHTML = '';
+                        p.appendChild(frag);
+                      }
+                    });
+
+                    // Animate paragraph lines
+                    var lines = prev.querySelectorAll('p .line');
+                    if (lines.length > 0) {
+                      lines.forEach(function (line) {
+                        line.style.opacity = '0';
+                        line.style.transform = 'translateY(20px)';
+                        line.style.filter = 'blur(8px)';
+                      });
+                      anime({ targets: lines, opacity: [0, 1], translateY: [20, 0], filter: ['blur(8px)', 'blur(0px)'], duration: 600, delay: anime.stagger(100, { start: 20 }), easing: 'easeOutCubic' });
+                    }
+                  } else {
+                    // Animate paragraph lines for slide 3+
+                    var lines = prev.querySelectorAll('p .line');
+                    if (lines.length > 0) {
+                      lines.forEach(function (line) {
+                        line.style.opacity = '0';
+                        line.style.transform = 'translateY(20px)';
+                        line.style.filter = 'blur(8px)';
+                      });
+                      anime({ targets: lines, opacity: [0, 1], translateY: [20, 0], filter: ['blur(8px)', 'blur(0px)'], duration: 600, delay: anime.stagger(100, { start: 20 }), easing: 'easeOutCubic' });
+                    }
+                    revealListOnParagraphClick(prev);
+                  }
+                }
+
+                current.style.display = 'none';
+                animating = false;
+              } // end animatePrevSlideContent
+            }
+          });
+
+          // Current slide: Zoom out and fade out (goes to back)
+          transitionTimeline.add({
+            targets: current,
+            scale: [1, 0.6],
+            opacity: [1, 0],
+            filter: ['blur(0px)', 'blur(30px)'],
+            duration: 700,
+            easing: 'easeOutQuad'
+          }, 0);
+
+          // Previous slide: Zoom in from 2.0 to 1, fade in, unblur
+          transitionTimeline.add({
+            targets: prev,
+            scale: [2.0, 1],
+            opacity: [0, 1],
+            filter: ['blur(30px)', 'blur(0px)'],
+            duration: 700,
+            easing: 'easeOutQuad'
+          }, 0);
+        }
+
+        // Add click-to-advance for all slides except the last; avoid duplicating slide1's existing handler
+        slides.forEach(function (sl, idx) {
+          if (idx === 0) return; // slide1 already has custom handler
+          sl.style.cursor = 'pointer';
+          sl.addEventListener('click', function () {
+            var nextIdx = Math.min(idx + 1, slides.length - 1);
+            if (nextIdx !== idx) transitionTo(nextIdx);
+          });
+        });
+
+        // Also allow advancing from the last visible slide if user clicks anywhere in the slideshow background
+        document.querySelector('slideshow').addEventListener('click', function (e) {
+          // If click originated on slide1, original handler will run; we ignore here
+          var activeIdx = slides.findIndex(function (sl) { return sl.style.display !== 'none' && sl.style.visibility !== 'hidden'; });
+          if (activeIdx <= 0) return; // let slide1 logic handle first transition
+          if (e.target.closest('slide') !== slides[activeIdx]) return; // only when clicking active slide
+          var nextIdx = Math.min(activeIdx + 1, slides.length - 1);
+          if (nextIdx !== activeIdx) transitionTo(nextIdx);
+        });
+
+        // Keyboard support for additional slides (ArrowRight/PageDown/Space for next, ArrowLeft/PageUp for prev)
+        document.addEventListener('keydown', function (e) {
+          var activeIdx = slides.findIndex(function (sl) { return sl.style.display !== 'none' && sl.style.visibility !== 'hidden'; });
+          if (['ArrowRight', 'PageDown', ' '].includes(e.key)) {
+            if (activeIdx >= 1 && activeIdx < slides.length - 1) { e.preventDefault(); transitionTo(activeIdx + 1); }
+          }
+          if (['ArrowLeft', 'PageUp'].includes(e.key)) {
+            if (activeIdx > 1) { e.preventDefault(); transitionToPrev(activeIdx - 1); }
+            // If going back to slide1 (activeIdx === 1), simply show it without re-running initial loaders
+            else if (activeIdx === 1) { e.preventDefault(); transitionToPrev(0); }
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+
+</html>

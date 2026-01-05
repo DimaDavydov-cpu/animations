@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+
+body{
+    font-family: Macan;
+    display: flex;
+    text-align: center;
+    height: 100vh;
+    width: 100vw;
+    /* cursor: none; */
+    background: transparent url('companion_bg@2x.png') no-repeat center top / 1440px 900px;
+    padding: 0;
+    margin: 0;
+}
+
+.avatar{
+    width: 24px;
+    height: 24px;
+    background-color: #ECDDFB;
+    display: flex;
+    justify-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    
+
+    top:0; 
+    left: 50%; 
+    position: absolute;
+    transform: translate(-644px, 720px);
+}
+
+.avatar img{
+    animation: zoom 1.5s cubic-bezier(0.26, 0.9, 0.43, 0.97) infinite;
+}
+
+.twister{   
+    position: relative;
+}
+.twister img{
+    position: absolute;
+    top: 6px;
+}
+
+
+
+
+@keyframes twist {
+  0% {
+    transform: rotate(-40deg);
+  }
+  100% {
+    transform: rotate(320deg);
+  }
+}
+
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(.7);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+
+
+@keyframes line {
+  0% {
+    stroke-dashoffset: 70;
+  }
+  50% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 70;
+  }
+}
+
+.avatar svg{
+  position: absolute;
+  animation: twist 1.5s cubic-bezier(0.26, 0.9, 0.43, 0.97)  infinite;
+  top: -3px;
+
+}
+.avatar svg path{
+  stroke-dasharray: 70;
+  stroke-dashoffset: 40;
+  animation: line 1.5s infinite;
+}
+
+</style>
+</head>
+<body>
+
+
+        <div class="avatar ai_box">
+            <img src="ai_spark.svg" width="12"/>
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M29.5 15C29.5 23.0081 23.0081 29.5 15 29.5C6.99187 29.5 0.5 23.0081 0.5 15C0.5 6.99187 6.99187 0.5 15 0.5C23.0081 0.5 29.5 6.99187 29.5 15Z" stroke="#984AE8"/>
+</svg>
+
+              
+              
+        </div>
+
+        <!-- <div class="ai_box avatar twister" style="animation: none;">
+            <img src="ai_spark.svg" width="12"/>
+            <img src="ai_spark.svg" width="12"/>
+        </div> -->
+
+</body>
+</html>
+
+

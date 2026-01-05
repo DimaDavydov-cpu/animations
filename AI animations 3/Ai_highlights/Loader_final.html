@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+
+body{
+    font-family: Macan;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap:5%;
+    height: 100vh;
+    width: 100vw;
+    /* cursor: none; */
+    margin: 0;
+    background: transparent url('gig@2x.png') no-repeat center top / 1440px 1715px;
+    padding: 0;
+    margin: 80px 0;
+
+}
+
+@property --a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 10deg;
+}
+
+.ai_box{
+    background-color: #fff;
+    border-radius: 12px;
+    position: relative;
+    /* box-shadow: 0px 2px 20px #D0A1FF; */
+}
+
+.ai_box:before{
+    content: '';
+    display: block;
+    position: absolute;
+    width:calc(100% + 6px);
+    height: calc(100% + 6px);
+    top:-3px;
+    left:-3px;
+    border-radius: 14px;
+    z-index: -1;
+    background: linear-gradient(var(--a), #ECDDFB, #C89DF3) 0 100% / 100% 100%;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) 0s;
+}
+.ai_box.on:before{
+    --a: 0deg;
+    opacity: 1;
+    background: linear-gradient(var(--a), #ECDDFB, #C89DF3) 0 100% / 100% 100%;
+    animation: ai_outline 1s infinite linear; 
+}
+
+
+.ai_box.stat{
+    border-radius: 12px;
+
+
+    top: 220px;
+    left: -250px;
+    border: #DADBDD solid 1px;
+    transition: border-color .3s;
+}
+
+.ai_box.stat:before{
+    opacity: 0;
+}
+.ai_box.stat:after{
+    opacity: 0 !important;
+}
+
+ .ai_box.stat.on:before{
+    opacity: 1;
+}
+
+.ai_box.stat.on{
+    border-color: transparent;
+}
+
+
+
+
+@keyframes ai_outline {
+  0% {
+    --a: 0deg;
+  }
+  50% {
+    --a: 180deg;
+    
+  }
+  100% {
+    --a: 360deg; 
+  }
+}
+
+.loader{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 40px 0;
+}
+
+.loader span{
+    overflow: hidden;
+    background-color: #F5F5F5;
+    width: 400px;
+    height: 20px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.loader span:first-child{
+    /* width: 100px;
+    height: 100px;
+    border-radius: 50px; */
+}
+.loader span:last-child{
+    width: 200px;
+}
+
+.loader span:before{
+    content: "";
+    display: block;
+    width: 400%;
+    height: 100%;
+    position: absolute;
+    background: linear-gradient(90deg, rgba(239, 239, 239, 0.00) 0%, rgba(255, 255, 255, .6) 60%, rgba(250, 250, 250, 0.00) 100%);
+    animation: wave 2s 0s linear infinite;
+}
+
+
+.loader span:first-child{
+    border-radius: 40px;
+    width: 40px;
+    height: 40px;
+}
+.loader span:nth-child(2){
+
+    /* height: 80px; */
+}
+.loader.two span{
+    /* background-color: #EFEFEF; */
+}
+.loader.two span:before{
+    background: linear-gradient(90deg, rgba(239, 239, 239, 0.00) 0%, #E4E5E7 50%, rgba(250, 250, 250, 0.00) 100%);
+}
+
+
+.loader.neo span{
+    background-color: #ECDDFB;
+}
+.loader.neo span:before{
+    background: linear-gradient(90deg, #ffffff00 0%, #D8B9F7 50%, #ffffff00 100%);
+
+}
+
+
+@keyframes wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(25%);
+  }
+}
+
+
+.loader.new_special span{
+    background: #F8F0FF linear-gradient(90deg, #ECDDFB 0%, #D8B9F7 70%, #ECDDFB 100%) 0 0 / 400% 100%;
+    animation: loadingwave 3s linear infinite;
+}
+.loader.new_special span:before{
+    /* display: none; */
+}
+
+@keyframes loadingwave {
+    0% {
+        background-position: 0% 100%;
+    }
+    100% {
+        background-position: -400% 100%;
+    }
+}
+
+.vertical{
+    position: relative;
+    overflow: hidden;
+}
+.vertical span:before{
+    display: none;
+}
+.vertical:before{
+    content: "";
+    display: block;
+    position: absolute;
+    animation: vertwave cubic-bezier(0.4, 0.75, 0.89, 0.46) infinite;
+    background: linear-gradient(180deg, rgba(239, 239, 239, 0.00) 0%, rgba(255, 255, 255, 0.60) 50%, rgba(250, 250, 250, 0.00) 100%) !important;
+    animation-duration: 2s !important;
+    width: 100%;
+    height: 400% !important;
+    z-index: 1;
+}    
+
+@keyframes vertwave {
+  0% {
+    transform: translatey(-100%);
+  }
+  100% {
+    transform: translatey(100%);
+  }
+}
+
+
+</style>
+</head>
+<body>
+
+
+
+<div>
+<div class="loader two">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="loader two">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="loader two">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+</div>
+<div>
+<div class="loader neo">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="loader neo">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="loader neo">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script>
+var start = new Date;
+
+setInterval(function() {
+    $('.ai_box').addClass('on');
+}, 2000);
+setInterval(function() {
+    $('.ai_box').removeClass('on');
+}, 5000);
+</script>
+
+
+</body>
+</html>
+
+

@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .content-wrapper {
+      padding: 40px 0px;
+      /* max-width: 1400px; */
+      margin: 0 auto;
+    }
+
+    .welcome-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .welcome-title {
+      font-size: 24px;
+      letter-spacing: 0;
+      margin: 0;
+    }
+
+    .welcome-image {
+      height: 24px;
+    }
+
+    .hero-section {
+      border-radius: 16px;
+      background: var(--Linear, linear-gradient(180deg, #004014 -16.3%, #01260C 100%));
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      min-height: 300px;
+    }
+
+    .hero-tabs {
+      display: flex;
+      gap: 64px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 32px;
+    }
+
+    .hero-tab {
+      background: none;
+      border: none;
+      color: #C5C6C9;
+      font-size: 18px;
+      font-weight: 600;
+      padding: 12px 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      transition: color 0.2s;
+      font-family: inherit;
+    }
+    .hero-tab:hover{
+      background-color: transparent;
+      color: #fff;
+    }
+
+    .hero-tab.active {
+      color: white;
+    }
+
+    .hero-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: -32px;
+      right: -32px;
+      height: 2px;
+      background-color: white;
+    }
+
+    .tab-icon {
+      opacity: 0.9;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      line-height: 1.5;
+      max-width: 700px;
+      margin-bottom: 40px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .hero-subtitle a {
+      color: white;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .brief-input-wrapper {
+      background-color: white;
+      border-radius: 40px;
+      padding: 8px 8px 8px 24px;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 860px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .brief-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 18px;
+      color: #222325;
+      background: transparent;
+      padding: 12px 0;
+    }
+
+    .brief-input::placeholder {
+      color: #95979D;
+    }
+
+    .generate-brief-btn {
+      background: linear-gradient(135deg, #1DBF73 0%, #008A37 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 32px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .generate-brief-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(29, 191, 115, 0.3);
+    }
+
+    #hero-brief-textarea {
+      transition: height .28s var(--tilqvxan), border-color .4s, outline-color .4s;
+    }
+
+    #hero-brief-textarea:focus,
+    #hero-brief-textarea.has-content {
+      height: 148px !important;
+    }
+  
+
+    #generate-brief-btn:disabled #ai_star path {
+      fill: #95979D !important;
+      stroke: none !important;
+    }
+
+    .quick-categories {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE 10+ */
+    }
+
+    .quick-categories::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+
+    .category-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #e4e5e7;
+      background-color: white;
+      transition: all 0.2s;
+      cursor: pointer;
+      min-width: 140px;
+      text-align: left;
+      flex-shrink: 0;
+    }
+
+    .category-item:hover {
+      border-color: #222325;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .category-item svg {
+      margin-bottom: 12px;
+      color: #222325;
+    }
+
+    .category-item span {
+      font-size: 14px;
+      font-weight: 600;
+      color: #222325;
+      line-height: 1.2;
+    }
+
+
+    .input.on_dark::before{
+      border-radius: 20px
+    }
+
+    @media (max-width: 1200px) {
+      .quick-categories {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .quick-categories {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .hero-section {
+        padding: 40px 20px;
+      }
+      .hero-tabs {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="main_layout" style="/*max-width: 1600px; margin: 0 auto;*/">
+    <header style="width: 100%;">
+      <img src="Assets/fiverr_logo.svg" height="28px" style="margin-bottom: 4px; " />
+
+      <div class="input" id="head_search">
+        <input type="text" id="name" name="Search"
+          placeholder="Search for freelancer, service or just describe your need" />
+        <div class="button"><button><img src="Assets/search.svg" /></button></div>
+      </div>
+      <div class="button gost" id="drop1"><button><img src="Assets/cats.svg" />Explore to hire<img id="explore-arrow"
+            src="Assets/down.svg" /></button>
+      </div>
+      <div class="button border"><button>My orders</button></div>
+
+      <div style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
+        <div class="button icon gost sm"><button><img src="Assets/help.svg" /></button></div>
+        <div class="button icon gost sm"><button><img src="Assets/notifications.svg" /></button></div>
+        <div class="button icon gost sm"><button><img src="Assets/inbox.svg" /></button></div>
+        <div class="button icon gost sm"><button><img src="Assets/loved.svg" /></button></div>
+
+      </div>
+      <a href="#" class="button icon round"><img src="Assets/Avatar@2x.png" height="48px" /></a>
+      <div class="button border small"><button>$ 1256.26</button></div>
+
+
+
+    </header>
+    <div id="categories" style="padding-left: 20px;">
+      <div class="button gost small"><button>Trending 🔥</button></div>
+      <div class="button gost small"><button>Graphics & Design</button></div>
+      <div class="button gost small"><button>Programming & Tech</button></div>
+      <div class="button gost small"><button>Digital Marketing</button></div>
+      <div class="button gost small"><button>Video & Animation</button></div>
+      <div class="button gost small"><button>Writing & Translation</button></div>
+      <div class="button gost small"><button>Music & Audio</button></div>
+      <div class="button gost small"><button>Business</button></div>
+      <div class="button gost small"><button>Finance</button></div>
+      <div class="button gost small"><button>AI Services</button></div>
+      <div class="button gost small"><button>Personal Growth</button></div>
+      <div class="button gost small"><button>Consulting</button></div>
+      <div class="button gost small"><button>Data</button></div>
+      <div class="button gost small"><button>Photography</button></div>
+
+    </div>
+    
+
+    <div class="content-wrapper">
+      <div class="welcome-header">
+        <h1 class="welcome-title">Welcome, Sam</h1>
+        <img src="Assets/pro_head_right.svg" class="welcome-image">
+      </div>
+      
+      <section class="hero-section">
+
+
+        <div class="hero-tabs">
+          <button class="hero-tab active">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.40103 18.4375L3.86694 18.4375C2.93495 18.4375 2.17943 17.682 2.17944 16.75L2.17956 3.24998C2.17957 2.31801 2.93508 1.5625 3.86706 1.5625H14.8357C15.7677 1.5625 16.5232 2.31802 16.5232 3.25V4.36782M12.5036 7.19604L13.0912 8.78403C13.6297 10.2394 14.7771 11.3868 16.2325 11.9253L17.8205 12.513L16.2325 13.1006C14.7771 13.6391 13.6297 14.7865 13.0912 16.2419L12.5036 17.8299L11.9159 16.2419C11.3774 14.7865 10.23 13.6391 8.77464 13.1006L7.18664 12.513L8.77464 11.9253C10.23 11.3868 11.3774 10.2394 11.916 8.78403L12.5036 7.19604Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Post a project brief
+          </button>
+          <button class="hero-tab">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.9062 17.1721H18.4375C18.4375 14.3321 16.4034 11.9681 13.7969 11.6877M12.5312 8.73462C14.1622 8.73462 15.4844 7.41246 15.4844 5.78149C15.4844 4.15053 14.1622 2.82837 12.5312 2.82837M8.20703 11.6877H6.73047C3.87628 11.6877 1.5625 14.1431 1.5625 17.1721H13.375C13.375 14.1431 11.0612 11.6877 8.20703 11.6877ZM10.4219 5.78149C10.4219 7.41246 9.09971 8.73462 7.46875 8.73462C5.83778 8.73462 4.51562 7.41246 4.51562 5.78149C4.51562 4.15053 5.83778 2.82837 7.46875 2.82837C9.09971 2.82837 10.4219 4.15053 10.4219 5.78149Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Work with sourcing experts
+          </button>
+        </div>
+
+       <p>Add a brief, or generate one with AI, to receive a tailored shortlist of offers. <a href="#" class="on_dark">See how it works</a></p>
+        <div class="input on_dark" style="margin: auto; max-width: 1200px;">
+          <textarea id="hero-brief-textarea" name="comments" rows="8" placeholder="Search for any service..." style="height: 72px; border-radius: 16px; padding: 24px;"></textarea>
+          <div class="button ai_overlay_on_dark small1" style="margin-left: -190px; align-self: self-end; margin-bottom: 16px;"><button id="generate-brief-btn" disabled>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4.32093 14.75L3.09365 14.75C2.34806 14.75 1.74365 14.1456 1.74365 13.4L1.74375 2.59999C1.74375 1.85441 2.34816 1.25 3.09375 1.25H11.8686C12.6142 1.25 13.2186 1.85442 13.2186 2.6V3.49426M10.0029 5.75683L10.473 7.02722C10.9039 8.1915 11.8218 9.10945 12.9861 9.54027L14.2565 10.0104L12.9861 10.4805C11.8218 10.9113 10.9039 11.8292 10.473 12.9935L10.0029 14.2639L9.53286 12.9935C9.10204 11.8292 8.18408 10.9113 7.01981 10.4805L5.74941 10.0104L7.01981 9.54027C8.18408 9.10945 9.10204 8.1915 9.53286 7.02722L10.0029 5.75683Z" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4.32093 14.75L3.09365 14.75C2.34806 14.75 1.74365 14.1456 1.74365 13.4L1.74375 2.59999C1.74375 1.85441 2.34816 1.25 3.09375 1.25H11.8686C12.6142 1.25 13.2186 1.85442 13.2186 2.6V3.49426M10.0029 5.75683L10.473 7.02722C10.9039 8.1915 11.8218 9.10945 12.9861 9.54027L14.2565 10.0104L12.9861 10.4805C11.8218 10.9113 10.9039 11.8292 10.473 12.9935L10.0029 14.2639L9.53286 12.9935C9.10204 11.8292 8.18408 10.9113 7.01981 10.4805L5.74941 10.0104L7.01981 9.54027C8.18408 9.10945 9.10204 8.1915 9.53286 7.02722L10.0029 5.75683Z" stroke="white" stroke-opacity="0.8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              
+              Generate Brief
+            </button></div>
+        </div>
+
+      </section>
+
+
+
+
+
+
+      <div class="quick-categories">
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          <span>Programming &amp; Tech</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+          <span>Graphics &amp; Design</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
+          <span>Digital Marketing</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+          <span>Writing &amp; Translation</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          <span>Video &amp; Animation</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg>
+          <span>AI Services</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-music"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          <span>Music &amp; Audio</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Business</span>
+        </div>
+        <div class="category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222325" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg>
+          <span>Consulting</span>
+        </div>
+      </div>
+    </div>
+    
+    <spacer></spacer>
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-content">
+        <div class="footer-columns">
+          <div class="footer-column">
+            <h4>Categories</h4>
+            <ul>
+              <li><a href="#">Graphics & Design</a></li>
+              <li><a href="#">Digital Marketing</a></li>
+              <li><a href="#">Writing & Translation</a></li>
+              <li><a href="#">Video & Animation</a></li>
+              <li><a href="#">Music & Audio</a></li>
+              <li><a href="#">Programming & Tech</a></li>
+              <li><a href="#">AI Services</a></li>
+              <li><a href="#">Consulting</a></li>
+              <li><a href="#">Data</a></li>
+              <li><a href="#">Business</a></li>
+              <li><a href="#">Personal Growth & Hobbies</a></li>
+              <li><a href="#">Photography</a></li>
+              <li><a href="#">Finance</a></li>
+              <li><a href="#">End-to-End Projects</a></li>
+              <li><a href="#">Service Catalog</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h4>For Clients</h4>
+            <ul>
+              <li><a href="#">How Fiverr Works</a></li>
+              <li><a href="#">Customer Success Stories</a></li>
+              <li><a href="#">Quality Guide</a></li>
+              <li><a href="#">Fiverr Guides</a></li>
+              <li><a href="#">Fiverr Answers</a></li>
+              <li><a href="#">Browse Freelancer By Skill</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h4>For Freelancers</h4>
+            <ul>
+              <li><a href="#">Become a Fiverr Freelancer</a></li>
+              <li><a href="#">Become an Agency</a></li>
+              <li><a href="#">Freelancer Equity Program</a></li>
+              <li><a href="#">Community Hub</a></li>
+              <li><a href="#">Forum</a></li>
+              <li><a href="#">Events</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h4>Business Solutions</h4>
+            <ul>
+              <li><a href="#">Fiverr Pro</a></li>
+              <li><a href="#">Project Management Service</a></li>
+              <li><a href="#">Expert Sourcing Service</a></li>
+              <li><a href="#">ClearVoice – Content Marketing</a></li>
+              <li><a href="#">AutoDS - Dropshipping Tool</a></li>
+              <li><a href="#">AI store builder</a></li>
+              <li><a href="#">Fiverr Logo Maker</a></li>
+              <li><a href="#">Contact Sales</a></li>
+
+            </ul>
+          </div>
+
+          <div class="footer-column">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#">About Fiverr</a></li>
+              <li><a href="#">Help Center</a></li>
+              <li><a href="#">Trust & Safety</a></li>
+              <li><a href="#">Social Impact</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Do not sell or share my personal information</a></li>
+              <li><a href="#">Partnerships</a></li>
+              <li><a href="#">Creator Network</a></li>
+              <li><a href="#">Affiliates</a></li>
+              <li><a href="#">Invite a Friend</a></li>
+              <li><a href="#">Press & News</a></li>
+              <li><a href="#">Investor Relations</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div class="footer-logo">
+            <img src="Assets/fiverr_logo.svg" height="28px" alt="Fiverr" />
+            <span>© Fiverr International Ltd. 2025</span>
+          </div>
+
+          <div class="footer-social">
+            <a href="#" aria-label="TikTok">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M13.5 3.5c-.8-.9-1.3-2-1.3-3.2h-2.4v10.9c0 1.3-1 2.3-2.3 2.3-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3c.2 0 .5 0 .7.1V6.6c-.2 0-.5-.1-.7-.1-2.5 0-4.6 2.1-4.6 4.6s2.1 4.6 4.6 4.6 4.6-2.1 4.6-4.6V5.8c1 .7 2.2 1.1 3.4 1.1V4.5c-.7 0-1.4-.3-2-.9z" />
+              </svg>
+            </a>
+            <a href="#" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M8 1.4c2.1 0 2.4 0 3.2.1.8 0 1.2.2 1.5.3.4.1.6.3.9.6.3.3.5.5.6.9.1.3.3.7.3 1.5.1.8.1 1.1.1 3.2s0 2.4-.1 3.2c0 .8-.2 1.2-.3 1.5-.1.4-.3.6-.6.9-.3.3-.5.5-.9.6-.3.1-.7.3-1.5.3-.8.1-1.1.1-3.2.1s-2.4 0-3.2-.1c-.8 0-1.2-.2-1.5-.3-.4-.1-.6-.3-.9-.6-.3-.3-.5-.5-.6-.9-.1-.3-.3-.7-.3-1.5-.1-.8-.1-1.1-.1-3.2s0-2.4.1-3.2c0-.8.2-1.2.3-1.5.1-.4.3-.6.6-.9.3-.3.5-.5.9-.6.3-.1.7-.3 1.5-.3.8-.1 1.1-.1 3.2-.1zM8 0C5.9 0 5.6 0 4.8.1c-.8 0-1.4.2-1.9.4-.5.2-1 .5-1.4 1-.5.4-.8.9-1 1.4-.2.5-.4 1.1-.4 1.9C0 5.6 0 5.9 0 8s0 2.4.1 3.2c0 .8.2 1.4.4 1.9.2.5.5 1 1 1.4.4.5.9.8 1.4 1 .5.2 1.1.4 1.9.4.8.1 1.1.1 3.2.1s2.4 0 3.2-.1c.8 0 1.4-.2 1.9-.4.5-.2 1-.5 1.4-1 .5-.4.8-.9 1-1.4.2-.5.4-1.1.4-1.9.1-.8.1-1.1.1-3.2s0-2.4-.1-3.2c0-.8-.2-1.4-.4-1.9-.2-.5-.5-1-1-1.4-.4-.5-.9-.8-1.4-1-.5-.2-1.1-.4-1.9-.4C10.4 0 10.1 0 8 0z" />
+                <path
+                  d="M8 3.9c-2.3 0-4.1 1.8-4.1 4.1s1.8 4.1 4.1 4.1 4.1-1.8 4.1-4.1-1.8-4.1-4.1-4.1zm0 6.8c-1.5 0-2.7-1.2-2.7-2.7s1.2-2.7 2.7-2.7 2.7 1.2 2.7 2.7-1.2 2.7-2.7 2.7z" />
+                <circle cx="12.3" cy="3.7" r="1" />
+              </svg>
+            </a>
+            <a href="#" aria-label="LinkedIn">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M3.6 5.3h2.4v7.6H3.6V5.3zM4.8 1.6c.8 0 1.4.6 1.4 1.4s-.6 1.4-1.4 1.4-1.4-.6-1.4-1.4.6-1.4 1.4-1.4zM10.5 5.3c1.3 0 2.4.6 2.9 1.5v-1.5h2.4v7.6h-2.4V9.5c0-1-.4-1.7-1.3-1.7-.7 0-1.1.5-1.3 1-.1.2-.1.4-.1.7v3.4H8.3V5.3h2.2z" />
+              </svg>
+            </a>
+            <a href="#" aria-label="Facebook">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M9.5 3H11V0H9.5C7.6 0 6 1.6 6 3.5V5H4v3h2v8h3V8h2.5l.5-3H9V3.5c0-.3.2-.5.5-.5z" />
+              </svg>
+            </a>
+            <a href="#" aria-label="Pinterest">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M8 0C3.6 0 0 3.6 0 8c0 3.4 2.1 6.3 5.1 7.5-.1-.6-.1-1.6 0-2.3l.7-3s-.2-.4-.2-.9c0-.9.5-1.5 1.1-1.5.5 0 .8.4.8.9 0 .5-.3 1.3-.5 2-.1.6.3 1.1.9 1.1 1.1 0 1.9-1.1 1.9-2.8 0-1.5-1.1-2.5-2.6-2.5-1.8 0-2.8 1.3-2.8 2.7 0 .5.2 1.1.5 1.4.1.1.1.1.1.2l-.2.7c0 .1-.1.2-.2.1-.8-.4-1.3-1.5-1.3-2.4 0-2 1.4-3.8 4.1-3.8 2.2 0 3.9 1.5 3.9 3.6 0 2.1-1.3 3.8-3.2 3.8-.6 0-1.2-.3-1.4-.7l-.4 1.5c-.1.6-.5 1.3-.8 1.7.6.2 1.3.3 2 .3 4.4 0 8-3.6 8-8s-3.6-8-8-8z" />
+              </svg>
+            </a>
+            <a href="#" aria-label="Twitter">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M12.6 6v.5c0 4.7-3.6 10.1-10.1 10.1-2 0-3.9-.6-5.5-1.6.3 0 .5.1.8.1 1.6 0 3.1-.5 4.3-1.5-1.5 0-2.8-1-3.3-2.4.2 0 .4.1.6.1.3 0 .6 0 .9-.1-1.6-.3-2.8-1.7-2.8-3.4v-.1c.5.3 1 .4 1.6.4-.9-.6-1.5-1.7-1.5-2.9 0-.6.2-1.2.5-1.7 1.7 2.1 4.3 3.4 7.2 3.6-.1-.3-.1-.5-.1-.8 0-1.9 1.5-3.4 3.4-3.4 1 0 1.9.4 2.5 1.1.8-.2 1.5-.4 2.2-.8-.3.8-.8 1.5-1.5 1.9.7-.1 1.4-.3 2-.5-.5.7-1.1 1.3-1.8 1.8z" />
+              </svg>
+            </a>
+          </div>
+
+          <div class="footer-settings">
+            <button class="footer-btn">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zm0-1.5A6.5 6.5 0 1 0 8 1.5a6.5 6.5 0 0 0 0 13z" />
+                <path
+                  d="M8 3.5c1.5 0 2.8.7 3.6 1.8l-1.2.9C9.8 5.4 9 5 8 5c-1.7 0-3 1.3-3 3s1.3 3 3 3c1 0 1.8-.4 2.4-1.2l1.2.9c-.8 1.1-2.1 1.8-3.6 1.8-2.5 0-4.5-2-4.5-4.5S5.5 3.5 8 3.5z" />
+              </svg>
+              English
+            </button>
+            <button class="footer-btn">$ USD</button>
+            <button class="footer-btn" aria-label="Accessibility">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <circle cx="8" cy="4" r="1.5" />
+                <path
+                  d="M11.5 6h-7c-.3 0-.5.2-.5.5s.2.5.5.5h3v6.5c0 .3.2.5.5.5s.5-.2.5-.5V7h3c.3 0 .5-.2.5-.5s-.2-.5-.5-.5z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div id="current_orders" class="expandable bluredglass dark fixed bottom center"
+    style="--glass-bg: rgba(0, 0, 0, 0.6); --t-duration: .32s; --t-easing: cubic-bezier(0.84, 0.19, 0.31, 1.21); --c-easing: cubic-bezier(0.22, 0.61, 0.36, 1); --min-w: 164px; --min-h: 32px; --exp-w: 820px; --exp-h: 160px;">
+    <div class="minimized-view">
+      <p class="small">My active orders <span>(2)</span> <span class="dot_status yellow"></span></p>
+    </div>
+
+    <div class="expanded-view">
+      <div class="title-column">
+        <h3>My active<br>orders</h2>
+          <div class="button round gost on_dark icon sm">
+            <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 10L8 6L4 10" stroke="#0C0C0D" stroke-width="1.5" stroke-miterlimit="16"
+                  stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+      </div>
+      <div class="cards-track">
+        <div class="order-card">
+          <div class="card-top">
+            <h4>Salvation project One</h4>
+            <span class="tag tag-warning">ADD PROJECT DETAILS</span>
+          </div>
+          <div class="card-bottom">
+            <div class="progress-bg">
+              <div class="progress-fill" style="width: 10%;"></div>
+            </div>
+            <span class="percent">10%</span>
+          </div>
+        </div>
+        <div class="order-card">
+          <div class="card-top">
+            <h4>Salvation project Treee</h4>
+            <span class="tag tag-success">DELIVERY REVIEW</span>
+          </div>
+          <div class="card-bottom">
+            <div class="progress-bg">
+              <div class="progress-fill dark-fill" style="width: 90%;"></div>
+            </div>
+            <span class="percent">90%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const title = document.querySelector('h1');
+      if (!title) return;
+
+      const text = title.textContent;
+      title.setAttribute('aria-label', text);
+      title.innerHTML = '';
+
+      // Wrap each character in a span
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch; // preserve spaces
+        title.appendChild(span);
+      }
+
+      // Make "let’s get rollin’" lighter
+      const phrase = 'good to see you again';
+      const start = text.indexOf(phrase);
+      if (start !== -1) {
+        for (let i = start; i < start + phrase.length; i++) {
+          title.children[i].classList.add('light');
+        }
+      }
+
+      // Animate characters from blurred, transparent, and shifted right
+      anime({
+        targets: 'h1 .char',
+        opacity: [0, 1],
+        translateX: [0, 0],
+        translateY: [60, 0],
+        skewY: [30, 0],
+        /* scale:[2, 1], */
+        /* filter: ['blur(44px)', 'blur(0px)'], */
+        easing: 'cubicBezier(0.6, 0, 0.4, 1)',
+        duration: 400,
+        delay: anime.stagger(20) // letter-by-letter
+      });
+    });
+  </script>
+  <script>
+    (function () {
+      const header = document.querySelector('header');
+      const postJobBtn = document.getElementById('postJobBtn');
+      const DURATION = 600; // 1s
+      // const EASING = 'cubicBezier(0.6, 0, 0.4, 1)';
+      // const TARGET_WIDTH = 1180; // px when scrolled
+
+      // Helper: full width minus 16px (8px margin on each side)
+      function fullWidthPx() {
+        return Math.max(0, window.innerWidth - 16);
+      }
+
+      // Center the header horizontally
+      function setCentered() {
+        header.style.left = '50%';
+        header.style.transform = 'translateX(-50%)';
+      }
+
+      let compact = false;
+      let anim = null;
+
+      function animateHeader(toPx) {
+        const clamped = Math.min(toPx, fullWidthPx()); // ensure never exceeds viewport
+        if (anim) anim.pause();
+        anim = anime({
+          targets: header,
+          width: clamped + 'px',
+          duration: DURATION,
+          easing: EASING
+        });
+      }
+
+
+      function onResize() {
+        // Clamp width to viewport on resize
+        if (compact) {
+          header.style.width = Math.min(TARGET_WIDTH, fullWidthPx()) + 'px';
+        } else {
+          header.style.width = fullWidthPx() + 'px';
+        }
+      }
+
+      // Initialize full width and centered header
+      setCentered();
+      header.style.width = fullWidthPx() + 'px';
+      if (postJobBtn) postJobBtn.style.display = 'none';
+
+      // window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onResize);
+    })();
+
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const boxes = Array.from(document.querySelectorAll('.box'));
+      if (!boxes.length) return;
+
+      // Set initial state to avoid flash
+      boxes.forEach(function (el) {
+        el.style.opacity = 0;
+        el.style.transform = 'translateY(28px)';
+        if (el.classList.contains('texture_element')) {
+          const first = el.querySelector('div:first-child');
+          if (first) first.style.opacity = 0;
+        }
+      });
+
+      // Group boxes by their parent container for proper staggering
+      const groupedBoxes = new Map();
+      boxes.forEach(function (box) {
+        const parent = box.parentElement;
+        if (!groupedBoxes.has(parent)) {
+          groupedBoxes.set(parent, []);
+        }
+        groupedBoxes.get(parent).push(box);
+      });
+
+      // Track animated elements to prevent re-animation
+      const animated = new WeakSet();
+
+      // Create Intersection Observer
+      const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && !animated.has(entry.target)) {
+            animated.add(entry.target);
+
+            // Find the group this element belongs to
+            const parent = entry.target.parentElement;
+            const group = groupedBoxes.get(parent) || [entry.target];
+
+            // Find index within the group for stagger calculation
+            const indexInGroup = group.indexOf(entry.target);
+
+            // Animate the element
+            anime({
+              targets: entry.target,
+              opacity: [0, 1],
+              translateY: [28, 0],
+              duration: 700,
+              easing: 'cubicBezier(0.6, 0, 0.4, 1)',
+              delay: indexInGroup * 120,
+              complete: function () {
+                entry.target.style.removeProperty('opacity');
+                entry.target.style.removeProperty('transform');
+
+                if (entry.target.classList.contains('texture_element')) {
+                  const first = entry.target.querySelector('div:first-child');
+                  if (first) {
+                    anime({
+                      targets: first,
+                      opacity: [0, 1],
+                      duration: 300,
+                      easing: 'easeInOutQuad'
+                    });
+                  }
+                }
+              }
+            });
+
+            // Stop observing this element
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1, // Trigger when 10% of element is visible
+        rootMargin: '0px 0px -50px 0px' // Trigger slightly before element fully enters viewport
+      });
+
+      // Observe all boxes
+      boxes.forEach(function (box) {
+        observer.observe(box);
+      });
+    });
+  </script>
+  <script>
+
+
+
+
+
+
+
+
+    $(function () {
+      // Hero brief textarea logic
+      const $textarea = $('#hero-brief-textarea');
+      const $btn = $('#generate-brief-btn');
+
+      $textarea.on('input', function () {
+        if ($(this).val().trim().length > 0) {
+          $btn.prop('disabled', false);
+          $(this).addClass('has-content');
+        } else {
+          $btn.prop('disabled', true);
+          $(this).removeClass('has-content');
+        }
+      });
+
+      var $categories = $('#categories');
+      var $content = $('spacer, .grid, .fl_cats, .box.texture_element, .content-wrapper'); // Content after categories
+      var $arrow = $('#explore-arrow'); // Arrow icon
+      var isAnimating = false; // Lock to prevent clicks during animation
+
+      $('#drop1').on('click', function (e) {
+        e.preventDefault();
+
+        // Ignore clicks while animating
+        if (isAnimating) return;
+
+        if (!$categories.hasClass('show')) {
+          isAnimating = true;
+
+          // SHOW CATEGORIES
+          $categories.addClass('show');
+          $categories.css({ opacity: 0, transform: 'translateY(-24px) scale(1)', filter: 'blur(24px)' });
+
+          var $buttons = $categories.find('.button');
+          $buttons.css({ opacity: 0, transform: 'translateY(4px)' });
+
+          var catTl = anime.timeline({ easing: 'cubicBezier(0.6, 0, 0.4, 1)' });
+
+          catTl.add({
+            targets: $categories.get(0),
+            opacity: [0, 1],
+            translateY: [-24, 0],
+            scale: [1, 1],
+            filter: ['blur(24px)', 'blur(0px)'],
+            duration: 400
+          }).add({
+            targets: $buttons.toArray(),
+            opacity: [0, 1],
+            translateY: [8, 0],
+            duration: 280,
+            delay: anime.stagger(30)
+          }, '-=60');
+
+          // Push content down
+          anime({
+            targets: $content.toArray(),
+            translateY: [0, 80],
+            duration: 400,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          // Flip arrow up
+          anime({
+            targets: $arrow.get(0),
+            rotateX: [0, 180],
+            duration: 300,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          catTl.finished.then(function () {
+            $categories.css({ opacity: '', transform: '', filter: '' });
+            $buttons.css({ opacity: '', transform: '' });
+            isAnimating = false; // Unlock after animation completes
+          });
+
+        } else {
+          isAnimating = true;
+
+          // HIDE CATEGORIES
+          var $buttons = $categories.find('.button');
+
+          var catTl = anime.timeline({ easing: 'cubicBezier(0.6, 0, 0.4, 1)' });
+
+          catTl.add({
+            targets: $buttons.toArray(),
+            opacity: [1, 0],
+            translateY: [0, -8],
+            duration: 200,
+            delay: anime.stagger(25, { direction: 'reverse' })
+          }).add({
+            targets: $categories.get(0),
+            opacity: [1, 0],
+            translateY: [0, -80],
+            // scaleY: [1, 0.80],
+            filter: ['blur(0px)', 'blur(44px)'],
+            duration: 380
+          });
+
+          // Pull content back up
+          anime({
+            targets: $content.toArray(),
+            translateY: [80, 0],
+            duration: 400,
+            delay: 480,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          // Flip arrow back down
+          anime({
+            targets: $arrow.get(0),
+            rotateX: [180, 0],
+            duration: 300,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          catTl.finished.then(function () {
+            $categories.removeClass('show');
+            $categories.css({ opacity: '', transform: '', filter: '' });
+            $buttons.css({ opacity: '', transform: '' });
+            isAnimating = false; // Unlock after animation completes
+          });
+        }
+      });
+    });
+
+
+  </script>
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const h = document.querySelector('h1.ls-animate');
+      if (!h) return;
+
+      // Set initial state
+      h.style.opacity = 0;
+      h.style.letterSpacing = '0.2em';
+
+      const io = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            // Ensure single-line and hide overflow during animation
+            h.style.overflow = 'hidden';
+            h.style.whiteSpace = 'nowrap';
+            anime({
+              targets: h,
+              opacity: [0, 1],
+              letterSpacing: ['0.2em', '-0.04em'],
+              duration: 1200,
+              easing: 'cubicBezier(0.6, 0, 0.4, 1)',
+              complete: function () {
+                h.style.overflow = '';
+                h.style.whiteSpace = '';
+              }
+            });
+            obs.unobserve(h);
+          }
+        });
+      }, { threshold: 0.4 });
+
+      io.observe(h);
+    });
+  </script>
+  <script>
+    (function () {
+      const triggers = document.querySelectorAll('.open_sidebar');
+      const sidebar = document.getElementById('sidebar');
+      const content = sidebar ? sidebar.querySelector('.content') : null;
+      const root = document.documentElement; // CSS var host
+      if (!triggers.length || !sidebar) return;
+
+      const DURATION = 600;                 // ms for sidebar width animation
+      const CONTENT_FADE = 400;             // ms for content fade
+      const EASING = 'cubicBezier(0.6, 0, 0.4, 1)';
+      const TARGET = 600;                   // px target width
+      const START_CONTENT_AT = Math.floor(DURATION * 0.85); // start at ~85%
+
+      function readVar() {
+        const v = getComputedStyle(root).getPropertyValue('--sidebar-w').trim();
+        return v ? parseFloat(v) : 0;
+      }
+      function setVar(px) { root.style.setProperty('--sidebar-w', px + 'px'); }
+
+      // Initialize closed state
+      setVar(0);
+      if (content) { content.style.opacity = '0'; content.style.display = 'none'; }
+
+      function animateOpen() {
+        const from = readVar();
+        const tl = anime.timeline({ autoplay: false });
+
+        // 1) Animate width first
+        tl.add({
+          targets: { t: from },
+          t: TARGET,
+          duration: DURATION,
+          easing: EASING,
+          update: function (anim) {
+            const v = anim.animations[0].currentValue;
+            setVar(v);
+          }
+        });
+
+        // 2) Near the end (~85%), reveal and fade-in content with translateX and scale
+        if (content) {
+          tl.add({
+            targets: content,
+            opacity: [0, 1],
+            translateY: [8, 0],
+            // scale: [0.98, 1],
+            duration: CONTENT_FADE,
+            easing: EASING,
+            begin: function () {
+              content.style.display = 'flex';
+              content.style.opacity = '0';
+            }
+          }, START_CONTENT_AT);
+        }
+
+        tl.play();
+      }
+
+      function animateClose() {
+        const from = readVar();
+        const tl = anime.timeline({ autoplay: false });
+
+        // 1) Fade content out first, then hide it, with rightward motion and scale down, slower
+        if (content) {
+          tl.add({
+            targets: content,
+            opacity: [parseFloat(getComputedStyle(content).opacity) || 1, 0],
+            translateY: [0, 8],
+            // scale: [1, 0.98],
+            duration: CONTENT_FADE / 2,
+            easing: EASING,
+            complete: function () { content.style.display = 'none'; }
+          });
+        }
+
+        // 2) Collapse width to zero
+        tl.add({
+          targets: { t: from },
+          t: 0,
+          duration: DURATION,
+          easing: EASING,
+          update: function (anim) {
+            const v = anim.animations[0].currentValue;
+            setVar(v);
+          }
+        });
+
+        tl.play();
+      }
+
+      function isOpen() { return readVar() >= (TARGET - 1); }
+      function toggle() { isOpen() ? animateClose() : animateOpen(); }
+
+      triggers.forEach(function (el) {
+        el.addEventListener('click', function (e) { e.preventDefault(); toggle(); });
+      });
+    })();
+  </script>
+  <script>
+    // FAQ Accordion
+    document.addEventListener('DOMContentLoaded', function () {
+      const faqItems = document.querySelectorAll('.faq-item');
+
+      // Text splitting removed for smoother block animation
+
+      faqItems.forEach(function (item) {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        const paragraph = answer.querySelector('p');
+
+        question.addEventListener('click', function (e) {
+          e.preventDefault();
+          const isExpanded = question.getAttribute('aria-expanded') === 'true';
+
+          // Close all other items
+          faqItems.forEach(function (otherItem) {
+            const otherQuestion = otherItem.querySelector('.faq-question');
+            const otherAnswer = otherItem.querySelector('.faq-answer');
+
+            if (otherItem !== item && otherQuestion.getAttribute('aria-expanded') === 'true') {
+              otherQuestion.setAttribute('aria-expanded', 'false');
+
+              // Closing animation with easeOutQuad
+              anime({
+                targets: otherAnswer,
+                maxHeight: 0,
+                paddingBottom: 0,
+                opacity: 0,
+                translateY: -8,
+                duration: 400,
+                easing: 'easeOutQuad',
+                complete: function () {
+                  otherAnswer.classList.remove('open');
+                }
+              });
+            }
+          });
+
+          // Toggle current item
+          if (isExpanded) {
+            question.setAttribute('aria-expanded', 'false');
+
+            // Closing animation with easeOutQuad
+            anime({
+              targets: answer,
+              maxHeight: 0,
+              paddingBottom: 0,
+              opacity: 0,
+              translateY: -8,
+              duration: 400,
+              easing: 'easeOutQuad',
+              complete: function () {
+                answer.classList.remove('open');
+              }
+            });
+          } else {
+            question.setAttribute('aria-expanded', 'true');
+            answer.style.maxHeight = '0px';
+            answer.classList.add('open');
+            answer.style.opacity = '1';
+
+            // Set initial state for paragraph
+            if (paragraph) {
+              paragraph.style.opacity = '0';
+              paragraph.style.transform = 'translateY(8px)';
+            }
+
+            // Opening animation for container (height)
+            anime({
+              targets: answer,
+              maxHeight: 500,
+              // Remove other props from container animation to let paragraph handle content
+              duration: 900,
+              easing: 'easeOutQuad'
+            });
+
+            // Animate paragraph with delay and custom easing
+            if (paragraph) {
+              anime({
+                targets: paragraph,
+                opacity: [0, 1],
+                translateY: [-8, 0],
+                duration: 800,
+                delay: 150, // Slight delay for smoothness
+                easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+              });
+            }
+          }
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const aiSomething = document.getElementById('ai_something');
+      if (!aiSomething) return;
+
+      // Proxy state object to ensure smooth animation
+      // Initial value matches the desired default opacity
+      const glowState = { opacity: 0.8 };
+
+      // Initialize the CSS variable
+      aiSomething.style.setProperty('--glow-after-opacity', glowState.opacity);
+
+      const easing = 'cubicBezier(0.84, 0.19, 0.31, 1.21)';
+
+      function updateGlow() {
+        aiSomething.style.setProperty('--glow-after-opacity', glowState.opacity);
+      }
+
+      aiSomething.addEventListener('mouseenter', function () {
+        anime({
+          targets: glowState,
+          opacity: 0,
+          duration: 320,
+          easing: easing,
+          update: updateGlow
+        });
+      });
+
+      aiSomething.addEventListener('mouseleave', function () {
+        // Get the duration from the CSS variable (default to 520ms if not found)
+        const transitionDuration = parseFloat(getComputedStyle(aiSomething).getPropertyValue('--t-duration')) * 1000 || 520;
+        const delay = transitionDuration * 0.6;
+
+        anime({
+          targets: glowState,
+          opacity: .6,
+          duration: 320,
+          delay: delay,
+          easing: easing,
+          update: updateGlow
+        });
+      });
+
+      // SVG Rotation Animation
+      const svgIcon = aiSomething.querySelector('.minimized-view svg');
+      if (svgIcon) {
+        anime({
+          targets: svgIcon,
+          rotate: '1turn',
+          duration: 1000,
+          easing: 'easeInOutQuad',
+          loop: true,
+          delay: 4000, // 4s delay + 1s duration = 5s total cycle
+          endDelay: 0 // delay is applied before each loop iteration in anime.js loop parameters differently, but standard loop w/ delay works best like this or using keyframes.
+        });
+
+        // Better approach for "once every 5 seconds" with anime.js loop:
+        // Duration 1000ms, then wait 4000ms. 
+        // Anime.js 'delay' in loop context can be tricky. Using a recursive function or keyframes is often safer.
+        // Let's use keyframes for precise control.
+
+        anime.remove(svgIcon); // Clear any previous
+        anime({
+          targets: svgIcon,
+          rotate: '1turn',
+          duration: 5000, // Total cycle time
+          keyframes: [
+            { rotate: '1turn', duration: 1000, easing: 'easeInOutQuad' }, // Rotate for 1s
+            { rotate: '1turn', duration: 4000 } // Stay for 4s (no change, effectively a wait)
+          ],
+          loop: true,
+          easing: 'linear' // Main easing linear so timing is exact
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

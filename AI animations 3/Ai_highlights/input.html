@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+
+body{
+    font-family: Macan;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap:5%;
+    height: 100vh;
+    width: 100vw;
+    background: transparent url('brief_bg@2x.png') no-repeat center top / 1440px 792px;
+    padding: 0;
+    margin: 0;
+}
+
+
+.ai_box{
+    background-color: #fff;
+    border-radius: 12px;
+    position: relative;
+    /* box-shadow: 0px 2px 20px #D0A1FF; */
+}
+
+
+@property --a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 10deg;
+}
+
+
+.ai_box:before{
+    content: '';
+    display: block;
+    position: absolute;
+    width:calc(100% + 6px);
+    height: calc(100% + 6px);
+    top:-3px;
+    left:-3px;
+    border-radius: 10px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) 0s;
+}
+
+
+.input.Ai:before{
+    --a: 0deg;
+    opacity: 1;
+    background: linear-gradient(var(--a), #ECDDFB, #C89DF3) 0 100% / 100% 100%;
+    animation: ai_outline 1s infinite linear; 
+}
+
+.input{
+    border-radius: 8px;
+    border: #DADBDD solid 1px;
+    transition: border-color .5s;
+}
+
+.input.Ai{
+    border-color: transparent;
+}
+.input.Ai.focus{
+    border-color: #000;
+    border-width: 2px;
+}
+.input.Ai.focus:before{
+    opacity: 0;
+}
+
+
+.input{
+    top: 207px;
+    /* transition: border .8s; */
+    background-color: #fff;
+    /* border: 2px solid transparent; */
+    left: 481px;
+}
+
+
+.input.Ai.focus{
+    border-color: #000;
+}
+
+@keyframes ai_outline {
+  0% {
+    --a: 0deg;
+  }
+  50% {
+    --a: 180deg;
+    
+  }
+  100% {
+    --a: 360deg; 
+  }
+}
+
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+    
+
+        <div class="ai_box input">
+            <img src="Ai_Textarea@2x.png" width="416">
+        </div>
+        
+
+
+</body>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script>
+var start = new Date;
+
+setInterval(function() {
+    $('.input').addClass('Ai');
+}, 2000);
+setInterval(function() {
+    $('.input').addClass('focus');
+}, 5000);
+</script>
+</html>
+
+

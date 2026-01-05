@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+
+body{
+    font-family: Macan;
+    display: flex;
+    text-align: center;
+    height: 100vh;
+    width: 100vw;
+    /* cursor: none; */
+    background: transparent url('companion_bg@2x.png') no-repeat center top / 1440px 900px;
+    padding: 0;
+    margin: 0;
+}
+
+.avatar{
+    width: 24px;
+    height: 24px;
+    background-color: #ECDDFB;
+    display: flex;
+    justify-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    
+
+    top:0; 
+    left: 50%; 
+    position: absolute;
+    transform: translate(-644px, 720px);
+}
+
+.avatar img{
+    animation: twist 1.5s cubic-bezier(0.26, 0.9, 0.43, 0.97) infinite;
+}
+
+.twister{   
+    position: relative;
+}
+.twister img{
+    position: absolute;
+    top: 6px;
+}
+
+
+.ai_box:before{
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: #D0A1FF;
+
+    width:100%;
+    height: 100%;
+    top:0;
+    left:0;
+    border-radius: 12px;
+    z-index: -2;
+
+
+    animation: btn-glow 6s infinite linear;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #6671f5 66%, #ffffff00 85.5%, #f876b2 100%) 0 100% / 100% 200%;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #D0A1FF 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #7739B9 33%, #ffffff10 49.5%, #984AE8 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    filter: blur(4px);
+    opacity: 1;
+    transform: rotate(-45deg);
+    filter: blur(4px);
+    opacity: .4;
+}
+
+
+@keyframes twist {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
+
+
+
+
+@keyframes twister {
+  0% {
+    transform: translate(0,0) scale(1);
+  }
+  30% {
+    transform: translate(4px,-4px) scale(.5) rotate(0deg);
+  }
+  50% {
+    transform: translate(2px,-2px) scale(0);
+  }
+  100% {
+    transform: translate(0px,0px) scale(0);
+  }
+}
+
+@keyframes twister2 {
+  0% {
+    transform: translate(0,0) scale(0);
+  }
+  20% {
+    transform: translate(-4px,4px) scale(.5) rotate(45deg);
+  }
+  40% {
+    transform: translate(0px,0px) scale(1);
+  }
+  100% {
+    transform: translate(0px,0px) scale(1);
+  }
+}
+
+@keyframes btn-glow {
+  0% {
+    background-position: 0 300%;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+</style>
+</head>
+<body>
+
+
+        <div class="avatar ai_box">
+            <img src="ai_spark.svg" width="12"/>
+        </div>
+
+        <!-- <div class="ai_box avatar twister" style="animation: none;">
+            <img src="ai_spark.svg" width="12"/>
+            <img src="ai_spark.svg" width="12"/>
+        </div> -->
+
+</body>
+</html>
+
+

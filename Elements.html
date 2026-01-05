@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body style="display: flex; gap: 40px; flex-direction: column;">
+  <img src="Assets/fiverr_logo.svg" height="28px" style="margin-bottom: 40px; align-self: flex-start;" />
+
+
+  <div class="box shadow" style="gap: 28px;">
+    <h2>Inputs</h2>
+    <div class="input" id="head_search">
+      <input type="text" id="name" name="Search"
+        placeholder="Search for freelancer, service or just describe your need" />
+      <div class="button"><button><img src="Assets/search.svg" /></button></div>
+    </div>
+
+    <div class="horizontal v">
+      <div class="form_control" style="width: 50%;">
+        <label for="name">Title of the input</label>
+        <div class="input">
+          <input type="text" id="name" name="name" placeholder="e.g. Mike Shinoda" />
+        </div>
+        <p>Some description</p>
+      </div>
+      <div class="form_control" style="width: 50%;">
+        <label for="name">Title of the Select</label>
+        <div class="input">
+          <input type="text" id="name" name="name" placeholder="e.g. Mike Shinoda" />
+          <div class="button gost icon on_right sm"><button><img src="Assets/down.svg"></button></div>
+        </div>
+
+      </div>
+
+
+    </div>
+
+    <div class="box grey" style="width: 100%">
+      <div class="form_control" style="width: 100%;">
+        <label for="name">Generate a brief with AI to receive a tailored shortlist of offers.</label>
+        <div class="input">
+          <textarea name="comments" id="brief" rows="4" style="height: 90px;"></textarea>
+          <div class="icon round" style="margin-left: -62px; align-self: self-end; margin-bottom: 16px;"><button
+              style="background-color: #EFEFF0;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 1.25V14.75M8 1.25L12.2188 5.46872M8 1.25L3.78125 5.46875" stroke="#95979D"
+                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button></div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+  </div>
+
+
+
+
+  <div class="box shadow">
+
+    <h2>Buttons</h2>
+    <div class="horizontal">
+
+
+
+      <div class="button border" id="postJobBtn"><button><img src="Assets/brief.svg" /> Post a job</button></div>
+
+
+      <div class="button"><button>Submit that</button></div>
+
+      <div class="button gost"><button>Cancel</button></div>
+
+
+
+
+
+
+
+      <div class="button icon round ">
+        <button><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5313 12.2188L14.75 8M14.75 8L10.5312 3.78125M14.75 8H1.25" stroke="white" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="button icon">
+        <button><img src="Assets/search.svg" />
+        </button>
+      </div>
+
+      <div class="button icon round gost on_dark1">
+        <button>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5313 12.2188L14.75 8M14.75 8L10.5312 3.78125M14.75 8H1.25" stroke="black" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="button icon round border">
+        <button>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5313 12.2188L14.75 8M14.75 8L10.5312 3.78125M14.75 8H1.25" stroke="black" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="floating bluredglass dropdown" id="drop1.1" style="top: 547px; right: 65px; padding: 4px;"><a
+          href="#"><img src="Assets/cats.svg">User action</a><a href="#"><img src="Assets/cats.svg">Meaningfull
+          action</a><a href="#"><img src="Assets/cats.svg">Action here</a><a href="#"><img src="Assets/cats.svg">Hire
+          freelancers</a><a href="#"><img src="Assets/cats.svg">Transformation</a><a href="#"><img
+            src="Assets/cats.svg">Log out</a></div>
+      <div class="button gost" id="drop1"><button><img src="Assets/cats.svg" /><img src="Assets/down.svg" /></button>
+      </div>
+
+
+
+
+
+    </div>
+    <br /><br />
+    Text links representations <a href="#contact"> See how it works</a>
+
+
+
+  </div>
+
+
+
+
+
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const title = document.querySelector('h1');
+      if (!title) return;
+
+      const text = title.textContent;
+      title.setAttribute('aria-label', text);
+      title.innerHTML = '';
+
+      // Wrap each character in a span
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch; // preserve spaces
+        title.appendChild(span);
+      }
+
+      // Make "let’s get rollin’" lighter
+      const phrase = 'let\u2019s get rollin\u2019';
+      const start = text.indexOf(phrase);
+      if (start !== -1) {
+        for (let i = start; i < start + phrase.length; i++) {
+          title.children[i].classList.add('light');
+        }
+      }
+
+      // Animate characters from blurred, transparent, and shifted right
+      anime({
+        targets: 'h1 .char',
+        opacity: [0, 1],
+        translateX: [0, 0],
+        translateY: [60, 0],
+        skewY: [30, 0],
+        /* scale:[2, 1], */
+        /* filter: ['blur(44px)', 'blur(0px)'], */
+        easing: 'cubicBezier(.24, .48, 0, .98)',
+        duration: 400,
+        delay: anime.stagger(20) // letter-by-letter
+      });
+    });
+  </script>
+  <script>
+    (function () {
+      const header = document.querySelector('header');
+      const postJobBtn = document.getElementById('postJobBtn');
+      const DURATION = 600; // 1s
+      const EASING = 'cubicBezier(.24, .48, 0, .98)';
+      const TARGET_WIDTH = 1180; // px when scrolled
+
+      // Helper: full width minus 16px (8px margin on each side)
+      function fullWidthPx() {
+        return Math.max(0, window.innerWidth - 16);
+      }
+
+      // Center the header horizontally
+      function setCentered() {
+        header.style.left = '50%';
+        header.style.transform = 'translateX(-50%)';
+      }
+
+      let compact = false;
+      let anim = null;
+
+      function animateHeader(toPx) {
+        const clamped = Math.min(toPx, fullWidthPx()); // ensure never exceeds viewport
+        if (anim) anim.pause();
+        anim = anime({
+          targets: header,
+          width: clamped + 'px',
+          duration: DURATION,
+          easing: EASING
+        });
+      }
+
+      function onScroll() {
+        if (window.scrollY > 0 && !compact) {
+          compact = true;
+          animateHeader(TARGET_WIDTH);
+          if (postJobBtn) postJobBtn.style.display = 'flex';
+        } else if (window.scrollY === 0 && compact) {
+          compact = false;
+          animateHeader(fullWidthPx());
+          if (postJobBtn) postJobBtn.style.display = 'none';
+        }
+      }
+
+      function onResize() {
+        // Clamp width to viewport on resize
+        if (compact) {
+          header.style.width = Math.min(TARGET_WIDTH, fullWidthPx()) + 'px';
+        } else {
+          header.style.width = fullWidthPx() + 'px';
+        }
+      }
+
+      // Initialize full width and centered header
+      setCentered();
+      header.style.width = fullWidthPx() + 'px';
+      if (postJobBtn) postJobBtn.style.display = 'none';
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onResize);
+    })();
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const containers = document.querySelectorAll('.image_bg');
+      if (!containers.length) return;
+
+      containers.forEach(function (container) {
+        const slides = container.querySelectorAll('.bg');
+        if (!slides.length) return;
+
+        // Initialize all slides hidden and zoomed
+        slides.forEach(function (s) {
+          s.style.opacity = 0;
+          s.style.transform = 'scale(1.2)';
+        });
+
+        let current = 0;
+        // Show first slide
+        slides[current].style.opacity = 1;
+        slides[current].style.transform = 'scale(1)';
+
+        function showNext() {
+          const prev = slides[current];
+          current = (current + 1) % slides.length;
+          const next = slides[current];
+
+          anime({
+            targets: prev,
+            opacity: [1, 0],
+            scale: [1, 1.1],
+            duration: 1000,
+            easing: 'cubicBezier(.24, .48, 0, .98)'
+          });
+
+          anime({
+            targets: next,
+            opacity: [0, 1],
+            scale: [1.2, 1],
+            duration: 1000,
+            easing: 'cubicBezier(.24, .48, 0, .98)'
+          });
+        }
+
+        // Run slideshow every 2 seconds
+        setInterval(showNext, 2400);
+      });
+    });
+  </script>
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const boxes = Array.from(document.querySelectorAll('.box'));
+      if (!boxes.length) return;
+
+      // Set initial state to avoid flash
+      boxes.forEach(function (el) {
+        el.style.opacity = 0;
+        el.style.transform = 'translateY(28px)';
+        if (el.classList.contains('texture_element')) {
+          const first = el.querySelector('div:first-child');
+          if (first) first.style.opacity = 0;
+        }
+      });
+
+      anime({
+        targets: boxes,
+        opacity: [0, 1],
+        translateY: [28, 0],
+        duration: 700,
+        easing: 'cubicBezier(.24, .48, 0, .98)',
+        delay: anime.stagger(120, { start: 150 }),
+        complete: function (anim) {
+          anim.animatables.forEach(function (a) {
+            setTimeout(function () {
+              a.target.style.removeProperty('opacity');
+              a.target.style.removeProperty('transform');
+              if (a.target.classList.contains('texture_element')) {
+                const first = a.target.querySelector('div:first-child');
+                if (first) {
+                  anime({
+                    targets: first,
+                    opacity: [0, 1],
+                    duration: 300,
+                    easing: 'easeInOutQuad'
+                  });
+                }
+              }
+            }, 0);
+          });
+        }
+      });
+    });
+  </script>
+  <script>
+    (function () {
+      const title = document.querySelector('h1');
+      if (!title) return;
+
+      const START_WEIGHT = 700;  // current in CSS
+      const END_WEIGHT = 300;  // lightest available weight loaded
+      const MIN_SCALE = 0.60; // shrink more on scroll
+      const RANGE_PX = 320;  // scroll distance to reach full effect
+
+      let ticking = false;
+
+      function clamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
+
+      function update() {
+        const t = clamp01(window.scrollY / RANGE_PX);
+        const scale = 1 - (1 - MIN_SCALE) * t;
+        const weight = Math.round(START_WEIGHT + (END_WEIGHT - START_WEIGHT) * t);
+
+        title.style.transform = `scale(${scale})`;
+        title.style.fontWeight = String(weight);
+
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      }
+
+      // Prime the state on load
+      update();
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
+
+
+
+
+
+
+    $(function () {
+      var $menu = $('#drop1\\.1');
+
+      $('#drop1').on('click', function (e) {
+        e.preventDefault();
+
+        if (!$menu.hasClass('show')) {
+          // SHOW: set visible and animate container then links
+          $menu.addClass('show');
+          $menu.css({ opacity: 0, transform: 'translateY(-8px) scale(0.9)', filter: 'blur(12px)' });
+
+          // Prepare links for staggered reveal
+          var $links = $menu.find('a');
+          $links.css({ opacity: 0, transform: 'translateY(4px)' });
+
+          var tl = anime.timeline({ easing: 'cubicBezier(.24, .48, 0, .98)' });
+
+          tl.add({
+            targets: $menu.get(0),
+            opacity: [0, 1],
+            translateY: [-8, 0],
+            scale: [0.9, 1],
+            filter: ['blur(12px)', 'blur(0px)'],
+            duration: 220
+          }).add({
+            targets: $links.toArray(),
+            opacity: [0, 1],
+            translateY: [4, 0],
+            duration: 180,
+            delay: anime.stagger(40)
+          }, '-=60');
+
+          tl.finished.then(function () {
+            $menu.css({ opacity: '', transform: '', filter: '' });
+            $links.css({ opacity: '', transform: '' });
+          });
+
+        } else {
+          // HIDE: animate links out then container, finally hide
+          var $links = $menu.find('a');
+
+          var tl = anime.timeline({ easing: 'cubicBezier(.24, .48, 0, .98)' });
+
+          tl.add({
+            targets: $links.toArray(),
+            opacity: [1, 0],
+            translateY: [0, 4],
+            duration: 80,
+            delay: anime.stagger(20, { direction: 'reverse' })
+          }).add({
+            targets: $menu.get(0),
+            opacity: [1, 0],
+            translateY: [0, -12],
+            scale: [1, 0.9],
+            filter: ['blur(0px)', 'blur(12px)'],
+            duration: 180
+          });
+
+          tl.finished.then(function () {
+            $menu.removeClass('show');
+            $menu.css({ opacity: '', transform: '', filter: '' });
+            $links.css({ opacity: '', transform: '' });
+          });
+        }
+      });
+    });
+
+
+  </script>
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const h = document.querySelector('h1.ls-animate');
+      if (!h) return;
+
+      // Set initial state
+      h.style.opacity = 0;
+      h.style.letterSpacing = '0.2em';
+
+      const io = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            // Ensure single-line and hide overflow during animation
+            h.style.overflow = 'hidden';
+            h.style.whiteSpace = 'nowrap';
+            anime({
+              targets: h,
+              opacity: [0, 1],
+              letterSpacing: ['0.2em', '-0.04em'],
+              duration: 1200,
+              easing: 'cubicBezier(.24, .48, 0, .98)',
+              complete: function () {
+                h.style.overflow = '';
+                h.style.whiteSpace = '';
+              }
+            });
+            obs.unobserve(h);
+          }
+        });
+      }, { threshold: 0.4 });
+
+      io.observe(h);
+    });
+  </script>
+  </script>
+  <script>
+    (function () {
+      const triggers = document.querySelectorAll('.open_sidebar');
+      const sidebar = document.getElementById('sidebar');
+      const root = document.documentElement; // where we'll store the CSS variable
+      if (!triggers.length || !sidebar) return;
+
+      const DURATION = 420;
+      const EASING = 'cubicBezier(.24, .48, 0, .98)';
+      const TARGET = 400; // px
+
+      function readVar() {
+        const v = getComputedStyle(root).getPropertyValue('--sidebar-w').trim();
+        return v ? parseFloat(v) : 0;
+      }
+
+      function animate(open) {
+        const from = readVar();
+        const to = open ? TARGET : 0;
+
+        anime({
+          targets: { t: from },
+          t: to,
+          duration: DURATION,
+          easing: EASING,
+          update: function (anim) {
+            const v = anim.animations[0].currentValue;
+            root.style.setProperty('--sidebar-w', v + 'px');
+          }
+        });
+      }
+
+      function toggle() {
+        const open = readVar() < TARGET - 1;
+        animate(open);
+      }
+
+      // initialize starting state
+      root.style.setProperty('--sidebar-w', '0px');
+
+      triggers.forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          toggle();
+        });
+      });
+    })();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const textarea = document.getElementById('brief');
+      const iconDiv = textarea ? textarea.parentElement.querySelector('.icon.round') : null;
+
+      if (textarea && iconDiv) {
+        const btn = iconDiv.querySelector('button');
+        const svgPaths = iconDiv.querySelectorAll('svg path');
+
+        // Expand textarea on focus
+        textarea.addEventListener('focus', function () {
+          anime({
+            targets: textarea,
+            height: '200px',
+            duration: 500,
+            easing: 'cubicBezier(.15, .52, 0, .98)'
+          });
+        });
+
+        // Collapse textarea on blur
+        textarea.addEventListener('blur', function () {
+          anime({
+            targets: textarea,
+            height: '100px',
+            duration: 500,
+            easing: 'cubicBezier(.15, .52, 0, .98)'
+          });
+        });
+
+        // On input
+        textarea.addEventListener('input', function () {
+          const hasText = textarea.value.trim().length > 0;
+
+          // Animate icon background to black
+          anime({
+            targets: iconDiv,
+            backgroundColor: '#000',
+            duration: 200,
+            easing: 'linear'
+          });
+
+          // Animate SVG stroke to white
+          if (svgPaths.length) {
+            anime({
+              targets: svgPaths,
+              stroke: '#ffffff',
+              duration: 100,
+              easing: 'cubicBezier(.15, .52, 0, .98)'
+            });
+          }
+
+          // Animate button background
+          if (btn) {
+            anime({
+              targets: btn,
+              backgroundColor: hasText ? '#222325' : '#EFEFF0',
+              duration: 100,
+              easing: 'cubicBezier(.15, .52, 0, .98)'
+            });
+          }
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

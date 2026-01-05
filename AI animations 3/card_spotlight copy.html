@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+
+body{
+    font-family: Macan;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap:5%;
+    height: 100vh;
+    width: 100vw;
+    background: transparent url('results@2x.png') no-repeat center top / 1440px 1140px;
+    padding: 0;
+    margin: 0;
+}
+
+
+.ai_box{
+    background-color: #fff;
+    border-radius: 12px;
+    position: relative;
+    /* box-shadow: 0px 2px 20px #D0A1FF; */
+    top: 344px;
+    left: 213px;
+}
+
+.ai_box:before{
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: #D0A1FF;
+
+    width:100%;
+    height: 100%;
+    top:0;
+    left:0;
+    border-radius: 12px;
+    z-index: -1;
+
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #6671f5 66%, #ffffff00 85.5%, #f876b2 100%) 0 100% / 100% 200%;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #D0A1FF 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #7739B9 33%, #ffffff10 49.5%, #984AE8 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    filter: blur(8px);
+    opacity: 0;
+    transform: rotate(180deg);
+    transition: opacity 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53) .4s;
+
+    animation: btn-glow 6s infinite linear;
+    display: none;
+}
+
+
+.ai_box.blur2:before{
+    filter: blur(8px);
+}
+.ai_box.blur3:before{
+    filter: blur(12px);
+}
+
+
+
+.ai_box:after{
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: #D0A1FF;
+
+    width:100%;
+    height: 100%;
+    top:0;
+    left:0;
+    border-radius: 12px;
+    /* z-index: -1; */
+
+    background: linear-gradient(45deg, #D0A1FF, #911eff12 30%, #d0a1ff00 60%, #D0A1FF 100%) 0 0% / 100% 200%;
+    background: linear-gradient(25deg, #984AE8, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #7739B9 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    background: linear-gradient(0deg, #D0A1FF, #911eff12 16.5%, #D0A1FF 33%, #fe848f20 49.5%, #D0A1FF 66%, #d0a1ff00 85.5%, #D0A1FF 100%) 0 60% / 100% 280%;
+
+    border-radius: inherit;
+    filter: blur(40px);
+    opacity: 0;
+    transition: opacity .3s;
+    /* mix-blend-mode: overlay; */
+    transform: scale(.9) rotate(180deg);
+}
+
+.ai_box:hover:after,
+.ai_box.on:after{
+    /* opacity: 1; */
+    animation: wave 1s linear;
+}
+
+
+.ai_box:hover:before,
+.ai_box.on:before{
+    opacity: 1;
+}
+
+
+
+@keyframes btn-glow {
+  0% {
+    background-position: 0 300%;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes wave {
+
+    0% {
+    background-position: 0 100%;
+    opacity: 0;
+}
+20% {
+    background-position: 0 120%;
+    opacity: .2;
+}
+60% {
+    background-position: 0 180%;
+    opacity: .2;
+}
+100% {
+    background-position: 0 200%;
+    opacity: 0;
+}
+
+}
+
+@keyframes loadingwave {
+
+0% {
+    background-position: 0% 100%;
+
+}
+50% {
+    background-position: -200% 100%;
+
+}
+
+100% {
+    background-position: -400% 100%;
+}
+
+}
+
+
+.ai_hl{
+    display: flex;
+    height: 36px;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    align-items: flex-start;
+    gap: var(--border-radius-lg, 8px);
+    align-self: stretch;
+    border-radius: var(--border-radius-lg, 8px);
+    background: #F8F0FF;
+
+    color: var(--Purple-800, #8842D0);
+    text-overflow: ellipsis;
+    font-family: Macan;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 120%;
+    margin: 0 12px;
+    background: #F8F0FF linear-gradient(90deg, #F8F0FF 0%,#D8B9F7 70%, #F8F0FF 100%) 0 0 / 400% 100%;
+    /* animation: loadingwave 3s 3s linear ; */
+}
+
+.on .ai_hl{
+    animation: loadingwave 3s 1s linear ;
+}
+
+</style>
+</head>
+<body>
+
+
+<div class="ai_box">
+    <img src="content2@2x.png" width="312"/>
+    <span class="ai_hl"><img src="ai_spark.svg" width="14"/>Built websites for numerous gyms...</span>
+</div>
+
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script>
+var start = new Date;
+
+setInterval(function() {
+    $('.ai_box').addClass('on');
+}, 2000);
+
+
+</script>
+
+
+
+
+
+
+</body>
+</html>
+
+

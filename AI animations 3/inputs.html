@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+
+body{
+    font-family: Macan;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap:5%;
+    height: 100vh;
+    width: 100vw;
+    /* cursor: none; */
+    margin: 0;
+
+}
+
+
+.ai_box{
+    background-color: #fff;
+    border-radius: 12px;
+    position: relative;
+    /* box-shadow: 0px 2px 20px #D0A1FF; */
+}
+
+.ai_box:before{
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: #D0A1FF;
+
+    width:100%;
+    height: 100%;
+    top:0;
+    left:0;
+    border-radius: 12px;
+    z-index: -1;
+
+
+    animation: btn-glow 6s infinite linear;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #6671f5 66%, #ffffff00 85.5%, #f876b2 100%) 0 100% / 100% 200%;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #D0A1FF 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #7739B9 33%, #ffffff10 49.5%, #984AE8 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    filter: blur(4px);
+    opacity: 0;
+    transform: rotate(180deg);
+    transition: opacity 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53) 0s;
+}
+
+
+.ai_box.blur2:before{
+    filter: blur(8px);
+}
+.ai_box.blur3:before{
+    filter: blur(12px);
+}
+/* .ai_box.second:before{
+    transform: scale(1);
+    background: linear-gradient(90deg, #ECDDFB, #D0A1FF);
+    background-size: 200% 200%;
+    animation: animateGlow 2s ease infinite;
+}
+
+.ai_box.third:before{
+    filter: blur(40px);
+    transform: translate(-10%,0);
+    transform: translate(-10%,-10%) scale(.8);
+    background: #D0A1FF none;
+    animation: anim 4s linear infinite;
+} */
+
+
+.ai_box:after{
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: #D0A1FF;
+
+    width:100%;
+    height: 100%;
+    top:0;
+    left:0;
+    border-radius: 12px;
+    /* z-index: -1; */
+
+    background: linear-gradient(45deg, #D0A1FF, #911eff12 30%, #d0a1ff00 60%, #D0A1FF 100%) 0 0% / 100% 200%;
+    background: linear-gradient(25deg, #984AE8, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #7739B9 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    background: linear-gradient(45deg, #D0A1FF, #911eff12 16.5%, #D0A1FF 33%, #fe848f20 49.5%, #D0A1FF 66%, #d0a1ff00 85.5%, #D0A1FF 100%) 0 60% / 100% 280%;
+
+    border-radius: inherit;
+    filter: blur(40px);
+    opacity: 0;
+    transition: opacity .3s;
+    /* mix-blend-mode: overlay; */
+    transform: scale(.9)
+}
+
+.ai_box:hover:after{
+    /* opacity: 1; */
+    animation: wave 1s linear;
+}
+
+
+.ai_box:hover:before{
+    opacity: 1;
+}
+
+/* Optional color border */
+
+.ai_box.stat{
+    /* background: linear-gradient(white, white) padding-box, linear-gradient(-45deg, #F8F0FF, #984AE8) border-box; */
+    border-radius: 12px;
+    border: 1px solid transparent;
+}
+
+.ai_box.stat:before{
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #D0A1FF 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    opacity: 1;
+}
+.ai_box.stat:after{
+    opacity: 0 !important;
+}
+.ai_box.stat:hover:before{
+    opacity: 0;
+}
+
+.ai_box.stat:hover{
+    /* box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.13), 0px 1.28px 5.579px 0px rgba(0, 0, 0, 0.08), 0px 0.08px 2.557px 0px rgba(0, 0, 0, 0.05); */
+}
+
+@keyframes btn-glow {
+  0% {
+    background-position: 0 300%;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes wave {
+
+    0% {
+    background-position: 0 100%;
+    opacity: 0;
+}
+20% {
+    background-position: 0 120%;
+    opacity: .4;
+}
+60% {
+    background-position: 0 160%;
+    opacity: .4;
+}
+100% {
+    background-position: 0 200%;
+    opacity: 0;
+}
+
+    /* 0% {
+    background-position: 0 0%;
+    opacity: 0;
+  }
+  20% {
+    background-position: 0 80%;
+        opacity: .2;
+  }
+  80% {
+    background-position: 0 160%;
+    opacity: .4;
+  }
+  100% {
+    background-position: 0 200%;
+    opacity: 0;
+  } */
+}
+
+/* @keyframes anim{
+  0% {
+    transform: translate(-8%,-12%) scale(.8);
+  }
+  25% {
+    transform: translate(8%,-12%) scale(.8);
+  }
+  50% {
+    transform: translate(8%,12%) scale(.8);
+  }
+  75% {
+    transform: translate(-8%,12%) scale(.8);
+  }
+  100% {
+    transform: translate(-8%,-12%) scale(.8);
+  }
+} */
+
+/* @keyframes animateGlow {
+      0%  {
+				background-position: 0% 50%
+			}
+      
+	50% {
+			background-position: 100% 50%
+		}
+			
+  100% {
+        	background-position: 0% 50%
+		}
+    } */
+
+
+.ai_box span{
+    position: absolute;
+    font-size: 10vw;
+    opacity: .1;
+    top: -11vw;
+    left: -2vw;
+}
+
+.cta{
+    background-color: #000;
+    color: #fff;
+    padding: 16px 20px;
+    gap: 8px;
+    border-radius: 8px;
+    /* outline: 2px solid #fff6; */
+    display: inline-flex;
+}
+
+.cta:before{
+    opacity: 1;
+    filter: blur(4px);
+    /* transform: scale(1.06); */
+}
+
+.input{
+    border-radius: 8px;
+    border: 1px solid var(--Greys-1200, #222325);
+    background: var(--White, #FFF);
+    padding: 16px 20px;
+    border-color: #E4E5E7;
+    margin-bottom: 40px;
+    border-color: #222325;
+    width: 60%;
+}
+
+.big{
+    height: 200px;
+    display: flex;
+    justify-content:space-between;
+}
+
+.input:before{
+    background: linear-gradient(-10deg, #D0A1FF, #ffffff20 16.5%, #D0A1FF 33%, #ffffff10 49.5%, #D0A1FF 66%, #ffffff00 85.5%, #D0A1FF 100%) 0 100% / 100% 200%;
+    /* opacity: 1; */
+
+    filter: blur(8px);
+}
+.input:after{
+    display: none;
+}
+
+.big .cta{
+    align-self: flex-end;
+}
+
+.input:hover{
+    border-color: #222325;
+    background: linear-gradient(white, white) padding-box, linear-gradient(-45deg, #7739B9, #984AE8) border-box;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+</style>
+</head>
+<body>
+
+
+
+<div style="width:80%;">
+
+        
+
+        <div class="ai_box input">
+            Type here
+        </div>
+
+
+        <div class="ai_box input big">
+            Type here
+
+            <div class="ai_box cta">
+                <img src="ai_icon.svg" />  Generate
+            </div>
+        </div>
+        
+
+</div>
+
+
+
+<!-- <div class="ai_box second">
+    <img src="content@2x.png" width="312"/>
+</div>
+
+<div class="ai_box third">
+    <img src="content@2x.png" width="312"/>
+</div> -->
+
+</body>
+</html>
+
+

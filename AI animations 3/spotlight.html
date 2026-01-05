@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+
+body{
+    font-family: Macan;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap:5%;
+    height: 100vh;
+    width: 100vw;
+    /* cursor: none; */
+    margin: 0;
+    background: transparent url('gig@2x.png') no-repeat center top / 1440px 1715px;
+    padding: 0;
+    margin: 0;
+
+}
+
+@property --a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 10deg;
+}
+
+.ai_box{
+    background-color: #fff;
+    border-radius: 12px;
+    position: relative;
+    /* box-shadow: 0px 2px 20px #D0A1FF; */
+}
+
+.ai_box:before{
+    content: '';
+    display: block;
+    position: absolute;
+    width:calc(100% + 6px);
+    height: calc(100% + 6px);
+    top:-3px;
+    left:-3px;
+    border-radius: 14px;
+    z-index: -1;
+    background: linear-gradient(var(--a), #ECDDFB, #C89DF3) 0 100% / 100% 100%;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) 0s;
+}
+.ai_box.on:before{
+    --a: 0deg;
+    opacity: 1;
+    background: linear-gradient(var(--a), #ECDDFB, #C89DF3) 0 100% / 100% 100%;
+    animation: ai_outline 1s infinite linear; 
+}
+
+
+.ai_box.stat{
+    border-radius: 12px;
+
+
+    top: 220px;
+    left: -250px;
+    border: #DADBDD solid 1px;
+    transition: border-color .3s;
+}
+
+.ai_box.stat:before{
+    opacity: 0;
+}
+.ai_box.stat:after{
+    opacity: 0 !important;
+}
+
+ .ai_box.stat.on:before{
+    opacity: 1;
+}
+
+.ai_box.stat.on{
+    border-color: transparent;
+}
+
+
+
+
+@keyframes ai_outline {
+  0% {
+    --a: 0deg;
+  }
+  50% {
+    --a: 180deg;
+    
+  }
+  100% {
+    --a: 360deg; 
+  }
+}
+
+
+
+
+
+
+</style>
+</head>
+<body>
+
+
+<div class="ai_box stat">
+    <img src="sellers@2x.png" width="766"/>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script>
+var start = new Date;
+
+setInterval(function() {
+    $('.ai_box').addClass('on');
+}, 2000);
+setInterval(function() {
+    $('.ai_box').removeClass('on');
+}, 5000);
+</script>
+
+
+</body>
+</html>
+
+
