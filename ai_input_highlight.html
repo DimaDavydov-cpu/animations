@@ -50,11 +50,27 @@
         }
       }
 
-      .input #hero-brief-textarea {
-        animation: border-fade 0.8s calc(2 * var(--glow-duration, 4s)) forwards;
+      @keyframes glow-rotate-sequence {
+        0% {
+          --a: 0turn;
+          animation-timing-function: linear;
+        }
+
+        80% {
+          --a: 1turn;
+          animation-timing-function: ease-out;
+        }
+
+        100% {
+          --a: 2turn;
+        }
       }
 
-      .input:after{
+      .input #hero-brief-textarea {
+        animation: border-fade 0.8s 4s forwards;
+      }
+
+      .input:after {
         /* Conic gradient properties for :before as well */
         content: "";
         z-index: -1;
@@ -70,10 +86,10 @@
             var(--glow-c4) var(--glow-p4));
         filter: blur(var(--glow-blur, 0px));
 
-        /* 2 iterations of 'animate' (rotating) followed by 'glow-fade-out' */
+        /* Custom rotation sequence (2 circles) followed by fade-out */
         animation:
-          animate var(--glow-duration, 4s) 2 linear forwards,
-          glow-fade-out 0.8s calc(2 * var(--glow-duration, 4s)) forwards;
+          glow-rotate-sequence 4s forwards,
+          glow-fade-out 0.8s 4s forwards;
       }
       /* .input.glow.animated.intro:after {
         filter: blur(0px);
@@ -84,7 +100,7 @@
 
 <body class="inglow" style="
   --glow-height: 4%;
-  --glow-opacity.6
+  --glow-opacity:1;
 ">
   
 
