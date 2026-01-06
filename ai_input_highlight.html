@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        align-items: center;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #hero-brief-textarea {
+        border-color: #fff;
+        border-radius: 16px;
+      }
+
+      .input:before {
+        border-radius: 20px;
+      }
+
+      /* Glow Intro Animation */
+      @keyframes glow-fade-out {
+        0% {
+          opacity: var(--glow-opacity, 0.6);
+        }
+
+        100% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes border-fade {
+        0% {
+          border-color: #fff;
+        }
+
+        100% {
+          border-color: #C5C6C9;
+        }
+      }
+
+      .input #hero-brief-textarea {
+        animation: border-fade 0.8s calc(2 * var(--glow-duration, 4s)) forwards;
+      }
+
+      .input:after{
+        /* Conic gradient properties for :before as well */
+        content: "";
+        z-index: -1;
+        position: absolute;
+        inset: var(--glow-inset, -2px);
+        transform: translateZ(-1px);
+        border-radius: 18px;
+        opacity: var(--glow-opacity, 0.4);
+        background: conic-gradient(from calc(var(--a) + var(--glow-angle)) at 50% 50%,
+            var(--glow-c1) var(--glow-p1),
+            var(--glow-c2) var(--glow-p2),
+            var(--glow-c3) var(--glow-p3),
+            var(--glow-c4) var(--glow-p4));
+        filter: blur(var(--glow-blur, 0px));
+
+        /* 2 iterations of 'animate' (rotating) followed by 'glow-fade-out' */
+        animation:
+          animate var(--glow-duration, 4s) 2 linear forwards,
+          glow-fade-out 0.8s calc(2 * var(--glow-duration, 4s)) forwards;
+      }
+      /* .input.glow.animated.intro:after {
+        filter: blur(0px);
+        opacity: 0;
+      } */
+    </style>
+</head>
+
+<body class="inglow" style="
+  --glow-height: 4%;
+  --glow-opacity.6
+">
+  
+
+  <div class="input" style="
+    margin: auto;
+    max-width: 1200px;
+    --glow-blur: 0px;
+    --glow-c1: #C5C6C9;
+    --glow-c2: #1DBF73;
+    --glow-c3: #D0E500;
+    --glow-c4: #C5C6C9;
+    --glow-p1: 0deg;
+    --glow-p2: 40deg;
+    --glow-p3: 120deg;
+      --glow-p4: 270deg;
+      --glow-inset: -2px;
+      --glow-duration: 2s;
+      --glow-opacity: 0.6;
+      ">
+    <textarea id="hero-brief-textarea" name="comments" rows="8" placeholder="Create your brief..." style="height: 140px;"></textarea>
+    <div class="button" style="margin-left: -190px; align-self: self-end; margin-bottom: 16px;"><button id="generate-brief-btn" disabled>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.32093 14.75L3.09365 14.75C2.34806 14.75 1.74365 14.1456 1.74365 13.4L1.74375 2.59999C1.74375 1.85441 2.34816 1.25 3.09375 1.25H11.8686C12.6142 1.25 13.2186 1.85442 13.2186 2.6V3.49426M10.0029 5.75683L10.473 7.02722C10.9039 8.1915 11.8218 9.10945 12.9861 9.54027L14.2565 10.0104L12.9861 10.4805C11.8218 10.9113 10.9039 11.8292 10.473 12.9935L10.0029 14.2639L9.53286 12.9935C9.10204 11.8292 8.18408 10.9113 7.01981 10.4805L5.74941 10.0104L7.01981 9.54027C8.18408 9.10945 9.10204 8.1915 9.53286 7.02722L10.0029 5.75683Z" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4.32093 14.75L3.09365 14.75C2.34806 14.75 1.74365 14.1456 1.74365 13.4L1.74375 2.59999C1.74375 1.85441 2.34816 1.25 3.09375 1.25H11.8686C12.6142 1.25 13.2186 1.85442 13.2186 2.6V3.49426M10.0029 5.75683L10.473 7.02722C10.9039 8.1915 11.8218 9.10945 12.9861 9.54027L14.2565 10.0104L12.9861 10.4805C11.8218 10.9113 10.9039 11.8292 10.473 12.9935L10.0029 14.2639L9.53286 12.9935C9.10204 11.8292 8.18408 10.9113 7.01981 10.4805L5.74941 10.0104L7.01981 9.54027C8.18408 9.10945 9.10204 8.1915 9.53286 7.02722L10.0029 5.75683Z" stroke="white" stroke-opacity="0.8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        Generate Brief
+      </button></div>
+  </div>
+
+
+  
+
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const title = document.querySelector('h1');
+      if (!title) return;
+
+      const text = title.textContent;
+      title.setAttribute('aria-label', text);
+      title.innerHTML = '';
+
+      // Wrap each character in a span
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch; // preserve spaces
+        title.appendChild(span);
+      }
+
+      // Make "let’s get rollin’" lighter
+      const phrase = 'good to see you again';
+      const start = text.indexOf(phrase);
+      if (start !== -1) {
+        for (let i = start; i < start + phrase.length; i++) {
+          title.children[i].classList.add('light');
+        }
+      }
+
+      // Animate characters from blurred, transparent, and shifted right
+      anime({
+        targets: 'h1 .char',
+        opacity: [0, 1],
+        translateX: [0, 0],
+        translateY: [60, 0],
+        skewY: [30, 0],
+        /* scale:[2, 1], */
+        /* filter: ['blur(44px)', 'blur(0px)'], */
+        easing: 'cubicBezier(0.6, 0, 0.4, 1)',
+        duration: 400,
+        delay: anime.stagger(20) // letter-by-letter
+      });
+    });
+  </script>
+  <script>
+    (function () {
+      const header = document.querySelector('header');
+      const postJobBtn = document.getElementById('postJobBtn');
+      const DURATION = 600; // 1s
+      const EASING = 'cubicBezier(0.6, 0, 0.4, 1)';
+      // const TARGET_WIDTH = 1180; // px when scrolled
+
+      // Helper: full width minus 16px (8px margin on each side)
+      function fullWidthPx() {
+        return Math.max(0, window.innerWidth - 16);
+      }
+
+      // Center the header horizontally
+      function setCentered() {
+        header.style.left = '50%';
+        header.style.transform = 'translateX(-50%)';
+      }
+
+      let compact = false;
+      let anim = null;
+
+      function animateHeader(toPx) {
+        const clamped = Math.min(toPx, fullWidthPx()); // ensure never exceeds viewport
+        if (anim) anim.pause();
+        anim = anime({
+          targets: header,
+          width: clamped + 'px',
+          duration: DURATION,
+          easing: EASING
+        });
+      }
+
+
+      function onResize() {
+        // Clamp width to viewport on resize
+        if (compact) {
+          header.style.width = Math.min(TARGET_WIDTH, fullWidthPx()) + 'px';
+        } else {
+          header.style.width = fullWidthPx() + 'px';
+        }
+      }
+
+      // Initialize full width and centered header
+      setCentered();
+      header.style.width = fullWidthPx() + 'px';
+      if (postJobBtn) postJobBtn.style.display = 'none';
+
+      // window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onResize);
+    })();
+
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const boxes = Array.from(document.querySelectorAll('.box, .quick-categories, .hero-section, .welcome-header'));
+      if (!boxes.length) return;
+
+      // Set initial state to avoid flash
+      boxes.forEach(function (el) {
+        el.style.opacity = 0;
+        el.style.transform = 'translateY(28px)';
+        if (el.classList.contains('texture_element')) {
+          const first = el.querySelector('div:first-child');
+          if (first) first.style.opacity = 0;
+        }
+      });
+
+      // Group boxes by their parent container for proper staggering
+      const groupedBoxes = new Map();
+      boxes.forEach(function (box) {
+        const parent = box.parentElement;
+        if (!groupedBoxes.has(parent)) {
+          groupedBoxes.set(parent, []);
+        }
+        groupedBoxes.get(parent).push(box);
+      });
+
+      // Track animated elements to prevent re-animation
+      const animated = new WeakSet();
+
+      // Create Intersection Observer
+      const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && !animated.has(entry.target)) {
+            animated.add(entry.target);
+
+            // Find the group this element belongs to
+            const parent = entry.target.parentElement;
+            const group = groupedBoxes.get(parent) || [entry.target];
+
+            // Find index within the group for stagger calculation
+            const indexInGroup = group.indexOf(entry.target);
+
+            // Animate the element
+            anime({
+              targets: entry.target,
+              opacity: [0, 1],
+              translateY: [28, 0],
+              duration: 700,
+              easing: 'cubicBezier(0.6, 0, 0.4, 1)',
+              delay: indexInGroup * 120,
+              complete: function () {
+                entry.target.style.removeProperty('opacity');
+                entry.target.style.removeProperty('transform');
+
+                if (entry.target.classList.contains('texture_element')) {
+                  const first = entry.target.querySelector('div:first-child');
+                  if (first) {
+                    anime({
+                      targets: first,
+                      opacity: [0, 1],
+                      duration: 300,
+                      easing: 'easeInOutQuad'
+                    });
+                  }
+                }
+              }
+            });
+
+            // Stop observing this element
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1, // Trigger when 10% of element is visible
+        rootMargin: '0px 0px -50px 0px' // Trigger slightly before element fully enters viewport
+      });
+
+      // Observe all boxes
+      boxes.forEach(function (box) {
+        observer.observe(box);
+      });
+    });
+  </script>
+  <script>
+
+
+
+
+
+
+
+
+    $(function () {
+      // Hero brief textarea logic
+      const $textarea = $('#hero-brief-textarea');
+      const $btn = $('#generate-brief-btn');
+
+      $textarea.on('input', function () {
+        if ($(this).val().trim().length > 0) {
+          $btn.prop('disabled', false);
+          $(this).addClass('has-content');
+        } else {
+          $btn.prop('disabled', true);
+          $(this).removeClass('has-content');
+        }
+      });
+
+      var $categories = $('#categories');
+      var $content = $('spacer, .grid, .fl_cats, .box.texture_element, .content-wrapper'); // Content after categories
+      var $arrow = $('#explore-arrow'); // Arrow icon
+      var isAnimating = false; // Lock to prevent clicks during animation
+
+      $('#drop1').on('click', function (e) {
+        e.preventDefault();
+
+        // Ignore clicks while animating
+        if (isAnimating) return;
+
+        if (!$categories.hasClass('show')) {
+          isAnimating = true;
+
+          // SHOW CATEGORIES
+          $categories.addClass('show');
+          $categories.css({ opacity: 0, transform: 'translateY(-24px) scale(1)', filter: 'blur(24px)' });
+
+          var $buttons = $categories.find('.button');
+          $buttons.css({ opacity: 0, transform: 'translateY(4px)' });
+
+          var catTl = anime.timeline({ easing: 'cubicBezier(0.6, 0, 0.4, 1)' });
+
+          catTl.add({
+            targets: $categories.get(0),
+            opacity: [0, 1],
+            translateY: [-24, 0],
+            scale: [1, 1],
+            filter: ['blur(24px)', 'blur(0px)'],
+            duration: 400
+          }).add({
+            targets: $buttons.toArray(),
+            opacity: [0, 1],
+            translateY: [8, 0],
+            duration: 280,
+            delay: anime.stagger(30)
+          }, '-=60');
+
+          // Push content down
+          anime({
+            targets: $content.toArray(),
+            translateY: [0, 80],
+            duration: 400,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          // Flip arrow up
+          anime({
+            targets: $arrow.get(0),
+            rotateX: [0, 180],
+            duration: 300,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          catTl.finished.then(function () {
+            $categories.css({ opacity: '', transform: '', filter: '' });
+            $buttons.css({ opacity: '', transform: '' });
+            isAnimating = false; // Unlock after animation completes
+          });
+
+        } else {
+          isAnimating = true;
+
+          // HIDE CATEGORIES
+          var $buttons = $categories.find('.button');
+
+          var catTl = anime.timeline({ easing: 'cubicBezier(0.6, 0, 0.4, 1)' });
+
+          catTl.add({
+            targets: $buttons.toArray(),
+            opacity: [1, 0],
+            translateY: [0, -8],
+            duration: 200,
+            delay: anime.stagger(25, { direction: 'reverse' })
+          }).add({
+            targets: $categories.get(0),
+            opacity: [1, 0],
+            translateY: [0, -80],
+            // scaleY: [1, 0.80],
+            filter: ['blur(0px)', 'blur(44px)'],
+            duration: 380
+          });
+
+          // Pull content back up
+          anime({
+            targets: $content.toArray(),
+            translateY: [80, 0],
+            duration: 400,
+            delay: 480,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          // Flip arrow back down
+          anime({
+            targets: $arrow.get(0),
+            rotateX: [180, 0],
+            duration: 300,
+            easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+          });
+
+          catTl.finished.then(function () {
+            $categories.removeClass('show');
+            $categories.css({ opacity: '', transform: '', filter: '' });
+            $buttons.css({ opacity: '', transform: '' });
+            isAnimating = false; // Unlock after animation completes
+          });
+        }
+      });
+    });
+
+
+  </script>
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const h = document.querySelector('h1.ls-animate');
+      if (!h) return;
+
+      // Set initial state
+      h.style.opacity = 0;
+      h.style.letterSpacing = '0.2em';
+
+      const io = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            // Ensure single-line and hide overflow during animation
+            h.style.overflow = 'hidden';
+            h.style.whiteSpace = 'nowrap';
+            anime({
+              targets: h,
+              opacity: [0, 1],
+              letterSpacing: ['0.2em', '-0.04em'],
+              duration: 1200,
+              easing: 'cubicBezier(0.6, 0, 0.4, 1)',
+              complete: function () {
+                h.style.overflow = '';
+                h.style.whiteSpace = '';
+              }
+            });
+            obs.unobserve(h);
+          }
+        });
+      }, { threshold: 0.4 });
+
+      io.observe(h);
+    });
+  </script>
+  <script>
+    (function () {
+      const triggers = document.querySelectorAll('.open_sidebar');
+      const sidebar = document.getElementById('sidebar');
+      const content = sidebar ? sidebar.querySelector('.content') : null;
+      const root = document.documentElement; // CSS var host
+      if (!triggers.length || !sidebar) return;
+
+      const DURATION = 600;                 // ms for sidebar width animation
+      const CONTENT_FADE = 400;             // ms for content fade
+      const EASING = 'cubicBezier(0.6, 0, 0.4, 1)';
+      const TARGET = 600;                   // px target width
+      const START_CONTENT_AT = Math.floor(DURATION * 0.85); // start at ~85%
+
+      function readVar() {
+        const v = getComputedStyle(root).getPropertyValue('--sidebar-w').trim();
+        return v ? parseFloat(v) : 0;
+      }
+      function setVar(px) { root.style.setProperty('--sidebar-w', px + 'px'); }
+
+      // Initialize closed state
+      setVar(0);
+      if (content) { content.style.opacity = '0'; content.style.display = 'none'; }
+
+      function animateOpen() {
+        const from = readVar();
+        const tl = anime.timeline({ autoplay: false });
+
+        // 1) Animate width first
+        tl.add({
+          targets: { t: from },
+          t: TARGET,
+          duration: DURATION,
+          easing: EASING,
+          update: function (anim) {
+            const v = anim.animations[0].currentValue;
+            setVar(v);
+          }
+        });
+
+        // 2) Near the end (~85%), reveal and fade-in content with translateX and scale
+        if (content) {
+          tl.add({
+            targets: content,
+            opacity: [0, 1],
+            translateY: [8, 0],
+            // scale: [0.98, 1],
+            duration: CONTENT_FADE,
+            easing: EASING,
+            begin: function () {
+              content.style.display = 'flex';
+              content.style.opacity = '0';
+            }
+          }, START_CONTENT_AT);
+        }
+
+        tl.play();
+      }
+
+      function animateClose() {
+        const from = readVar();
+        const tl = anime.timeline({ autoplay: false });
+
+        // 1) Fade content out first, then hide it, with rightward motion and scale down, slower
+        if (content) {
+          tl.add({
+            targets: content,
+            opacity: [parseFloat(getComputedStyle(content).opacity) || 1, 0],
+            translateY: [0, 8],
+            // scale: [1, 0.98],
+            duration: CONTENT_FADE / 2,
+            easing: EASING,
+            complete: function () { content.style.display = 'none'; }
+          });
+        }
+
+        // 2) Collapse width to zero
+        tl.add({
+          targets: { t: from },
+          t: 0,
+          duration: DURATION,
+          easing: EASING,
+          update: function (anim) {
+            const v = anim.animations[0].currentValue;
+            setVar(v);
+          }
+        });
+
+        tl.play();
+      }
+
+      function isOpen() { return readVar() >= (TARGET - 1); }
+      function toggle() { isOpen() ? animateClose() : animateOpen(); }
+
+      triggers.forEach(function (el) {
+        el.addEventListener('click', function (e) { e.preventDefault(); toggle(); });
+      });
+    })();
+  </script>
+  <script>
+    // FAQ Accordion
+    document.addEventListener('DOMContentLoaded', function () {
+      const faqItems = document.querySelectorAll('.faq-item');
+
+      // Text splitting removed for smoother block animation
+
+      faqItems.forEach(function (item) {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        const paragraph = answer.querySelector('p');
+
+        question.addEventListener('click', function (e) {
+          e.preventDefault();
+          const isExpanded = question.getAttribute('aria-expanded') === 'true';
+
+          // Close all other items
+          faqItems.forEach(function (otherItem) {
+            const otherQuestion = otherItem.querySelector('.faq-question');
+            const otherAnswer = otherItem.querySelector('.faq-answer');
+
+            if (otherItem !== item && otherQuestion.getAttribute('aria-expanded') === 'true') {
+              otherQuestion.setAttribute('aria-expanded', 'false');
+
+              // Closing animation with easeOutQuad
+              anime({
+                targets: otherAnswer,
+                maxHeight: 0,
+                paddingBottom: 0,
+                opacity: 0,
+                translateY: -8,
+                duration: 400,
+                easing: 'easeOutQuad',
+                complete: function () {
+                  otherAnswer.classList.remove('open');
+                }
+              });
+            }
+          });
+
+          // Toggle current item
+          if (isExpanded) {
+            question.setAttribute('aria-expanded', 'false');
+
+            // Closing animation with easeOutQuad
+            anime({
+              targets: answer,
+              maxHeight: 0,
+              paddingBottom: 0,
+              opacity: 0,
+              translateY: -8,
+              duration: 400,
+              easing: 'easeOutQuad',
+              complete: function () {
+                answer.classList.remove('open');
+              }
+            });
+          } else {
+            question.setAttribute('aria-expanded', 'true');
+            answer.style.maxHeight = '0px';
+            answer.classList.add('open');
+            answer.style.opacity = '1';
+
+            // Set initial state for paragraph
+            if (paragraph) {
+              paragraph.style.opacity = '0';
+              paragraph.style.transform = 'translateY(8px)';
+            }
+
+            // Opening animation for container (height)
+            anime({
+              targets: answer,
+              maxHeight: 500,
+              // Remove other props from container animation to let paragraph handle content
+              duration: 900,
+              easing: 'easeOutQuad'
+            });
+
+            // Animate paragraph with delay and custom easing
+            if (paragraph) {
+              anime({
+                targets: paragraph,
+                opacity: [0, 1],
+                translateY: [-8, 0],
+                duration: 800,
+                delay: 150, // Slight delay for smoothness
+                easing: 'cubicBezier(0.6, 0, 0.4, 1)'
+              });
+            }
+          }
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const aiSomething = document.getElementById('ai_something');
+      if (!aiSomething) return;
+
+      // Proxy state object to ensure smooth animation
+      // Initial value matches the desired default opacity
+      const glowState = { opacity: 0.8 };
+
+      // Initialize the CSS variable
+      aiSomething.style.setProperty('--glow-after-opacity', glowState.opacity);
+
+      const easing = 'cubicBezier(0.84, 0.19, 0.31, 1.21)';
+
+      function updateGlow() {
+        aiSomething.style.setProperty('--glow-after-opacity', glowState.opacity);
+      }
+
+      aiSomething.addEventListener('mouseenter', function () {
+        anime({
+          targets: glowState,
+          opacity: 0,
+          duration: 320,
+          easing: easing,
+          update: updateGlow
+        });
+      });
+
+      aiSomething.addEventListener('mouseleave', function () {
+        // Get the duration from the CSS variable (default to 520ms if not found)
+        const transitionDuration = parseFloat(getComputedStyle(aiSomething).getPropertyValue('--t-duration')) * 1000 || 520;
+        const delay = transitionDuration * 0.6;
+
+        anime({
+          targets: glowState,
+          opacity: .6,
+          duration: 320,
+          delay: delay,
+          easing: easing,
+          update: updateGlow
+        });
+      });
+
+      // SVG Rotation Animation
+      const svgIcon = aiSomething.querySelector('.minimized-view svg');
+      if (svgIcon) {
+        anime({
+          targets: svgIcon,
+          rotate: '1turn',
+          duration: 1000,
+          easing: 'easeInOutQuad',
+          loop: true,
+          delay: 4000, // 4s delay + 1s duration = 5s total cycle
+          endDelay: 0 // delay is applied before each loop iteration in anime.js loop parameters differently, but standard loop w/ delay works best like this or using keyframes.
+        });
+
+        // Better approach for "once every 5 seconds" with anime.js loop:
+        // Duration 1000ms, then wait 4000ms. 
+        // Anime.js 'delay' in loop context can be tricky. Using a recursive function or keyframes is often safer.
+        // Let's use keyframes for precise control.
+
+        anime.remove(svgIcon); // Clear any previous
+        anime({
+          targets: svgIcon,
+          rotate: '1turn',
+          duration: 5000, // Total cycle time
+          keyframes: [
+            { rotate: '1turn', duration: 1000, easing: 'easeInOutQuad' }, // Rotate for 1s
+            { rotate: '1turn', duration: 4000 } // Stay for 4s (no change, effectively a wait)
+          ],
+          loop: true,
+          easing: 'linear' // Main easing linear so timing is exact
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>
