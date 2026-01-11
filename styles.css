@@ -673,9 +673,7 @@ button {
   outline: solid 2px #00000000;
   outline-offset: 2px;
   border: 1px solid transparent;
-  transform: outline-offset .3s;
-
-  transition: outline .3s, background-color .2s;
+  transition: outline .3s, background-color .2s, outline-offset .3s;
 }
 
 .small button {
@@ -994,6 +992,9 @@ textarea:hover {
   opacity: var(--glow-opacity);
 }
 
+.outline:before{
+  filter: blur(0px);
+}
 .animated:before,
 .animated:after {
   animation: animate var(--glow-duration) var(--glow-iteration) var(--glow-easing);
@@ -2980,7 +2981,7 @@ input:checked+.slider:before {
   background-color: #fff;
 }
 
-.button.ai:after {
+.button.ai:hover:after {
   content: "";
   position: absolute;
   inset: 0;
@@ -3000,7 +3001,7 @@ input:checked+.slider:before {
   background-size: 300% 100%;
   background-position: 100% 0;
 
-  animation: gradient-sweep-pos 1s linear 0s 2 forwards;
+  animation: gradient-sweep-pos 0.8s linear 2 forwards;
 }
 
 .button.ai.border:after {
