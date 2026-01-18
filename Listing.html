@@ -41,11 +41,21 @@
       transform: translateY(0) scale(1);
       filter: blur(0px);
       pointer-events: auto;
-      /* Show Animation */
+      /* Show Animation - Initial reveal is static (no left/max-width transition) */
       transition: opacity 400ms cubic-bezier(.24, .48, 0, .98),
                   transform 400ms cubic-bezier(.24, .48, 0, .98),
                   filter 400ms cubic-bezier(.24, .48, 0, .98),
                   visibility 0s;
+    }
+
+    /* This class is added when transitioning between categories to enable smooth movement */
+    .trending-popover.moving {
+      transition: opacity 400ms cubic-bezier(.24, .48, 0, .98),
+                  transform 400ms cubic-bezier(.24, .48, 0, .98),
+                  filter 400ms cubic-bezier(.24, .48, 0, .98),
+                  visibility 0s,
+                  left 400ms cubic-bezier(.24, .48, 0, .98),
+                  max-width 400ms cubic-bezier(.24, .48, 0, .98);
     }
 
     /* Alignment utility classes removed as we calculate left explicitly now */
@@ -81,7 +91,6 @@
     .column-section.dropdown {
       display: flex;
       flex-direction: column;
-      gap: 2px;
       margin-bottom: 24px;
     }
 
@@ -93,6 +102,7 @@
     text-overflow: ellipsis;
     overflow: hidden;
     width: 100%;
+    align-items: center;
     }
     .column-section.dropdown a:hover {
       color: #222325;
@@ -111,11 +121,14 @@
       color: white;
       font-size: 10px;
       font-weight: 600;
-      padding: 2px 6px;
+      padding: 4px 6px 3px;
       border-radius: 4px;
       /* margin-left: 8px; */
       text-transform: uppercase;
       letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .popover-footer {
@@ -236,7 +249,6 @@
     </div>
 
     <div style="height:100vh"></div>
-
 
 
     <footer class="site-footer">
@@ -1233,7 +1245,7 @@
                   <a href="#">Interpretation <span class="badge-new">New</span></a>
                 </div>
                 <div class="column-section dropdown">
-                  <h4>Industry Specific Content <span class="badge-new">New</span></h4>
+                  <h4>Industry Specific Content</h4>
                   <a href="#">Business, Finance & Law</a>
                   <a href="#">Health & Medical</a>
                   <a href="#">Internet & Technology</a>
@@ -1727,8 +1739,27 @@
       const $popover = $('#category-popover');
       const $dynamicContent = $('#popover-dynamic-content');
       let currentCategory = null;
+      let closeTimeout = null;
+
+      function clearCloseTimeout() {
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+          closeTimeout = null;
+        }
+      }
+
+      function startCloseTimeout() {
+        clearCloseTimeout();
+        closeTimeout = setTimeout(() => {
+          if ($popover.hasClass('show')) {
+            $popover.removeClass('show moving');
+            currentCategory = null;
+          }
+        }, 3000);
+      }
 
       $categoryBtns.on('mouseenter', function () {
+        clearCloseTimeout();
         const cat = $(this).data('category');
         if (!cat || !categoryData[cat]) return;
 
@@ -1762,7 +1793,10 @@
           const windowWidth = window.innerWidth;
 
           // 1. Determine width
-          const targetMaxWidth = Math.min(cols * 400, 1600);
+          let targetMaxWidth = 1400; // Default for 4 cols
+          if (cols === 2) targetMaxWidth = 740;
+          else if (cols === 3) targetMaxWidth = 980;
+
           const actualWidth = Math.min(targetMaxWidth, windowWidth - 40);
 
           $popover.css('max-width', actualWidth + 'px');
@@ -1771,8 +1805,8 @@
           let leftPos;
           const btnCenter = btnRect.left + btnRect.width / 2;
 
-          // Special case: Finance and AI should center like Consulting (which is 4 cols)
-          const forceCenter = ['finance', 'ai', 'consulting'].includes(cat);
+          // Special case: Finance, AI, Personal Growth, Data, and Photography should center like Consulting
+          const forceCenter = ['finance', 'ai', 'consulting', 'personal', 'data', 'photography'].includes(cat);
 
           if (cols < 4 && !forceCenter) {
             if (btnCenter > windowWidth / 2) {
@@ -1795,6 +1829,7 @@
 
         if ($popover.hasClass('show') && currentCategory !== cat) {
           // Content fade switch while popover is already open
+          $popover.addClass('moving'); // Enable smooth horizontal movement
           $dynamicContent.addClass('content-fade');
           setTimeout(() => {
             updateContent();
@@ -1802,6 +1837,7 @@
           }, 200); // Matches the slower fade-out duration
         } else {
           // Initial reveal or same category
+          $popover.removeClass('moving'); // Snap to size for initial appearance
           updateContent();
           $popover.addClass('show');
         }
@@ -1809,11 +1845,23 @@
         currentCategory = cat;
       });
 
+      $categoryBtns.on('mouseleave', function () {
+        startCloseTimeout();
+      });
+
+      $popover.on('mouseenter', function () {
+        clearCloseTimeout();
+      });
+
+      $popover.on('mouseleave', function () {
+        startCloseTimeout();
+      });
+
       $categoryBtns.on('click', function (e) {
         e.stopPropagation();
         const cat = $(this).data('category');
         if (cat === currentCategory && $popover.hasClass('show')) {
-          $popover.removeClass('show');
+          $popover.removeClass('show moving'); // Remove moving class on hide
           currentCategory = null;
         }
       });
@@ -1822,7 +1870,7 @@
       $(document).on('click', function (e) {
         if (!$(e.target).closest('.category-btn, #category-popover').length) {
           if ($popover.hasClass('show')) {
-            $popover.removeClass('show');
+            $popover.removeClass('show moving'); // Remove moving class on hide
             currentCategory = null;
           }
         }
@@ -1831,7 +1879,7 @@
       // Close popover if categories bar is hidden
       $('#drop1').on('click', function () {
         if ($categories.hasClass('show') && $popover.hasClass('show')) {
-          $popover.removeClass('show');
+          $popover.removeClass('show moving'); // Remove moving class on hide
           currentCategory = null;
         }
       });

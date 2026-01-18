@@ -340,7 +340,7 @@
         </div>
 
         <div class="chat-footer">
-          <div class="ai_loading"></div>
+          <div class="ai_loading" style="display: none;"></div>
           <div class="footer-tools-input">
             <div class="footer-status-bar" style="display: none;">
 
@@ -581,8 +581,8 @@
       top: 23px;
       left: 23px;
       right: 23px;
-      height: 24%;
-      border-radius: 13px 13px 0 0;
+      height: 20%;
+      border-radius: 13px;
       z-index: 0;
       overflow: hidden;
       opacity: 0;
@@ -593,14 +593,13 @@
       content: '';
       display: block;
       background: conic-gradient(from 180deg at 48.85% 54.29%, rgba(208, 229, 0, 0.00) 84.80769395828247deg, rgba(208, 229, 0, 0.60) 124.92471098899841deg, rgba(29, 191, 115, 0.60) 244.5113968849182deg, rgba(29, 191, 115, 0.00) 282.5516438484192deg);
-      inset: -40px;
       height: 70vw;
       width: 70vw;
       top: -25vw;
       position: absolute;
-      transform: rotate(360deg) translateY(-50%);
       animation: ai-loading-swing 1.6s infinite;
       transform-origin: center center;
+      scale: 2 0.8;
     }
 
     .ai_loading:after {
@@ -1834,14 +1833,17 @@
 
       $('#ai-edit-toggle-btn').on('click', function () {
         const $statusBar = $('.footer-status-bar');
+        const $loading = $('.ai_loading');
         const $btn = $(this).find('button');
         const isVisible = $statusBar.is(':visible');
 
         if (isVisible) {
           $statusBar.hide();
+          $loading.hide();
           $btn.css('background-color', '#fff');
         } else {
           $statusBar.show();
+          $loading.show();
           $btn.css('background-color', '#E4E5E7');
         }
       });
@@ -2194,6 +2196,7 @@
 
         // 2. Show status bar and animation
         $statusBar.show();
+        $loading.show();
         $('#ai-edit-toggle-btn button').css('background-color', '#E4E5E7');
         anime({
           targets: $statusBar[0],
