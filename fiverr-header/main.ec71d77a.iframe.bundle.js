@@ -37,8 +37,8 @@ var map = {
 	"./components/README.mdx": [
 		"./src/components/README.mdx",
 		810,
-		396,
-		761,
+		63,
+		274,
 		8
 	]
 };
@@ -68,14 +68,14 @@ module.exports = webpackAsyncContext;
 var map = {
 	"./components/index.stories": [
 		"./src/components/index.stories.tsx",
-		396,
-		761,
+		63,
+		274,
 		696
 	],
 	"./components/index.stories.tsx": [
 		"./src/components/index.stories.tsx",
-		396,
-		761,
+		63,
+		274,
 		696
 	]
 };
@@ -265,4 +265,4 @@ module.exports = __STORYBOOK_MODULE_PREVIEW_API__;
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.0d64025d.iframe.bundle.js.map
+//# sourceMappingURL=main.ec71d77a.iframe.bundle.js.map
