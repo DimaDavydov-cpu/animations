@@ -20544,10 +20544,57 @@ function FiverrHeaderPage_useDropdownState() {
     wrapperRef
   };
 }
-function UnreadBadge(_ref) {
+
+// Reusable vertical scroll-fade: shows a white gradient at the bottom when content overflows
+function ScrollFade(_ref) {
+  let {
+    children,
+    style
+  } = _ref;
+  const ref = (0,react.useRef)(null);
+  const [hasMore, setHasMore] = (0,react.useState)(false);
+  const check = (0,react.useCallback)(() => {
+    const el = ref.current;
+    if (el) setHasMore(el.scrollHeight > el.clientHeight + el.scrollTop + 1);
+  }, []);
+  (0,react.useEffect)(() => {
+    requestAnimationFrame(check);
+  }, [check]);
+  return (/*#__PURE__*/
+    // flex column so the inner scroll div can use flex:1 to fill exactly the remaining space
+    react.createElement("div", {
+      style: {
+        position: 'relative',
+        flex: 1,
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column'
+      }
+    }, /*#__PURE__*/react.createElement("div", {
+      ref: ref,
+      onScroll: check,
+      style: FiverrHeaderPage_objectSpread({
+        overflowY: 'auto',
+        flex: 1,
+        minHeight: 0
+      }, style)
+    }, children), hasMore && /*#__PURE__*/react.createElement("div", {
+      style: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 48,
+        background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)',
+        pointerEvents: 'none'
+      }
+    }))
+  );
+}
+function UnreadBadge(_ref2) {
   let {
     count
-  } = _ref;
+  } = _ref2;
   const isCircle = count < 10;
   return /*#__PURE__*/react.createElement(components_Center, {
     borderRadius: "circle",
@@ -20574,10 +20621,10 @@ function UnreadBadge(_ref) {
     }
   }, count));
 }
-function MessageRow(_ref2) {
+function MessageRow(_ref3) {
   let {
     item
-  } = _ref2;
+  } = _ref3;
   const [isHovered, setIsHovered] = (0,react.useState)(false);
   const [isRead, setIsRead] = (0,react.useState)(item.count === undefined);
   return /*#__PURE__*/react.createElement("div", {
@@ -20662,10 +20709,10 @@ function MessageRow(_ref2) {
     size: "sm"
   }))))))));
 }
-function OrderRow(_ref3) {
+function OrderRow(_ref4) {
   let {
     item
-  } = _ref3;
+  } = _ref4;
   const statusMap = {
     incomplete: {
       variant: 'error',
@@ -20740,10 +20787,10 @@ function OrderRow(_ref3) {
     color: "bodySecondary"
   }, "(", item.username, ")"))));
 }
-function NotificationRow(_ref4) {
+function NotificationRow(_ref5) {
   let {
     item
-  } = _ref4;
+  } = _ref5;
   const [isHovered, setIsHovered] = (0,react.useState)(false);
   const [isRead, setIsRead] = (0,react.useState)(!item.isUnread);
   return /*#__PURE__*/react.createElement("div", {
@@ -20840,11 +20887,11 @@ function NotificationRow(_ref4) {
 
 // ── Shared top-navigation bar ────────────────────────────────────────────────
 
-function FiverrHeader(_ref5) {
+function FiverrHeader(_ref6) {
   let {
     isFullWidth = false,
     onToggleFullWidth
-  } = _ref5;
+  } = _ref6;
   const [isSearchOpen, setIsSearchOpen] = (0,react.useState)(false);
   const [isSearchVisible, setIsSearchVisible] = (0,react.useState)(false);
   const searchRef = (0,react.useRef)(null);
@@ -21080,10 +21127,18 @@ function FiverrHeader(_ref5) {
       borderRadius: 8,
       boxShadow: '0 4px 24px rgba(0,0,0,0.16)',
       boxSizing: 'border-box',
-      transformOrigin: 'top center'
+      transformOrigin: 'top center',
+      maxHeight: 'calc(100vh - 100px)',
+      display: 'flex',
+      flexDirection: 'column'
     }, getDropdownAnimStyle(notifDD.isVisible))
   }, /*#__PURE__*/react.createElement("div", {
-    style: getDropdownContentAnimStyle(notifDD.isVisible)
+    style: FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, getDropdownContentAnimStyle(notifDD.isVisible)), {}, {
+      display: 'flex',
+      flexDirection: 'column',
+      flex: 1,
+      minHeight: 0
+    })
   }, /*#__PURE__*/react.createElement(components_Stack, {
     direction: "row",
     alignItems: "center",
@@ -21122,7 +21177,7 @@ function FiverrHeader(_ref5) {
     onClick: () => setIsNotificationsMuted(v => !v)
   }, isNotificationsMuted ? /*#__PURE__*/react.createElement(SoundMuted, null) : /*#__PURE__*/react.createElement(SoundMax, null))))), /*#__PURE__*/react.createElement(components_Divider, {
     marginBottom: "2"
-  }), /*#__PURE__*/react.createElement(components_Stack, {
+  }), /*#__PURE__*/react.createElement(ScrollFade, null, /*#__PURE__*/react.createElement(components_Stack, {
     direction: "column",
     gap: "0",
     paddingX: "2",
@@ -21131,7 +21186,7 @@ function FiverrHeader(_ref5) {
   }, NOTIFICATIONS.map(item => /*#__PURE__*/react.createElement(NotificationRow, {
     key: item.id,
     item: item
-  })))))), /*#__PURE__*/react.createElement("div", {
+  }))))))), /*#__PURE__*/react.createElement("div", {
     ref: messagesDD.wrapperRef,
     style: {
       position: 'relative'
@@ -21163,10 +21218,18 @@ function FiverrHeader(_ref5) {
       borderRadius: 8,
       boxShadow: '0 4px 24px rgba(0,0,0,0.16)',
       boxSizing: 'border-box',
-      transformOrigin: 'top center'
+      transformOrigin: 'top center',
+      maxHeight: 'calc(100vh - 100px)',
+      display: 'flex',
+      flexDirection: 'column'
     }, getDropdownAnimStyle(messagesDD.isVisible))
   }, /*#__PURE__*/react.createElement("div", {
-    style: getDropdownContentAnimStyle(messagesDD.isVisible)
+    style: FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, getDropdownContentAnimStyle(messagesDD.isVisible)), {}, {
+      display: 'flex',
+      flexDirection: 'column',
+      flex: 1,
+      minHeight: 0
+    })
   }, /*#__PURE__*/react.createElement(components_Stack, {
     direction: "row",
     alignItems: "center",
@@ -21205,7 +21268,7 @@ function FiverrHeader(_ref5) {
     onClick: () => setIsMessagesMuted(v => !v)
   }, isMessagesMuted ? /*#__PURE__*/react.createElement(SoundMuted, null) : /*#__PURE__*/react.createElement(SoundMax, null))))), /*#__PURE__*/react.createElement(components_Divider, {
     marginBottom: "2"
-  }), /*#__PURE__*/react.createElement(components_Stack, {
+  }), /*#__PURE__*/react.createElement(ScrollFade, null, /*#__PURE__*/react.createElement(components_Stack, {
     direction: "column",
     gap: "0",
     paddingX: "2",
@@ -21213,7 +21276,7 @@ function FiverrHeader(_ref5) {
   }, MESSAGES.map(item => /*#__PURE__*/react.createElement(MessageRow, {
     key: item.id,
     item: item
-  }))), /*#__PURE__*/react.createElement(components_Divider, {
+  })))), /*#__PURE__*/react.createElement(components_Divider, {
     marginTop: "2"
   }), /*#__PURE__*/react.createElement(components_Stack, {
     paddingX: "5",
@@ -21247,10 +21310,18 @@ function FiverrHeader(_ref5) {
       borderRadius: 8,
       boxShadow: '0 4px 24px rgba(0,0,0,0.16)',
       boxSizing: 'border-box',
-      transformOrigin: 'top center'
+      transformOrigin: 'top center',
+      maxHeight: 'calc(100vh - 100px)',
+      display: 'flex',
+      flexDirection: 'column'
     }, getDropdownAnimStyle(ordersDD.isVisible))
   }, /*#__PURE__*/react.createElement("div", {
-    style: getDropdownContentAnimStyle(ordersDD.isVisible)
+    style: FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, getDropdownContentAnimStyle(ordersDD.isVisible)), {}, {
+      display: 'flex',
+      flexDirection: 'column',
+      flex: 1,
+      minHeight: 0
+    })
   }, /*#__PURE__*/react.createElement(components_Stack, {
     direction: "row",
     alignItems: "center",
@@ -21264,7 +21335,7 @@ function FiverrHeader(_ref5) {
     color: "bodyPrimary"
   }, "My orders")), /*#__PURE__*/react.createElement(components_Divider, {
     marginBottom: "2"
-  }), /*#__PURE__*/react.createElement(components_Stack, {
+  }), /*#__PURE__*/react.createElement(ScrollFade, null, /*#__PURE__*/react.createElement(components_Stack, {
     direction: "column",
     gap: "0",
     paddingX: "2",
@@ -21272,7 +21343,7 @@ function FiverrHeader(_ref5) {
   }, ORDERS.map(item => /*#__PURE__*/react.createElement(OrderRow, {
     key: item.id,
     item: item
-  }))), /*#__PURE__*/react.createElement(components_Divider, {
+  })))), /*#__PURE__*/react.createElement(components_Divider, {
     marginTop: "2"
   }), /*#__PURE__*/react.createElement(components_Stack, {
     paddingX: "5",
@@ -26069,4 +26140,4 @@ StoryFiverrBuyerHome.parameters = {
 /***/ })
 
 }]);
-//# sourceMappingURL=274.51421493.iframe.bundle.js.map
+//# sourceMappingURL=274.cc252698.iframe.bundle.js.map
