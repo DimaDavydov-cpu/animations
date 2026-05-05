@@ -1,0 +1,17 @@
+{
+  "name": "fiverr-onboarding-animation",
+  "version": "1.0.0",
+  "description": "Animated onboarding intro for Fiverr product design team",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "animation",
+    "onboarding",
+    "fiverr"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

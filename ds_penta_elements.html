@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Penta UI - Design System Elements</title>
+  <link rel="stylesheet" href="ds_penta.css">
+  <style>
+    /* Page Layout */
+    body {
+      background: var(--surface-primary);
+      padding: 40px;
+    }
+    
+    .page-header {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+    
+    .section {
+      margin-bottom: 64px;
+    }
+    
+    .section-title {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--foreground-secondary);
+      margin-bottom: 24px;
+    }
+    
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    
+    .component-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .component-label {
+      font-size: var(--text-xs);
+      color: var(--foreground-tertiary);
+      margin-bottom: 4px;
+    }
+    
+    /* Dark section for inverse components */
+    .dark-section {
+      background: var(--surface-inverse);
+      padding: 32px;
+      border-radius: var(--radius-xl);
+      margin-top: 24px;
+    }
+    
+    .dark-section .section-title {
+      color: var(--grey-600);
+    }
+    
+    /* Inline SVG */
+    .icon-svg {
+      width: 18px;
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1>Penta UI</h1>
+    <p class="secondary">Design System Elements for Vibe Coding Prototypes</p>
+  </header>
+
+  <!-- Typography -->
+  <section class="section">
+    <div class="section-title">Typography</div>
+    <h1>Heading 1</h1>
+    <h2>Heading 2</h2>
+    <h3>Heading 3</h3>
+    <h4>Heading 4</h4>
+    <p>Body text — Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    <p class="small secondary">Small secondary text — Used for captions and helper text.</p>
+  </section>
+
+  <!-- Links -->
+  <section class="section">
+    <div class="section-title">Links</div>
+    <div class="component-row">
+      <a href="#">Default Link</a>
+      <a href="#" class="secondary">Secondary Link</a>
+    </div>
+    
+    <div class="dark-section">
+      <div class="component-row">
+        <a href="#" class="on_dark">Link on Dark</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="section">
+    <div class="section-title">Buttons</div>
+    
+    <div class="component-row">
+      <div class="button">
+        <button>Default Button</button>
+      </div>
+      <div class="button border">
+        <button>Outline Button</button>
+      </div>
+      <div class="button gost">
+        <button>Ghost Button</button>
+      </div>
+    </div>
+    
+    <div class="component-row">
+      <div class="button small">
+        <button>Small Button</button>
+      </div>
+      <div class="button small border">
+        <button>Small Outline</button>
+      </div>
+    </div>
+    
+    <div class="component-row">
+      <div class="button round">
+        <button>Round Button</button>
+      </div>
+      <div class="button round border">
+        <button>Round Outline</button>
+      </div>
+    </div>
+    
+    <div class="component-row">
+      <div class="button icon">
+        <button>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 3V15M3 9H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="button icon sm border">
+        <button>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 12L12 4M12 4H5M12 4V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <div class="component-row">
+      <div class="button ai">
+        <button>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1V4M9 14V17M1 9H4M14 9H17M3.636 3.636L5.757 5.757M12.243 12.243L14.364 14.364M14.364 3.636L12.243 5.757M5.757 12.243L3.636 14.364" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          AI Generate
+        </button>
+      </div>
+    </div>
+    
+    <div class="component-row">
+      <div class="button">
+        <button disabled>Disabled Button</button>
+      </div>
+    </div>
+    
+    <!-- Buttons on Dark -->
+    <div class="dark-section">
+      <div class="section-title">Buttons on Dark</div>
+      <div class="component-row">
+        <div class="button on_dark">
+          <button>Button on Dark</button>
+        </div>
+        <div class="button on_dark round">
+          <button>Round on Dark</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inputs -->
+  <section class="section">
+    <div class="section-title">Inputs</div>
+    
+    <div class="component-group" style="max-width: 400px;">
+      <div class="form_control">
+        <label>Default Input</label>
+        <div class="input">
+          <input type="text" placeholder="Enter your text...">
+        </div>
+      </div>
+      
+      <div class="form_control">
+        <label>Textarea</label>
+        <div class="input">
+          <textarea placeholder="Enter your message..." rows="3"></textarea>
+        </div>
+        <p>Helper text for additional context.</p>
+      </div>
+      
+      <div class="form_control">
+        <label>Input with Button</label>
+        <div class="input">
+          <input type="text" placeholder="Search..." style="padding-right: 50px;">
+          <div class="button on_right sm icon">
+            <button style="width: 36px; height: 36px; min-height: 36px;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M11.5 11.5L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- AI Glow Input -->
+    <div class="component-group" style="max-width: 400px; margin-top: 32px;">
+      <div class="component-label">AI Glow Border Input</div>
+      <div class="ai_glow_border">
+        <textarea placeholder="Ask me anything..." rows="2"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toggles & Checkboxes -->
+  <section class="section">
+    <div class="section-title">Toggles & Checkboxes</div>
+    
+    <div class="component-row">
+      <div class="toggle-group">
+        <label class="switch">
+          <input type="checkbox" checked>
+          <span class="slider"></span>
+        </label>
+        <span>Toggle on</span>
+      </div>
+      
+      <div class="toggle-group">
+        <label class="switch">
+          <input type="checkbox">
+          <span class="slider"></span>
+        </label>
+        <span>Toggle off</span>
+      </div>
+    </div>
+    
+    <div class="component-row" style="margin-top: 24px;">
+      <div class="checkbox-group">
+        <input type="checkbox" id="check1" checked>
+        <label for="check1">Checkbox checked</label>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="check2">
+        <label for="check2">Checkbox unchecked</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tags -->
+  <section class="section">
+    <div class="section-title">Tags</div>
+    <div class="component-row">
+      <span class="tag">Default</span>
+      <span class="tag success">Success</span>
+      <span class="tag warning">Warning</span>
+      <span class="tag error">Error</span>
+      <span class="tag info">Info</span>
+    </div>
+  </section>
+
+  <!-- Avatars -->
+  <section class="section">
+    <div class="section-title">Avatars</div>
+    <div class="component-row" style="align-items: center;">
+      <div class="avatar xs">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+      </div>
+      <div class="avatar sm">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+      </div>
+      <div class="avatar">
+        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="">
+      </div>
+      <div class="avatar lg">
+        <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="">
+      </div>
+      <div class="avatar xl">
+        <img src="https://randomuser.me/api/portraits/women/90.jpg" alt="">
+      </div>
+      
+      <div class="avatar-with-status">
+        <div class="avatar lg">
+          <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="">
+        </div>
+        <span class="status-dot online"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Status Dots -->
+  <section class="section">
+    <div class="section-title">Status Dots</div>
+    <div class="component-row" style="align-items: center; gap: 24px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="status-dot online"></span>
+        <span>Online</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="status-dot away"></span>
+        <span>Away</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="status-dot busy"></span>
+        <span>Busy</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="status-dot offline"></span>
+        <span>Offline</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Progress Bars -->
+  <section class="section">
+    <div class="section-title">Progress Bars</div>
+    <div class="component-group" style="max-width: 400px;">
+      <div class="progress-bar">
+        <div class="progress-bar__track">
+          <div class="progress-bar__fill" style="width: 65%;"></div>
+        </div>
+        <span class="progress-bar__label">65%</span>
+      </div>
+      
+      <div class="progress-bar">
+        <div class="progress-bar__track">
+          <div class="progress-bar__fill success" style="width: 100%;"></div>
+        </div>
+        <span class="progress-bar__label">Done</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Boxes & Cards -->
+  <section class="section">
+    <div class="section-title">Boxes & Cards</div>
+    
+    <div class="grid small">
+      <div class="box outlined">
+        <h4>Outlined Box</h4>
+        <p class="small secondary">With border and white background.</p>
+      </div>
+      
+      <div class="box grey">
+        <h4>Grey Box</h4>
+        <p class="small secondary">Subtle grey background variant.</p>
+      </div>
+      
+      <div class="box shadow">
+        <h4>Shadow Box</h4>
+        <p class="small secondary">Elevated with drop shadow.</p>
+      </div>
+      
+      <div class="box dark">
+        <h4>Dark Box</h4>
+        <p class="small" style="color: var(--grey-600);">Inverse colors for contrast sections.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Link Cards -->
+  <section class="section">
+    <div class="section-title">Link Cards</div>
+    
+    <div class="grid small">
+      <a href="#" class="link-card">
+        <div class="link-card__header">
+          <div class="avatar sm">
+            <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="">
+          </div>
+        </div>
+        <div class="link-card__title">
+          Project Name
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M4 10L10 4M10 4H5M10 4V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="link-card__content">
+          Click to open the project details and manage settings.
+        </div>
+        <div class="link-card__footer">
+          Updated 2 days ago
+        </div>
+      </a>
+      
+      <a href="#" class="link-card">
+        <div class="link-card__title">
+          Quick Action
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M4 10L10 4M10 4H5M10 4V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="link-card__content">
+          Short description of this action or link destination.
+        </div>
+      </a>
+      
+      <a href="#" class="link-card dark">
+        <div class="link-card__title">
+          Dark Link Card
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M4 10L10 4M10 4H5M10 4V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="link-card__content">
+          For use on light backgrounds as accent.
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Dropdown -->
+  <section class="section">
+    <div class="section-title">Dropdown</div>
+    <div class="dropdown show" style="position: relative;">
+      <a href="#">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Menu Item 1
+      </a>
+      <a href="#">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8H13M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Menu Item 2
+      </a>
+      <a href="#">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 4H14M2 8H14M2 12H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Menu Item 3
+      </a>
+    </div>
+  </section>
+
+  <!-- Glow Effects -->
+  <section class="section">
+    <div class="section-title">Glow Effects</div>
+    
+    <div class="component-row" style="gap: 32px; flex-wrap: wrap;">
+      <div class="glow animated" style="padding: 32px; width: 240px;">
+        <h4>Animated Glow</h4>
+        <p class="small secondary">Rotating conic gradient border.</p>
+      </div>
+      
+      <div class="glow outline animated" style="padding: 32px; width: 240px;">
+        <h4>Outline Glow</h4>
+        <p class="small secondary">Sharp border without blur.</p>
+      </div>
+    </div>
+    
+    <div style="margin-top: 32px;">
+      <div class="box dark inglow" style="min-height: 200px; position: relative;">
+        <h4>Inner Glow Box</h4>
+        <p class="small" style="color: var(--grey-600);">Bottom gradient glow effect inside the container.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blurred Glass -->
+  <section class="section">
+    <div class="section-title">Blurred Glass</div>
+    
+    <div style="position: relative; padding: 64px; background: linear-gradient(135deg, var(--green-300), var(--lime-light)); border-radius: var(--radius-xl);">
+      <div class="bluredglass" style="padding: 24px; display: inline-block;">
+        <h4>Glass Card</h4>
+        <p class="small secondary">Frosted glass effect with backdrop blur.</p>
+      </div>
+    </div>
+    
+    <div style="position: relative; padding: 64px; background: linear-gradient(135deg, var(--grey-1100), var(--grey-1200)); border-radius: var(--radius-xl); margin-top: 24px;">
+      <div class="bluredglass dark" style="padding: 24px; display: inline-block;">
+        <h4>Dark Glass Card</h4>
+        <p class="small" style="color: var(--grey-600);">For dark backgrounds.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading States -->
+  <section class="section">
+    <div class="section-title">Loading States</div>
+    
+    <div class="component-row">
+      <div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chat Bubbles -->
+  <section class="section">
+    <div class="section-title">Chat Bubbles</div>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 500px; background: var(--surface-secondary); padding: 24px; border-radius: var(--radius-xl);">
+      <div class="chat-bubble user">
+        Hi, can you help me with my project?
+      </div>
+      <div class="chat-bubble ai">
+        Of course! I'd be happy to help. What kind of project are you working on?
+      </div>
+      <div class="chat-bubble user">
+        A design system for prototyping.
+      </div>
+      <div class="loading-dots" style="align-self: flex-start;">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Animation Utilities -->
+  <section class="section">
+    <div class="section-title">Animation Utilities</div>
+    <p class="small secondary" style="margin-bottom: 16px;">Refresh the page to see animations replay.</p>
+    
+    <div class="component-row">
+      <div class="box grey anim-fade-up" style="min-height: auto; padding: 16px;">
+        <span class="component-label">anim-fade-up</span>
+      </div>
+      <div class="box grey anim-scale-in anim-delay-2" style="min-height: auto; padding: 16px;">
+        <span class="component-label">anim-scale-in + delay-2</span>
+      </div>
+      <div class="box grey anim-blur-in anim-delay-4" style="min-height: auto; padding: 16px;">
+        <span class="component-label">anim-blur-in + delay-4</span>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

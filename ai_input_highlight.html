@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font"
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        align-items: center;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #F5F5F5
+      }
+
+      #hero-brief-textarea {
+        border-color: #fff;
+        border-radius: 16px;
+      }
+
+
+      /* Glow Intro Animation */
+      @keyframes glow-fade-out {
+        0% {
+          /* opacity: var(--glow-opacity, 0.6); */
+        }
+
+        100% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes border-fade {
+        0% {
+          border-color: #fff;
+        }
+
+        100% {
+          border-color: #C5C6C9;
+        }
+      }
+
+      @keyframes glow-rotate-sequence {
+        0% {
+          --a: 0turn;
+          animation-timing-function: linear;
+        }
+
+        40% {
+          --a: 1turn;
+          animation-timing-function: ease-out;
+        }
+
+        100% {
+          --a: 1.5turn;
+        }
+      }
+
+      .input #hero-brief-textarea {
+        animation: border-fade 0.8s 2.4s forwards;
+      }
+      
+
+      .input:after{
+        /* Conic gradient properties for :before as well */
+        content: "";
+        z-index: -1;
+        position: absolute;
+        inset: var(--glow-inset, -2px);
+        transform: translateZ(-1px);
+        border-radius: 18px;
+        opacity: var(--glow-opacity, 0.4);
+        background: conic-gradient(from calc(var(--a) + var(--glow-angle)) at 50% 50%,
+            var(--glow-c1) var(--glow-p1),
+            var(--glow-c2) var(--glow-p2),
+            var(--glow-c3) var(--glow-p3),
+            var(--glow-c4) var(--glow-p4));
+        filter: blur(var(--glow-blur, 0px));
+        
+        animation:
+          glow-rotate-sequence 3.2s cubic-bezier(0.33, 0.45, 0.33, 0.93) forwards,
+          glow-fade-out 1.2s 2.4s forwards;
+      }
+
+      .input:before{
+        /* transform: scale(1);
+        filter: blur(20px);
+        opacity: .4; */
+        border-radius: 20px;
+      }
+
+    </style>
+</head>
+
+<body class="inglow" style="
+  --glow-height: 12%;
+  --glow-opacity:.5;
+">
+  
+<div class="box" style="background-color: #F5F5F5; width: 90%; z-index: -1; padding: 80px 24px;">
+  <div class="input" style="
+    margin: auto;
+    max-width: 1200px;
+    --glow-blur: 0px;
+    --glow-c1: #EFEFF0;
+    --glow-c2: #6fc49d;
+    --glow-c3: #D0E500;
+    --glow-c4: #EFEFF0;
+    --glow-p1: 0deg;
+    --glow-p2: 40deg;
+    --glow-p3: 100deg;
+    --glow-p4: 270deg;
+    --glow-duration: 2s;
+    --glow-opacity: 1;
+      ">
+    <textarea id="hero-brief-textarea" name="comments" rows="8" placeholder="Create your brief..." style="height: 140px;"></textarea>
+    <div class="button ai" style="margin-left: -190px; align-self: self-end; margin-bottom: 16px;"><button id="generate-brief-btn">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.32093 14.75L3.09365 14.75C2.34806 14.75 1.74365 14.1456 1.74365 13.4L1.74375 2.59999C1.74375 1.85441 2.34816 1.25 3.09375 1.25H11.8686C12.6142 1.25 13.2186 1.85442 13.2186 2.6V3.49426M10.0029 5.75683L10.473 7.02722C10.9039 8.1915 11.8218 9.10945 12.9861 9.54027L14.2565 10.0104L12.9861 10.4805C11.8218 10.9113 10.9039 11.8292 10.473 12.9935L10.0029 14.2639L9.53286 12.9935C9.10204 11.8292 8.18408 10.9113 7.01981 10.4805L5.74941 10.0104L7.01981 9.54027C8.18408 9.10945 9.10204 8.1915 9.53286 7.02722L10.0029 5.75683Z" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4.32093 14.75L3.09365 14.75C2.34806 14.75 1.74365 14.1456 1.74365 13.4L1.74375 2.59999C1.74375 1.85441 2.34816 1.25 3.09375 1.25H11.8686C12.6142 1.25 13.2186 1.85442 13.2186 2.6V3.49426M10.0029 5.75683L10.473 7.02722C10.9039 8.1915 11.8218 9.10945 12.9861 9.54027L14.2565 10.0104L12.9861 10.4805C11.8218 10.9113 10.9039 11.8292 10.473 12.9935L10.0029 14.2639L9.53286 12.9935C9.10204 11.8292 8.18408 10.9113 7.01981 10.4805L5.74941 10.0104L7.01981 9.54027C8.18408 9.10945 9.10204 8.1915 9.53286 7.02722L10.0029 5.75683Z" stroke="white" stroke-opacity="0.8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        
+        Generate Brief
+      </button></div>
+  </div>
+</div>
+
+
+  
+</body>
+
+</html>

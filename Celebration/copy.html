@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Card Glow → Success</title>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2" as="font" crossorigin="anonymous"/>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2" as="font" crossorigin="anonymous"/>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2" as="font" crossorigin="anonymous"/>
+  <link rel="preload" href="https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2" as="font" crossorigin="anonymous"/>
+
+  <style>
+:root {
+  --bg-global: #f5f5f5;
+  --bg-panel: #ffffff;
+  --border: #e4e5e7;
+  --text-main: #1c1c1c;
+  --text-muted: #62646a;
+  --text-light: #7a7d85;
+  --button-bg-disabled: #e4e5e7;
+  --button-text-disabled: #a0a0a0;
+  --highlight-bg: #f1f1f1;
+  --radius: 16px;
+  --accent: #1DBF73;
+}
+
+body {
+  font-family: 'Macan', Helvetica, Arial, sans-serif;
+  margin: 0;
+  color: #080808;
+  background: var(--bg-global);
+}
+
+@font-face {
+  font-family: 'Macan';
+  src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Macan';
+  src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Macan';
+  src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Macan';
+  src: url('https://npm-assets.fiverrcdn.com/assets/uploads/macan-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative; /* for stacking */
+}
+
+.card {
+  width: 360px;
+  max-width: 92vw;
+  border-radius: var(--radius);
+  background: #ffffff;
+  padding: 28px 24px;
+  position: relative;
+  transition: opacity 800ms ease-in-out; /* smoother fade */
+}
+
+.glow {
+  position: relative;
+  border-radius: var(--radius);
+  background: #fff;          /* card stays white */
+  z-index: -;                /* content above its own glow */
+}
+
+/* Animated stroke ring using CSS custom property */
+@property --a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.glow:before {
+  content: '';
+  position: absolute;
+  inset: -2px;                         /* sit just outside card */
+  border-radius: calc(var(--radius) + 2px);
+  padding: 2px;                         /* ring width */
+  background: linear-gradient(var(--a), #ffffff 50%, var(--accent) 100%);
+  /* mask so only the stroke remains */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ai_outline 4s infinite cubic-bezier(0.93, 0.07, 0.26, 0.98);
+  z-index: 0;                           /* behind the card content */
+  pointer-events: none;
+}
+
+.glow:after {
+  content: '';
+  position: absolute;
+  inset: -56px;                          /* big bloom around card */
+  border-radius: calc(var(--radius) + 56px);
+  background: radial-gradient(60% 60% at 50% 40%, rgba(29,191,115,.50) 0%, rgba(29,191,115,.22) 45%, rgba(29,191,115,0) 100%);
+  filter: blur(34px);
+  transform: translateY(0);
+  animation: glowFloat 3.8s ease-in-out infinite alternate;
+  z-index: -1;                           /* BEHIND the card */
+  pointer-events: none;
+}
+
+@keyframes glowFloat {
+  0%   { transform: translateY(-6px); opacity: .9; }
+  100% { transform: translateY(6px);  opacity: .9; }
+}
+
+@keyframes ai_outline {
+  0%   { --a: 0deg; }
+  50%  { --a: 180deg; }
+  100% { --a: 360deg; }
+}
+
+h1 { margin: 0 0 8px 0; font-size: 24px; }
+
+p { margin: 0; line-height: 1.4; color: var(--text-muted); font-size: 14px; }
+
+/* Card A layout (score + meter) */
+.row { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+.title { margin:0; font-size:24px; font-weight:800; }
+.score { font-size:28px; font-weight:800; }
+.score .total { font-size:16px; font-weight:600; color:#7a7d85; margin-left:2px; }
+
+/* bump animation for score */
+@keyframes bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.bump {
+  display:inline-block;
+  animation: bump 700ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.sub { margin:10px 0 16px; color:#62646a; line-height:1.4; }
+.meter { height:10px; border-radius:999px; background:#efefef; overflow:hidden; }
+.meter .fill { height:100%; width:0; background:#1c1c1c; transition:width 300ms ease; }
+
+/* Success card (second state) */
+.card.success { 
+  width: 360px; 
+  max-width: 92vw; 
+  border-radius: var(--radius); 
+  background: #ffffff; 
+  border: 1px solid var(--border); 
+  padding: 20px; 
+  align-items: center; 
+  gap: 16px; 
+  position: absolute; 
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  opacity: 0;           /* hidden until show-success */
+  pointer-events: none; 
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:12px;
+}
+
+/* Cross-fade */
+.show-success .card.glow { opacity: 0; pointer-events: none; }
+.show-success .card.success { opacity: 1; pointer-events: auto; }
+
+/* Freeze: stop stroke motion & turn ring solid green (halo stays) */
+.freeze-stroke .glow:before {
+  animation: none !important;
+  background: var(--accent) !important; /* solid green ring */
+}
+
+.success-icon {
+  flex:0 0 auto;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  margin-bottom:4px;
+}
+.success-icon img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain; 
+}
+.success-copy { flex: 1 1 auto; }
+.success-title { margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: var(--text-main); }
+.success-sub { margin: 0; color: var(--text-muted); font-size: 16px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card glow">
+      <div class="row">
+        <h2 class="title">Profile strength</h2>
+        <div class="score"><b id="scoreNum">12</b><span class="total">/13</span></div>
+      </div>
+      <p class="sub">Complete your profile so clients can trust and hire you faster.</p>
+      <div class="meter" aria-hidden="true">
+        <div class="fill" id="meterFill" style="width: 85%"></div>
+      </div>
+    </div>
+    <div class="card success" aria-hidden="true">
+      <div class="success-icon">
+        <img src="L2_icon.svg" alt="Completed" />
+      </div>
+      <div class="success-copy">
+        <h1 class="success-title">Profile completed</h1>
+        <p class="success-sub">All done with your level’s tasks! Reach the next level for new ones.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // Durations (ms)
+    var ANIM_MS = 2200;  // slower animate score/meter 12 -> 13
+    var HOLD_MS = 700;   // align with bump duration so fade starts right after the bump
+
+    var startScore = 12, endScore = 13;
+    var startWidth = 0.85, endWidth = 1.0; // 85% -> 100%
+
+    var numEl = document.getElementById('scoreNum');
+    var fillEl = document.getElementById('meterFill');
+
+    var t0 = performance.now();
+    function tick(t) {
+      var p = Math.min(1, (t - t0) / ANIM_MS);
+      // easeInOut (smoother)
+      var e = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
+      // width
+      var w = (startWidth + (endWidth - startWidth) * e) * 100;
+      fillEl.style.width = w + '%';
+      // number (12 -> 13 only at the end, but show tween visually if ever wider range)
+      var val = startScore + (endScore - startScore) * e;
+      numEl.textContent = val >= endScore - 0.001 ? endScore.toString() : Math.floor(val).toString();
+      if (val >= endScore - 0.001) {
+        numEl.classList.remove('bump');
+        void numEl.offsetWidth; // trigger reflow
+        numEl.classList.add('bump');
+      }
+
+      if (p < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        // Show static stroke + halo (no motion)
+        document.body.classList.add('step-13');
+        // Freeze ring explicitly (removes rotation if any)
+        document.body.classList.add('freeze-stroke');
+        setTimeout(function () {
+          document.body.classList.add('show-success');
+        }, HOLD_MS);
+      }
+    }
+
+    // initialize state (12/13)
+    numEl.textContent = startScore.toString();
+    fillEl.style.width = (startWidth*100) + '%';
+    // kick the animation
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+</html>
