@@ -21683,7 +21683,7 @@ function FiverrHeaderPage() {
   };
   const activeMenu = displayedCategory ? CATEGORY_MENUS[displayedCategory] : null;
 
-  // Penta Motion: --duration-fast-3 (400ms) open / --duration-fast-2 (320ms) close
+  // Penta Motion: --duration-fast-3 (400ms) open / --duration-fast-1 (200ms) close
   // --ease-out enter · --ease-in exit · --blur-sm (8px) · transform-origin top center
   const EASE_OUT_ENTER_PANEL = 'cubic-bezier(0.16, 1, 0.3, 1)'; // --ease-out
   const EASE_IN_EXIT_PANEL = 'cubic-bezier(0.6, 0.05, 0.75, 0.2)'; // --ease-in
@@ -21702,8 +21702,8 @@ function FiverrHeaderPage() {
     // --blur-sm
     transformOrigin: 'top center',
     pointerEvents: 'none',
-    // --duration-fast-2 · --ease-in
-    transition: "opacity 320ms ".concat(EASE_IN_EXIT_PANEL, ", transform 320ms ").concat(EASE_IN_EXIT_PANEL, ", filter 320ms ").concat(EASE_IN_EXIT_PANEL)
+    // --duration-fast-1 · --ease-in
+    transition: "opacity 200ms ".concat(EASE_IN_EXIT_PANEL, ", transform 200ms ").concat(EASE_IN_EXIT_PANEL, ", filter 200ms ").concat(EASE_IN_EXIT_PANEL)
   };
   return /*#__PURE__*/react.createElement("div", {
     style: {
@@ -26309,4 +26309,4 @@ StoryFiverrBuyerHome.parameters = {
 /***/ })
 
 }]);
-//# sourceMappingURL=105.73fb88fa.iframe.bundle.js.map
+//# sourceMappingURL=105.ba7a8299.iframe.bundle.js.map
