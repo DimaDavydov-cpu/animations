@@ -21541,19 +21541,41 @@ function FiverrHeader(_ref8) {
       flex: 1,
       minHeight: 0
     })
-  }, /*#__PURE__*/react.createElement(components_Stack, {
-    direction: "column",
-    gap: "0.5",
-    paddingY: "4",
-    paddingX: "5"
+  }, /*#__PURE__*/react.createElement("div", {
+    style: {
+      padding: '16px 20px 12px'
+    }
+  }, /*#__PURE__*/react.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 8,
+      marginBottom: 2
+    }
   }, /*#__PURE__*/react.createElement(components_Text, {
     size: "b_md",
     fontWeight: "semibold",
     color: "bodyPrimary"
-  }, "David Bolkonsky Jr"), /*#__PURE__*/react.createElement(components_Text, {
+  }, "David Bolkonsky Jr"), /*#__PURE__*/react.createElement(components_TextButton, {
+    size: "md",
+    variant: "underline",
+    style: {
+      flexShrink: 0
+    }
+  }, "$1,000")), /*#__PURE__*/react.createElement(components_Text, {
     size: "b_sm",
-    color: "bodySecondary"
-  }, "David.Bol@fiverr.com")), /*#__PURE__*/react.createElement(components_Divider, null), /*#__PURE__*/react.createElement(ScrollFade, null, /*#__PURE__*/react.createElement("div", {
+    color: "bodySecondary",
+    style: {
+      marginBottom: 12
+    }
+  }, "David.Bol@fiverr.com"), /*#__PURE__*/react.createElement(components_Button, {
+    variant: "outline",
+    size: "sm",
+    style: {
+      width: '100%'
+    }
+  }, "Switch to selling")), /*#__PURE__*/react.createElement(components_Divider, null), /*#__PURE__*/react.createElement(ScrollFade, null, /*#__PURE__*/react.createElement("div", {
     style: {
       padding: '8px'
     }
@@ -21646,7 +21668,6 @@ function FiverrHeaderPage() {
   const megaMenuStyle = columnCount => {
     if (!catNavRef.current) return {};
     const navRect = catNavRef.current.getBoundingClientRect();
-    const isNarrow = columnCount <= 3;
     const base = {
       position: 'fixed',
       top: navRect.bottom,
@@ -21659,26 +21680,36 @@ function FiverrHeaderPage() {
       display: 'flex',
       flexDirection: 'column'
     };
-    if (isNarrow) {
-      const fullWidth = Math.min(navRect.width, 1440);
-      const baseNarrow = fullWidth * 0.6;
-      // 2-col menus: 15% narrower; 3-col menus: 20% wider
-      const scaledWidth = columnCount <= 2 ? Math.round(baseNarrow * 0.85) : Math.round(baseNarrow * 1.20);
+    // Width per column count
+    const fullWidth = Math.min(navRect.width, 1440);
+    const baseNarrow = fullWidth * 0.6;
+    let menuWidth;
+    if (columnCount <= 2) {
+      menuWidth = Math.round(baseNarrow * 0.85);
+    } else if (columnCount === 3) {
+      menuWidth = Math.round(baseNarrow * 1.20);
+    } else if (columnCount === 4) {
+      menuWidth = Math.min(Math.round(fullWidth), 1360);
+    } else {
+      // 5+ columns: full nav width up to 1440
+      menuWidth = Math.min(navRect.width, 1440);
+    }
+    if (columnCount <= 4) {
+      // Center on trigger, clamp 20px from either screen edge
       const triggerRect = triggerRectRef.current;
-      // Align left edge to the trigger, but clamp so menu never overflows the screen
-      const idealLeft = triggerRect ? triggerRect.left : navRect.left;
-      const clampedLeft = Math.min(idealLeft, window.innerWidth - scaledWidth - 16);
+      const triggerCenter = triggerRect ? triggerRect.left + triggerRect.width / 2 : navRect.left + navRect.width / 2;
+      const idealLeft = triggerCenter - menuWidth / 2;
+      const clampedLeft = Math.min(Math.max(idealLeft, 20), window.innerWidth - menuWidth - 20);
       return FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, base), {}, {
-        width: scaledWidth,
-        left: Math.max(clampedLeft, 0)
+        width: menuWidth,
+        left: clampedLeft
       });
     }
-    const maxWidth = 1440;
-    const width = Math.min(navRect.width, maxWidth);
-    const left = navRect.left + (navRect.width - width) / 2;
+    // 5+ columns: center on nav bar
+    const left = navRect.left + (navRect.width - menuWidth) / 2;
     return FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, base), {}, {
       left,
-      width
+      width: menuWidth
     });
   };
   const activeMenu = displayedCategory ? CATEGORY_MENUS[displayedCategory] : null;
@@ -21752,7 +21783,7 @@ function FiverrHeaderPage() {
     style: FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, megaMenuStyle(activeMenu.columns.length)), panelStyle),
     onMouseEnter: () => hoveredCategory && openMenu(hoveredCategory, undefined),
     onMouseLeave: scheduleMenuClose
-  }, /*#__PURE__*/react.createElement("style", null, "\n            .mega-menu-item {\n              display: flex; align-items: center; gap: 6px;\n              padding: 8px 8px; border-radius: 8px; cursor: pointer;\n              text-decoration: none !important; color: #62646a;\n              font-size: 16px; line-height: 24px;\n            }\n            .mega-menu-item:hover { background-color: #F5F5F5; color: #222325; }\n            .mega-menu-item--cta { color: #222325; font-weight: 600; }\n            .mega-menu-item--cta:hover { background-color: #F5F5F5; }\n          "), /*#__PURE__*/react.createElement("div", {
+  }, /*#__PURE__*/react.createElement("style", null, "\n            .mega-menu-item {\n              display: flex; align-items: center; gap: 6px;\n              padding: 8px 8px; border-radius: 8px; cursor: pointer;\n              text-decoration: none !important; color: #222325;\n              font-size: 14px; line-height: 20px;\n            }\n            .mega-menu-item:hover { background-color: #F5F5F5; color: #222325; }\n            .mega-menu-item--cta { color: #222325; font-weight: 600; }\n            .mega-menu-item--cta:hover { background-color: #F5F5F5; }\n          "), /*#__PURE__*/react.createElement("div", {
     style: {
       position: 'relative',
       flex: 1,
@@ -21832,13 +21863,13 @@ function FiverrHeaderPage() {
     direction: "column",
     gap: "0.5"
   }, /*#__PURE__*/react.createElement(components_Text, {
-    size: "b_sm",
+    size: "b_md",
     fontWeight: "semibold"
   }, activeMenu.footer.title), /*#__PURE__*/react.createElement(components_Text, {
     size: "b_sm",
     color: "bodySecondary"
   }, activeMenu.footer.description)), /*#__PURE__*/react.createElement(components_Button, {
-    size: "md",
+    size: "sm",
     variant: "outline"
   }, activeMenu.footer.cta))), /*#__PURE__*/react.createElement(components_Divider, null));
 }
@@ -26309,4 +26340,4 @@ StoryFiverrBuyerHome.parameters = {
 /***/ })
 
 }]);
-//# sourceMappingURL=105.ba7a8299.iframe.bundle.js.map
+//# sourceMappingURL=105.03733761.iframe.bundle.js.map
