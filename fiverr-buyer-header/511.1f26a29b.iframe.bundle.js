@@ -20441,7 +20441,7 @@ const PHOTOGRAPHY_MENU = {
   }]]
 };
 const CATEGORY_MENUS = {
-  'Trending 🔥': TRENDING_MENU,
+  'Trending': TRENDING_MENU,
   'Graphic & Design': GRAPHIC_DESIGN_MENU,
   'Programming & Tech': PROGRAMMING_MENU,
   'Digital Marketing': DIGITAL_MARKETING_MENU,
@@ -20458,7 +20458,7 @@ const CATEGORY_MENUS = {
 
 // ── Static data ────────────────────────────────────────────────────────────
 
-const CATEGORIES = ['Trending 🔥', 'Graphic & Design', 'Programming & Tech', 'Digital Marketing', 'Video & Animation', 'Writing & Translation', 'Music & Audio', 'Business', 'Finance', 'AI Services', 'Personal Growth', 'Consulting', 'Photography'];
+const CATEGORIES = ['Trending', 'Graphic & Design', 'Programming & Tech', 'Digital Marketing', 'Video & Animation', 'Writing & Translation', 'Music & Audio', 'Business', 'Finance', 'AI Services', 'Personal Growth', 'Consulting', 'Photography'];
 const RECENT_SEARCHES = ['i will be your expert business consultant', 'i will write seo blogs and articles'];
 const POPULAR_SEARCHES = ['logo design', 'youtube thumbnail', 'book cover design', 'interior design', 'data entry', 'video editing', 'website development', 'data entry typing work job'];
 const Z_OVERLAY = 11300;
@@ -26377,4 +26377,4 @@ StoryFiverrBuyerHome.parameters = {
 /***/ })
 
 }]);
-//# sourceMappingURL=511.fec654bb.iframe.bundle.js.map
+//# sourceMappingURL=511.1f26a29b.iframe.bundle.js.map
