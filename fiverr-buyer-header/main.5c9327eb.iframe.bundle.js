@@ -38,7 +38,7 @@ var map = {
 		"./src/components/README.mdx",
 		810,
 		63,
-		105,
+		511,
 		8
 	]
 };
@@ -69,13 +69,13 @@ var map = {
 	"./components/index.stories": [
 		"./src/components/index.stories.tsx",
 		63,
-		105,
+		511,
 		696
 	],
 	"./components/index.stories.tsx": [
 		"./src/components/index.stories.tsx",
 		63,
-		105,
+		511,
 		696
 	]
 };
@@ -265,4 +265,4 @@ module.exports = __STORYBOOK_MODULE_PREVIEW_API__;
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.5c75a09d.iframe.bundle.js.map
+//# sourceMappingURL=main.5c9327eb.iframe.bundle.js.map

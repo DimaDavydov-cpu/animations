@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunk_fiverr_private_penta_playground"] = self["webpackChunk_fiverr_private_penta_playground"] || []).push([[105],{
+(self["webpackChunk_fiverr_private_penta_playground"] = self["webpackChunk_fiverr_private_penta_playground"] || []).push([[511],{
 
 /***/ "../hooks/dist/esm/src/hooks/useIsClient/index.js":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -17284,14 +17284,14 @@ EnvelopeOpenIcon.__docgenInfo = {
   "methods": [],
   "displayName": "EnvelopeOpenIcon"
 };
-;// ../visuals/dist/esm/src/components/generated_visuals/logos/Fiverr.js
+;// ../visuals/dist/esm/src/components/generated_visuals/logos/FiverrDark.js
 
 
 
-const FiverrLogo = _ref => {
+const FiverrDarkLogo = _ref => {
   let {
     size = 'md',
-    dataTrackTag = pascalToSnake('FiverrLogo')
+    dataTrackTag = pascalToSnake('FiverrDarkLogo')
   } = _ref;
   return /*#__PURE__*/react.createElement("svg", {
     xmlns: "http://www.w3.org/2000/svg",
@@ -17301,20 +17301,20 @@ const FiverrLogo = _ref => {
     viewBox: "0 0 120 36",
     "data-track-tag": dataTrackTag
   }, /*#__PURE__*/react.createElement("path", {
-    fill: "#003912",
+    fill: "#404145",
     d: "M110.04 17.413h-4.247c-2.735 0-4.198 2.055-4.198 5.478v12.376h-8.056V17.413h-3.417c-2.734 0-4.198 2.055-4.198 5.478v12.376h-8.056V10.81h8.056v3.717c1.319-2.886 3.125-3.717 5.81-3.717h9.862v3.717c1.319-2.886 3.125-3.717 5.81-3.717h2.636v6.603zm-33.93 7.533H59.316c.44 2.74 2.147 4.304 5.028 4.304 2.147 0 3.66-.88 4.15-2.446l7.127 2.006c-1.757 4.255-6.102 6.848-11.277 6.848-8.739 0-12.743-6.8-12.743-12.62 0-5.722 3.515-12.57 12.254-12.57 9.276 0 12.352 6.945 12.352 12.081a25 25 0 0 1-.097 2.397M68.298 20.2c-.195-2.104-1.709-4.06-4.442-4.06-2.54 0-4.052 1.125-4.54 4.06zM37.542 35.267h7.079l8.837-24.456h-8.104l-4.296 14.233-4.395-14.234h-8.056zm-33.001 0h8.006V17.413h7.616v17.854h7.958V10.81H12.547V9.294c0-1.663 1.172-2.69 3.027-2.69h4.59V0h-5.908c-5.81 0-9.715 3.571-9.715 8.804v2.006H0v6.603h4.54z"
   }), /*#__PURE__*/react.createElement("path", {
     fill: "#1DBF73",
     d: "M115.02 36c2.75 0 4.98-2.234 4.98-4.99 0-2.755-2.23-4.99-4.98-4.99a4.984 4.984 0 0 0-4.98 4.99 4.984 4.984 0 0 0 4.98 4.99"
   }));
 };
-FiverrLogo.displayName = 'FiverrLogo';
-/* harmony default export */ const logos_Fiverr = (FiverrLogo);
+FiverrDarkLogo.displayName = 'FiverrDarkLogo';
+/* harmony default export */ const FiverrDark = (FiverrDarkLogo);
 ;
-FiverrLogo.__docgenInfo = {
+FiverrDarkLogo.__docgenInfo = {
   "description": "",
   "methods": [],
-  "displayName": "FiverrLogo"
+  "displayName": "FiverrDarkLogo"
 };
 ;// ../visuals/dist/esm/src/components/generated_visuals/system/Search.js
 
@@ -21114,7 +21114,7 @@ function FiverrHeader(_ref8) {
       transform: 'translateY(-4px)',
       cursor: 'pointer'
     }
-  }, /*#__PURE__*/react.createElement(logos_Fiverr, {
+  }, /*#__PURE__*/react.createElement(FiverrDark, {
     size: "sm"
   })), /*#__PURE__*/react.createElement("div", {
     ref: searchRef,
@@ -21695,21 +21695,26 @@ function FiverrHeaderPage() {
       menuWidth = Math.min(navRect.width, 1440);
     }
     if (columnCount <= 4) {
+      // Cap width so it never exceeds viewport minus 20px on each side
+      const maxAllowedWidth = window.innerWidth - 40;
+      const finalWidth = Math.min(menuWidth, maxAllowedWidth);
       // Center on trigger, clamp 20px from either screen edge
       const triggerRect = triggerRectRef.current;
       const triggerCenter = triggerRect ? triggerRect.left + triggerRect.width / 2 : navRect.left + navRect.width / 2;
-      const idealLeft = triggerCenter - menuWidth / 2;
-      const clampedLeft = Math.min(Math.max(idealLeft, 20), window.innerWidth - menuWidth - 20);
+      const idealLeft = triggerCenter - finalWidth / 2;
+      const clampedLeft = Math.min(Math.max(idealLeft, 20), window.innerWidth - finalWidth - 20);
       return FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, base), {}, {
-        width: menuWidth,
+        width: finalWidth,
         left: clampedLeft
       });
     }
-    // 5+ columns: center on nav bar
-    const left = navRect.left + (navRect.width - menuWidth) / 2;
+    // 5+ columns: center on nav bar, also respect 20px edges
+    const maxAllowedWidth = window.innerWidth - 40;
+    const finalWidth = Math.min(menuWidth, maxAllowedWidth);
+    const left = Math.max(20, navRect.left + (navRect.width - finalWidth) / 2);
     return FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, base), {}, {
       left,
-      width: menuWidth
+      width: finalWidth
     });
   };
   const activeMenu = displayedCategory ? CATEGORY_MENUS[displayedCategory] : null;
@@ -21783,7 +21788,7 @@ function FiverrHeaderPage() {
     style: FiverrHeaderPage_objectSpread(FiverrHeaderPage_objectSpread({}, megaMenuStyle(activeMenu.columns.length)), panelStyle),
     onMouseEnter: () => hoveredCategory && openMenu(hoveredCategory, undefined),
     onMouseLeave: scheduleMenuClose
-  }, /*#__PURE__*/react.createElement("style", null, "\n            .mega-menu-item {\n              display: flex; align-items: center; gap: 6px;\n              padding: 8px 8px; border-radius: 8px; cursor: pointer;\n              text-decoration: none !important; color: #222325;\n              font-size: 14px; line-height: 20px;\n            }\n            .mega-menu-item:hover { background-color: #F5F5F5; color: #222325; }\n            .mega-menu-item--cta { color: #222325; font-weight: 600; }\n            .mega-menu-item--cta:hover { background-color: #F5F5F5; }\n          "), /*#__PURE__*/react.createElement("div", {
+  }, /*#__PURE__*/react.createElement("style", null, "\n            .mega-menu-item {\n              display: flex; align-items: center; gap: 6px;\n              padding: 8px 8px; border-radius: 8px; cursor: pointer;\n              text-decoration: none !important; color: #222325;\n              font-size: 14px; line-height: 20px;\n            }\n            .mega-menu-item:hover { background-color: #F5F5F5; color: #222325; }\n            .mega-menu-item--cta { color: #222325; font-weight: 600; }\n            .mega-menu-item--cta:hover { background-color: #F5F5F5; }\n            @media (min-width: 1024px) {\n              .mega-menu-item { white-space: nowrap; }\n            }\n          "), /*#__PURE__*/react.createElement("div", {
     style: {
       position: 'relative',
       flex: 1,
@@ -21805,7 +21810,7 @@ function FiverrHeaderPage() {
         const MIN_COL_PX = 240;
         const maxFit = Math.max(1, Math.floor((menuWidth - 48) / MIN_COL_PX));
         const cols = Math.min(N, maxFit);
-        return "repeat(".concat(cols, ", minmax(0, 1fr))");
+        return "repeat(".concat(cols, ", minmax(min-content, 1fr))");
       })(),
       columnGap: '24px',
       padding: '20px 24px 0',
@@ -22115,6 +22120,38 @@ ArrowRightIcon.__docgenInfo = {
   "description": "",
   "methods": [],
   "displayName": "ArrowRightIcon"
+};
+;// ../visuals/dist/esm/src/components/generated_visuals/logos/Fiverr.js
+
+
+
+const FiverrLogo = _ref => {
+  let {
+    size = 'md',
+    dataTrackTag = pascalToSnake('FiverrLogo')
+  } = _ref;
+  return /*#__PURE__*/react.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: FIVERR_LOGOS_SIZES[size].width,
+    height: FIVERR_LOGOS_SIZES[size].height,
+    fill: "none",
+    viewBox: "0 0 120 36",
+    "data-track-tag": dataTrackTag
+  }, /*#__PURE__*/react.createElement("path", {
+    fill: "#003912",
+    d: "M110.04 17.413h-4.247c-2.735 0-4.198 2.055-4.198 5.478v12.376h-8.056V17.413h-3.417c-2.734 0-4.198 2.055-4.198 5.478v12.376h-8.056V10.81h8.056v3.717c1.319-2.886 3.125-3.717 5.81-3.717h9.862v3.717c1.319-2.886 3.125-3.717 5.81-3.717h2.636v6.603zm-33.93 7.533H59.316c.44 2.74 2.147 4.304 5.028 4.304 2.147 0 3.66-.88 4.15-2.446l7.127 2.006c-1.757 4.255-6.102 6.848-11.277 6.848-8.739 0-12.743-6.8-12.743-12.62 0-5.722 3.515-12.57 12.254-12.57 9.276 0 12.352 6.945 12.352 12.081a25 25 0 0 1-.097 2.397M68.298 20.2c-.195-2.104-1.709-4.06-4.442-4.06-2.54 0-4.052 1.125-4.54 4.06zM37.542 35.267h7.079l8.837-24.456h-8.104l-4.296 14.233-4.395-14.234h-8.056zm-33.001 0h8.006V17.413h7.616v17.854h7.958V10.81H12.547V9.294c0-1.663 1.172-2.69 3.027-2.69h4.59V0h-5.908c-5.81 0-9.715 3.571-9.715 8.804v2.006H0v6.603h4.54z"
+  }), /*#__PURE__*/react.createElement("path", {
+    fill: "#1DBF73",
+    d: "M115.02 36c2.75 0 4.98-2.234 4.98-4.99 0-2.755-2.23-4.99-4.98-4.99a4.984 4.984 0 0 0-4.98 4.99 4.984 4.984 0 0 0 4.98 4.99"
+  }));
+};
+FiverrLogo.displayName = 'FiverrLogo';
+/* harmony default export */ const logos_Fiverr = (FiverrLogo);
+;
+FiverrLogo.__docgenInfo = {
+  "description": "",
+  "methods": [],
+  "displayName": "FiverrLogo"
 };
 ;// ../visuals/dist/esm/src/components/generated_visuals/system/Medal.js
 
@@ -26340,4 +26377,4 @@ StoryFiverrBuyerHome.parameters = {
 /***/ })
 
 }]);
-//# sourceMappingURL=105.03733761.iframe.bundle.js.map
+//# sourceMappingURL=511.fec654bb.iframe.bundle.js.map
