@@ -652,3 +652,6 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .viewport { inset: 0; }
 .panel { top: calc(var(--topbar-h) + env(safe-area-inset-top) + var(--bar-gap) * 2); }
 .panel.dark-ui { top: calc(var(--topbar-h) + env(safe-area-inset-top) + var(--bar-gap) * 2); }
+
+/* Resolution switch: icon only */
+[data-preset] button { padding: 8px 10px; }
