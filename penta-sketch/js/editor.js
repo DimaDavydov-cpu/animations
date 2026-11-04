@@ -31,7 +31,7 @@
   });
   let doc = newDoc('full');
   const view = { x: 0, y: 0, s: 1 };
-  const ui = { zoom: 1, tool: 'draw', fingerDraws: true, grid: true, selectedId: null, editingId: null, lastLevel: 'body' };
+  const ui = { zoom: 1, tool: 'select', fingerDraws: true, grid: true, selectedId: null, editingId: null, lastLevel: 'body' };
   let past = [], future = [], editSnapshot = null;
 
   const snapDoc = () => JSON.stringify(doc);
@@ -858,7 +858,7 @@
     if (editingHere && e.pointerType === 'mouse') return;
     // Pencil / mouse on a text box: hand over to the browser (Scribble, caret).
     if (role === 'draw' && editable && !abHandle && !editingHere) return;
-    if (role === 'draw' && editingHere && e.pointerType === 'pen') return;
+    if (editingHere && e.pointerType === 'pen') return;   // Pencil writing into text (Scribble) in any tool
 
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType });
     e.preventDefault();
@@ -1090,6 +1090,7 @@
       return;
     }
     if (g.kind === 'tapOrPan') {
+      if (g.moved && !cancelled && e.pointerType === 'pen' && ui.tool === 'select') toast('Arrow is active. Tap the pencil icon to draw');
       if (g.moved || cancelled) return;
       const a = doc.artboard;
       const onArtboard = g.pt.x >= 0 && g.pt.y >= 0 && g.pt.x <= a.w && g.pt.y <= a.h;
@@ -1837,7 +1838,7 @@
   load();
   if (isFull()) sizeToViewport();
   buildRamps();
-  setTool('draw');
+  setTool('select');
   render(true);
   fit();
   renderSelection();

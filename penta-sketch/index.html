@@ -17,11 +17,11 @@
   <header class="topbar">
     <div class="topbar__group topbar__group--start">
       <div class="segmented" role="tablist" aria-label="Tool">
-        <div class="button small gost" data-tool="draw"><button type="button" title="Draw (P)" aria-label="Draw">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 2.5l3 3L5 14H2v-3l8.5-8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-</button></div>
         <div class="button small gost" data-tool="select"><button type="button" title="Select (V)" aria-label="Select">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2l10 5.5-4.5 1L6.5 13 3 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+</button></div>
+        <div class="button small gost" data-tool="draw"><button type="button" title="Draw (P)" aria-label="Draw">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 2.5l3 3L5 14H2v-3l8.5-8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
 </button></div>
       </div>
       <div class="button small icon gost" id="gridToggleWrap"><button type="button" id="gridToggle" title="Layout grid (G)" aria-label="Toggle layout grid">
@@ -91,10 +91,9 @@
     <div class="empty-hint" id="emptyHint">
       <p class="empty-hint__title">Sketch with Apple Pencil</p>
       <ul>
-        <li><b>Draw a rectangle</b> (it can be open) to create a card · a wide, short one asks Card or Input</li>
-        <li><b>Draw a line</b> (or tap) with Pencil to add text, then write in the box</li>
-        <li><b>Finger mode is on</b>: your finger draws like Pencil · two fingers scroll</li>
-        <li>Switch to <b>Select</b> to tap a card (panel) or the background (color) and to move things</li>
+        <li><b>Arrow</b> (selected now): tap cards, text and the background · drag to move · scroll with a finger</li>
+        <li>Tap the <b>pencil</b> to draw: a rectangle makes a card (a wide, short one asks Card or Input), a line makes text</li>
+        <li><b>Finger mode</b> lets your finger draw too · two fingers scroll</li>
         <li><b>Tap text</b> to edit it · drag across it to select</li>
       </ul>
     </div>
@@ -194,7 +193,7 @@
         <dt>Background</dt><dd>In Select mode (or with Finger mode off) tap the empty artboard to choose its color. Use the hex field for exact values.</dd>
         <dt>Select / move</dt><dd>In Select mode a finger tap selects; drag a selected item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers scroll the page.</dd>
         <dt>Canvas width</dt><dd>Adaptive (default) uses the full available width. Drag the handle on the canvas's right edge to resize it, pick iPad or Mobile, or tap the width next to the scale (for example 1194 px) to type an exact width. Height is automatic.</dd><dt>Scale</dt><dd>Tap the percentage in the top bar to switch between 100%, 75% and 50%. Touch never changes the scale: two fingers only pan.</dd><dt>Grid snapping</dt><dd>Card edges snap to the layout grid's columns and margins when within 20 px. A red guide shows the line they snapped to.</dd>
-        <dt>Finger mode</dt><dd>On by default: in Draw mode your finger draws like Pencil, and two fingers scroll. Turn it off in the ••• menu to select and scroll with one finger.</dd><dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>
+        <dt>Arrow and pencil</dt><dd>The arrow (Select) is active when you open the prototype: tap to select, drag to move, tap the background for its color. Tap the pencil (Draw) to sketch with Pencil or, with Finger mode on, your finger.</dd><dt>Finger mode</dt><dd>On by default: in Draw mode your finger draws like Pencil, and two fingers scroll. Turn it off in the ••• menu to select and scroll with one finger.</dd><dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>
       </dl>
     </div>
   </div>
