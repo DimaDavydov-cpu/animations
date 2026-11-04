@@ -56,6 +56,8 @@ Without it the app falls back to Helvetica.
 | Tap the artboard title (above its top-left corner) | Opens size editing: preset, exact W × H, and edge handles to drag. Size is not editable otherwise |
 | Draw / move / resize a card near the layout grid | Its edges snap to column edges, page margins and artboard edges within 20 px (red guide). Otherwise 8 px snapping |
 | Finger drag on the background | Scrolls the page |
+| Tap existing text (finger) | Edit it with the caret at the end. While editing, a finger tap places the caret exactly there and a finger drag selects text |
+| Drag the dashed frame around selected text | Moves the text (or reorders it in its stack) |
 | Write over existing text with Pencil | Edit it. Scratch out words to delete them (Scribble gestures) |
 
 Scribble must be on: iPad Settings → Apple Pencil → Scribble.

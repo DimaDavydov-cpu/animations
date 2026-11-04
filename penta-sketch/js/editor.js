@@ -415,6 +415,17 @@
     const box = document.createElement('div');
     box.className = 'sel-box';
     Object.assign(box.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' });
+    if (el.type === 'text') {
+      // the frame around the text: drag it to move the text (the text itself is for editing)
+      box.classList.add('sel-box--text');
+      for (const k of ['t', 'r', 'b', 'l']) {
+        const f = document.createElement('div');
+        f.className = `move-frame move-frame--${k}`;
+        f.dataset.moveFrame = '';
+        f.title = 'Drag to move';
+        box.appendChild(f);
+      }
+    }
     if (el.type === 'card') {
       const handles = el.parent ? ['se'] : ['nw', 'ne', 'sw', 'se'];
       for (const k of handles) {
@@ -636,6 +647,27 @@
   }
 
   /* ─────────────── Text editing ─────────────── */
+  /* Enter editing with the caret at the END of the text. */
+  function focusAtEnd(edit) {
+    if (!edit) return;
+    if (document.activeElement !== edit) edit.focus({ preventScroll: true });
+    const last = edit.lastChild;
+    const sel = getSelection();
+    if (last && last.nodeType === 3) sel.setBaseAndExtent(last, last.length, last, last.length);
+    else { const r = document.createRange(); r.selectNodeContents(edit); r.collapse(false); sel.removeAllRanges(); sel.addRange(r); }
+  }
+  /* Text position under a point, clamped to the given editable. */
+  function caretAt(edit, x, y) {
+    let r = null;
+    if (document.caretRangeFromPoint) r = document.caretRangeFromPoint(x, y);
+    else if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); if (p) { r = document.createRange(); r.setStart(p.offsetNode, p.offset); r.collapse(true); } }
+    if (r && edit.contains(r.startContainer)) return { node: r.startContainer, offset: r.startOffset };
+    // outside the text: before it (above / left) or after it
+    const b = edit.getBoundingClientRect();
+    const end = !(y < b.top + 4 || (y < b.bottom && x < b.left + 4));
+    const t = document.createRange(); t.selectNodeContents(edit); t.collapse(!end);
+    return { node: t.startContainer, offset: t.startOffset };
+  }
   function blurEditing() {
     const a = document.activeElement;
     if (a && a.classList && a.classList.contains('el-text__edit')) a.blur();
@@ -666,6 +698,7 @@
     const node = e.target.closest('.el-text');
     if (!node) return;
     node.classList.remove('is-editing');
+    { const sel = getSelection(); if (sel.anchorNode && e.target.contains(sel.anchorNode)) sel.removeAllRanges(); }
     const el = byId(node.dataset.id);
     ui.editingId = null;
     if (el) {
@@ -704,8 +737,15 @@
     const abHandle = e.target.closest('[data-ab-handle]');
     if (ui.abEdit && !abHandle) { closeArtboardEdit(); if (e.pointerType !== 'pen') return; }
 
+    const frame = e.target.closest('[data-move-frame]');
+    const editingHere = editable && document.activeElement === editable;
+    // tapping the text being edited brings a closed toolbar back
+    if (editingHere && ui.panelHidden && e.pointerType !== 'mouse') { ui.panelHidden = false; renderInspector(); }
+    // Mouse inside the text being edited: native caret / selection
+    if (editingHere && e.pointerType === 'mouse') return;
     // Pencil / mouse on a text box: hand over to the browser (Scribble, caret).
-    if (role === 'draw' && editable && !abHandle) return;
+    if (role === 'draw' && editable && !abHandle && !editingHere) return;
+    if (role === 'draw' && editingHere && e.pointerType === 'pen') return;
 
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType });
     e.preventDefault();
@@ -738,7 +778,7 @@
       return;
     }
 
-    if (role === 'draw') {
+    if (role === 'draw' && !frame) {
       blurEditing();
       clearTimeout(pending.timer);
       if (pending.strokes.length) {
@@ -752,6 +792,18 @@
       return;
     }
 
+    // Finger inside the text being edited: tap = place caret there, drag = select text
+    if (editingHere && e.pointerType === 'touch') {
+      const a = caretAt(editable, e.clientX, e.clientY);
+      gesture = { kind: 'textsel', id: e.pointerId, edit: editable, anchor: a, sx: e.clientX, sy: e.clientY };
+      getSelection().setBaseAndExtent(a.node, a.offset, a.node, a.offset);
+      return;
+    }
+    // The frame around selected text moves it (any input)
+    if (frame && ui.selectedId) {
+      gesture = { kind: 'move', id: e.pointerId, elId: ui.selectedId, draggable: true, start: pt, sx: e.clientX, sy: e.clientY, rect0: rectOf(ui.selectedId), before: snapDoc(), moved: false, target: null, fromFrame: true };
+      return;
+    }
     const handle = e.target.closest('[data-handle]');
     const elNode = e.target.closest('.el');
     if (handle && ui.selectedId) {
@@ -812,6 +864,13 @@
       for (const ev of evs.length ? evs : [e]) g.pts.push({ ...toArtboard(ev.clientX, ev.clientY), p: pressure(ev) });
       g.travel = Math.max(g.travel, Math.hypot(e.clientX - g.sx, e.clientY - g.sy));
       drawPath();
+      return;
+    }
+    if (g.kind === 'textsel') {
+      if (Math.hypot(e.clientX - g.sx, e.clientY - g.sy) < 4 && !g.moved) return;
+      g.moved = true;
+      const f = caretAt(g.edit, e.clientX, e.clientY);
+      getSelection().setBaseAndExtent(g.anchor.node, g.anchor.offset, f.node, f.offset);
       return;
     }
     if (g.kind === 'tapOrPan') {
@@ -890,6 +949,7 @@
     gesture = null;
     dropMarker.remove();
 
+    if (g.kind === 'textsel') return; // caret / selection already set
     if (g.kind === 'draw') {
       if (cancelled) { g.path.remove(); return; }
       if (g.travel < 6 && performance.now() - g.t0 < 400) {
@@ -925,7 +985,7 @@
       if (!g.moved) {
         const now = performance.now();
         const el = byId(g.elId);
-        if (el.type === 'text' && lastTap.id === el.id && now - lastTap.t < 350) nodes.get(el.id).firstChild.focus();
+        if (el.type === 'text' && !g.fromFrame) { select(g.elId); focusAtEnd(nodes.get(el.id).firstChild); }
         else { blurEditing(); select(g.elId); }
         lastTap = { id: g.elId, t: now };
         return;
@@ -965,10 +1025,18 @@
   viewportEl.addEventListener('pointercancel', (e) => endPointer(e, true));
 
   // Keep a finger tap on a text box from focusing it (finger = select, Pencil = write).
+  let touchStartPt = null;
   viewportEl.addEventListener('touchend', (e) => {
     const t = e.changedTouches[0];
     const editable = e.target.closest && e.target.closest('.el-text__edit');
-    if (editable && t && t.touchType !== 'stylus' && document.activeElement !== editable && !ui.fingerDraws) e.preventDefault();
+    if (editable && t && t.touchType !== 'stylus' && !ui.fingerDraws) {
+      if (document.activeElement !== editable) {
+        // finger tap on text: edit with the caret at the end (focus inside the touch gesture so the keyboard opens)
+        e.preventDefault();
+        const moved = touchStartPt && Math.hypot(t.clientX - touchStartPt.x, t.clientY - touchStartPt.y) > 8;
+        if (!moved && ui.selectedId === editable.closest('.el').dataset.id) focusAtEnd(editable);
+      } else e.preventDefault(); // our own caret / selection handling
+    }
   }, { passive: false });
   document.addEventListener('gesturestart', (e) => e.preventDefault());
 
@@ -981,7 +1049,9 @@
     if (stylus && e.target.closest('.el-text__edit')) return; // Scribble
     const drawing = ui.tool === 'draw' && (stylus || ui.fingerDraws);
     const sel = e.target.closest('.el');
-    const ours = e.target.closest('[data-handle], [data-ab-handle]') || (sel && sel.dataset.id === ui.selectedId);
+    const ed = e.target.closest('.el-text__edit');
+    const ours = e.target.closest('[data-handle], [data-ab-handle], [data-move-frame]') || (sel && sel.dataset.id === ui.selectedId) || (ed && document.activeElement === ed);
+    touchStartPt = { x: t.clientX, y: t.clientY };
     if (drawing || (ours && e.touches.length === 1)) e.preventDefault();
   }, { passive: false });
   viewportEl.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false }); // no zoom gestures

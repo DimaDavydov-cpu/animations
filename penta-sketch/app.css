@@ -692,3 +692,12 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .grid-overlay span { background: color-mix(in srgb, var(--grey-400) 50%, transparent); }
 
 .dark-ui .unit-select { flex: 0 0 64px !important; }
+
+/* Text: the frame around the selection moves it; inside is for editing */
+.move-frame { position: absolute; pointer-events: auto; touch-action: none; cursor: move; }
+.move-frame--t { left: calc(-18px * var(--inv, 1)); right: calc(-18px * var(--inv, 1)); top: calc(-18px * var(--inv, 1)); height: calc(16px * var(--inv, 1)); }
+.move-frame--b { left: calc(-18px * var(--inv, 1)); right: calc(-18px * var(--inv, 1)); bottom: calc(-18px * var(--inv, 1)); height: calc(16px * var(--inv, 1)); }
+.move-frame--l { top: calc(-2px * var(--inv, 1)); bottom: calc(-2px * var(--inv, 1)); left: calc(-18px * var(--inv, 1)); width: calc(16px * var(--inv, 1)); }
+.move-frame--r { top: calc(-2px * var(--inv, 1)); bottom: calc(-2px * var(--inv, 1)); right: calc(-18px * var(--inv, 1)); width: calc(16px * var(--inv, 1)); }
+.sel-box--text { outline-style: dashed; }
+.el-text.is-editing { touch-action: none; }
