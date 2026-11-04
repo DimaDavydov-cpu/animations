@@ -63,7 +63,7 @@
         <div class="dropdown menu" id="menu">
           <a href="#" data-action="save">Save project (.json)</a>
           <a href="#" data-action="open">Open project…</a>
-          <a href="#" data-action="grid" class="menu-grid">Layout grid: <b id="gridState">Off</b></a>
+          <a href="#" data-action="grid" class="menu-grid">Layout grid: <b id="gridState">On</b></a>
           <a href="#" data-action="finger">Draw with finger: <b id="fingerState">Off</b></a>
           <a href="#" data-action="help">How to use</a>
           <a href="#" data-action="clear" class="danger">Clear artboard</a>
@@ -92,7 +92,7 @@
     <div class="empty-hint" id="emptyHint">
       <p class="empty-hint__title">Sketch with Apple Pencil</p>
       <ul>
-        <li><b>Draw a rectangle</b> to create a card (a vertical stack)</li>
+        <li><b>Draw a rectangle</b> (it can be open) to create a card · a wide, short one asks Card or Input</li>
         <li><b>Draw a line</b> (or tap) with Pencil to add text, then write in the box</li>
         <li><b>Tap the background</b> with your finger to set its color</li>
         <li><b>Tap a card</b> with your finger to see its stack, size and style</li>
@@ -128,6 +128,16 @@
     </div>
     <p class="ab-popover__tip">Or drag the handle on the artboard's right edge. Height is automatic.</p>
     <div class="button small"><button type="button" id="abDone">Done</button></div>
+  </div>
+
+  <!-- ═══════════════ Wide, short shape: card or input? ═══════════════ -->
+  <div class="popover shape-choice dark-ui" id="shapeChoice" role="dialog" aria-label="What should this shape become?">
+    <span class="shape-choice__title">Make it</span>
+    <div class="button small"><button type="button" data-choice="card">Card</button></div>
+    <div class="button small"><button type="button" data-choice="input">Input</button></div>
+    <div class="button small icon gost"><button type="button" data-choice="cancel" aria-label="Cancel">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button></div>
   </div>
 
   <!-- ═══════════════ Color picker ═══════════════ -->

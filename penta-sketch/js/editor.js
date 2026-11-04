@@ -31,7 +31,7 @@
   });
   let doc = newDoc('full');
   const view = { x: 0, y: 0, s: 1 };
-  const ui = { zoom: 1, tool: 'draw', fingerDraws: false, grid: false, selectedId: null, editingId: null, lastLevel: 'body' };
+  const ui = { zoom: 1, tool: 'draw', fingerDraws: false, grid: true, selectedId: null, editingId: null, lastLevel: 'body' };
   let past = [], future = [], editSnapshot = null;
 
   const snapDoc = () => JSON.stringify(doc);
@@ -195,7 +195,8 @@
           place(node, ch, el);
           while (node.children.length > ch.length) node.lastChild.remove();
         } else {
-          node.className = `el el-text t-${PS.level(el.level).id}`;
+          node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}`;
+          if (el.variant === 'input') node.firstChild.dataset.placeholder = 'Input';
           node.classList.toggle('has-w', !!el.w && !parent);
           const extra = parent ? [] : [['max-width', Math.max(48, doc.artboard.w - el.x) + 'px']];
           applyCss(node, [...PS.sizeCss(el, parent), ...extra, ...PS.textColorCss(el)]);
@@ -556,7 +557,9 @@
     if (!strokes.length) return;
     const res = PS.recognize(strokes);
     const line = res.type === 'rect' ? null : PS.recognizeLine(strokes);
-    if (res.type === 'rect') {
+    if (res.type === 'rect' && res.h <= 72 && res.w >= 3 * res.h) {
+      askShape(res, paths);            // wide and short: a card, or an input?
+    } else if (res.type === 'rect') {
       createCard(res);
       fadeInk(paths, 'is-absorbed');
     } else if (line) {
@@ -565,8 +568,66 @@
     } else {
       fadeInk(paths);
       const many = strokes.length > 2 || res.reason === 'interior';
-      toast(many ? 'To write text: tap with Pencil first, then write inside the box' : 'Not recognized. Draw a closed rectangle to make a card');
+      toast(many ? 'To write text: tap with Pencil first, then write inside the box' : 'Not recognized. Draw a rectangle with all four edges to make a card');
     }
+  }
+
+  /* ── wide, short shape: ask whether it is a card or an input ── */
+  const choiceEl = $('shapeChoice');
+  let choice = null;
+  function askShape(res, paths) {
+    dismissChoice();
+    choice = { res, paths };
+    choiceEl.classList.add('is-open');
+    const rr = viewportEl.getBoundingClientRect();
+    const cx = rr.left + view.x + (res.x + res.w / 2) * view.s - viewportEl.scrollLeft;
+    const cy = rr.top + view.y + res.y * view.s - viewportEl.scrollTop;
+    const b = choiceEl.getBoundingClientRect();
+    let y = cy - b.height - 10;
+    if (y < topbarEl.getBoundingClientRect().bottom + 8) y = rr.top + view.y + (res.y + res.h) * view.s - viewportEl.scrollTop + 10;
+    placeBox(choiceEl, cx - b.width / 2, y);
+  }
+  function dismissChoice(fade = true) {
+    if (!choice) return;
+    if (fade) fadeInk(choice.paths);
+    choice = null;
+    choiceEl.classList.remove('is-open');
+  }
+  choiceEl.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-choice]');
+    if (!b || !choice) return;
+    const { res, paths } = choice;
+    const kind = b.dataset.choice;
+    choice = null;
+    choiceEl.classList.remove('is-open');
+    if (kind === 'card') { createCard(res); fadeInk(paths, 'is-absorbed'); }
+    else if (kind === 'input') { createInput(res); fadeInk(paths, 'is-absorbed'); }
+    else fadeInk(paths);
+  });
+
+  /* An input is a Penta text field: a text element with variant 'input' (44px, hairline border).
+   * Out on the canvas it snaps to whole grid columns and stays bound to them. */
+  function createInput(r) {
+    blurEditing();
+    const before = snapDoc();
+    const mid = { x: r.x + r.w / 2, y: r.y + r.h / 2 };
+    const parent = containerFor({ x: mid.x, y: mid.y, w: 0, h: 0 });
+    const el = { id: uid(), type: 'text', variant: 'input', parent: null, x: 0, y: snap(mid.y - 22), text: '', level: 'body', color: 'secondary' };
+    if (parent) placeInto(el, parent, insertionIndex(parent, mid));
+    else {
+      const L = gridLines(), gx = [];
+      const x1 = snapEdge(r.x, L.starts, gx), x2 = snapEdge(r.x + r.w, L.ends, gx);
+      el.x = x1; el.w = Math.max(SNAP * 6, x2 - x1);
+      doc.elements.push(el);
+      snapToColumns(el); bindToColumns(el);
+      if (gx.length) flashGuides(gx, []);
+    }
+    ui.selectedId = el.id;
+    ui.panelHidden = false;
+    render();
+    editSnapshot = before;
+    nodes.get(el.id).firstChild.focus();
+    toast('Input added. Type its placeholder');
   }
 
   let createGuides = null;
@@ -746,7 +807,7 @@
     ui.editingId = null;
     if (el) {
       el.text = e.target.innerText.replace(/\n$/, '').replace(/ /g, ' ');
-      if (!el.text.trim()) {
+      if (!el.text.trim() && el.variant !== 'input') {
         doc.elements = doc.elements.filter((x) => x.id !== el.id);
         if (ui.selectedId === el.id) ui.selectedId = null;
       }
@@ -774,6 +835,7 @@
   viewportEl.addEventListener('pointerdown', (e) => {
     if (e.button === 2) return;
     closeMenu();
+    dismissChoice();
     if (colorPop.classList.contains('is-open')) { closeColor(); if (e.pointerType !== 'pen') return; }
     const role = roleFor(e);
     const editable = e.target.closest('.el-text__edit');
@@ -1243,8 +1305,12 @@
       mutate(() => { el.level = l.id; });
     }, `${l.size}/${l.line}`)));
     const g = (label, ...c) => { const d = document.createElement('div'); d.className = 'insp-group'; if (label) { const s = document.createElement('span'); s.className = 'insp-label'; s.textContent = label; d.appendChild(s); } c.forEach((x) => d.appendChild(x)); return d; };
-    inspectorEl.appendChild(g('Text', levels));
-    inspectorEl.appendChild(g('Color', selectCtl('Text color', PS.TEXT_COLORS, el.color, (v) => mutate(() => { el.color = v; }))));
+    if (el.variant === 'input') {
+      inspectorEl.appendChild(g('Type', chips([{ id: 'text', label: 'Text' }, { id: 'input', label: 'Input' }], 'input', (v) => { if (v === 'text') mutate(() => { delete el.variant; el.color = 'primary'; }); })));
+    } else {
+      inspectorEl.appendChild(g('Text', levels));
+      inspectorEl.appendChild(g('Color', selectCtl('Text color', PS.TEXT_COLORS, el.color, (v) => mutate(() => { el.color = v; }))));
+    }
     const tools = [iconBtn(ICON_DUP, 'Duplicate', () => duplicate(el.id)), iconBtn(ICON_TRASH, 'Delete', () => removeSelected())];
     if (el.parent) tools.unshift(iconBtn(ICON_UP, 'Select parent card', () => { blurEditing(); select(el.parent); }));
     // close hides the toolbar only: the text stays selected (and in editing, if it was)
@@ -1680,7 +1746,7 @@
     if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); if (ui.selectedId) duplicate(ui.selectedId); return; }
     if (mod) return;
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeSelected(); }
-    else if (e.key === 'Escape') { closeArtboardEdit(); closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
+    else if (e.key === 'Escape') { dismissChoice(); closeArtboardEdit(); closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
     else if (e.key === 'v' || e.key === 'V') setTool('select');
     else if (e.key === 'p' || e.key === 'P') setTool('draw');
     else if (e.key === 'g' || e.key === 'G') { ui.grid = !ui.grid; renderArtboard(); }

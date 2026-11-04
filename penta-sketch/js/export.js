@@ -77,7 +77,11 @@
       return out;
     }
     out.push(['position', 'relative']);
-    if (el.type !== 'card') { out.push(['min-width', '0']); return out; }
+    if (el.type !== 'card') {
+      out.push(['min-width', '0']);
+      if (el.variant === 'input' && parent.layout.dir === 'row') out.push(['flex', '1 1 0']);
+      return out;
+    }
     if (parent.layout.dir === 'grid') {
       // grid cell: Fixed width is the column track itself; Fill/Hug live inside the cell
       if (el.sizeW === 'hug') out.push(['justify-self', 'start']);
@@ -105,7 +109,7 @@
   const toStyle = (pairs) => pairs.map(([k, v]) => `${k}: ${v}`).join('; ');
 
   function collectTokens(doc) {
-    const used = new Set(['--font-primary', '--grey-200']);
+    const used = new Set(['--font-primary', '--grey-200', '--border-primary', '--radius-md', '--foreground-tertiary', '--surface-primary']);
     const add = (t) => t && t.startsWith('--') && used.add(t);
     add(doc.artboard.bg);
     for (const el of doc.elements) {
@@ -138,6 +142,10 @@
         const style = toStyle([...PS.sizeCss(el, parent), ...PS.stackCss(el, kids.get(el.id) || []), ...PS.skinCss(el)]);
         const inner = render(el.id, depth + 1);
         return `${pad}<div class="card" style="${style}">${inner ? '\n' + inner + '\n' + pad : ''}</div>`;
+      }
+      if (el.variant === 'input') {
+        const st = toStyle([...PS.sizeCss(el, parent)]);
+        return `${pad}<input class="input-box" type="text" placeholder="${esc(el.text || 'Input')}" style="${st}">`;
       }
       const lvl = PS.level(el.level);
       const extra = parent ? [] : [['max-width', Math.max(48, doc.artboard.w - el.x) + 'px']];
@@ -174,6 +182,8 @@ ${tokens}
     .artboard { position: relative; width: ${a.w}px; min-height: ${a.h}px; margin: 0 auto; overflow: hidden; background: ${PS.colorCss(a.bg)}; }
     .artboard h1, .artboard h2, .artboard h3, .artboard h4, .artboard h5, .artboard p, .artboard span { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; letter-spacing: 0; }
 ${levelCss}
+    .input-box { height: 44px; padding: 12px 16px; border: 1px solid var(--border-primary); border-radius: var(--radius-md); background: var(--surface-primary); font: 16px/20px var(--font-primary); }
+    .input-box::placeholder { color: var(--foreground-tertiary); }
   </style>
 </head>
 <body>

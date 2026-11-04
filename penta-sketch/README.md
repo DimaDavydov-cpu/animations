@@ -46,9 +46,10 @@ Without it the app falls back to Helvetica.
 
 | Gesture | Result |
 |---|---|
-| Draw a rectangle or square with Pencil (one stroke or several, then pause) | Creates a Penta card. Every card is a flex **stack** (vertical by default, gap 16, padding 24) |
+| Draw a rectangle or square with Pencil. It does not have to be closed: all four edges (top, right, bottom, left) are enough, in one stroke or several, then pause | Creates a Penta card. Every card is a flex **stack** (vertical by default, gap 16, padding 24) |
 | Draw a rectangle inside a card / around existing items | Nests a card in the stack / wraps those items in a new stack |
 | Finger tap on a card | Opens the **card panel**: direction, wrap, gap, padding, align, distribute, size (Fixed / Fill / Hug), fill, border, radius, elevation |
+| Draw a wide, short rectangle (up to ~72px tall, at least 3x wider than tall) | A small chooser asks: **Card** or **Input**. An input is a Penta text field (44px, hairline border); type its placeholder. On the canvas it snaps to whole grid columns and stays bound to them |
 | Draw a straight horizontal line with Pencil | Adds a text box, inside a card or out on the canvas. On the canvas it snaps to whole grid columns (never fewer than two) and stays bound to them, so it follows the grid. Inside a card it joins the stack |
 | Tap with Pencil | Places a text box. Handwrite inside it and iPadOS **Scribble** converts it to text |
 | Text toolbar | Display, H1, H2, H3, H4, Subtitle, Body, Body S, Caption, Overline + color role |
@@ -69,6 +70,7 @@ Shortcuts: Cmd+Z / Cmd+Shift+Z, Delete, Cmd+D duplicate, G grid, 0 fit, +/- zoom
 ## Other features
 
 * **Card heights snap to the 24px rhythm** (minimum 24): when drawing, resizing with a handle, or typing a height in the panel. Hug and Fill heights follow their content / space
+* The layout grid overlay is **on by default** (toggle it with the grid button)
 * Layout grid overlay (grid toggle): Penta columns plus a light vertical rhythm, a faint line every 8px and a stronger one every 24px
 * Artboard presets: Desktop 1440, Tablet 834, Mobile 390, with the Penta 12 / 8 / 4 column grid overlay
 * Autosave in the browser. Save and open `.json` projects from the ••• menu

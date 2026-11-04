@@ -90,13 +90,14 @@
     const L = strokes.reduce((s, st) => s + pathLength(st), 0);
     const P = 2 * (w + h);
     const lengthRatio = L / P;
-    if (lengthRatio < 0.72 || lengthRatio > 1.7) return { type: 'none', reason: 'length', lengthRatio };
+    // an open rectangle (gaps, loose corners) is fine: it just needs enough ink for four edges
+    if (lengthRatio < 0.5 || lengthRatio > 1.9) return { type: 'none', reason: 'length', lengthRatio };
 
     const step = Math.max(2, P / 200);
     const pts = strokes.flatMap((st) => resample(st, step));
 
     // 1) almost all ink lies near the bounding box edges
-    const tol = Math.max(10, 0.16 * minSide);
+    const tol = Math.max(10, 0.2 * minSide);
     const sides = { l: [], r: [], t: [], b: [] };
     let near = 0;
     for (const p of pts) {
@@ -107,7 +108,7 @@
     const nearFrac = near / pts.length;
     if (nearFrac < 0.85) return { type: 'none', reason: 'interior', nearFrac };
 
-    // 2) all four sides are drawn along most of their length
+    // 2) all four edges (top, right, bottom, left) are present; they need not be closed or complete
     const cov = {
       l: coverage(sides.l.map((p) => p.y), minY, maxY, 10),
       r: coverage(sides.r.map((p) => p.y), minY, maxY, 10),
@@ -115,11 +116,11 @@
       b: coverage(sides.b.map((p) => p.x), minX, maxX, 10),
     };
     const minCov = Math.min(cov.l, cov.r, cov.t, cov.b);
-    if (minCov < 0.6) return { type: 'none', reason: 'open', cov };
+    if (minCov < 0.3) return { type: 'none', reason: 'open', cov };
 
     // 3) square-ish corners: rectangles fill their bbox, ellipses fill ~78%
     const fill = hullArea(pts) / (w * h);
-    if (fill < 0.86) return { type: 'none', reason: 'round', fill };
+    if (fill < 0.8) return { type: 'none', reason: 'round', fill };
 
     // Use medians of side points (ignores corner overshoot) for the final edges.
     const x1 = median(sides.l.map((p) => p.x)), x2 = median(sides.r.map((p) => p.x));
