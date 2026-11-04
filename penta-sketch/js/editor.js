@@ -14,6 +14,9 @@
   const STORAGE_KEY = 'penta-sketch:v1';
   const SNAP = PS.GRID.snap;
   const snap = (v) => Math.round(v / SNAP) * SNAP;
+  /* Card heights snap to the 24px vertical rhythm (min one rhythm step) */
+  const RHYTHM = 24;
+  const snapH = (v) => Math.max(RHYTHM, Math.round(v / RHYTHM) * RHYTHM);
   const uid = () => Math.random().toString(36).slice(2, 9);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const ARTBOARD_MIN = 240, ARTBOARD_MAX = 4000;
@@ -565,7 +568,7 @@
   function createCard(r) {
   createGuides = null;
     let x = snap(r.x), y = snap(r.y);
-    let w = Math.max(SNAP * 3, snap(r.x + r.w) - x), h = Math.max(SNAP * 3, snap(r.y + r.h) - y);
+    let w = Math.max(SNAP * 3, snap(r.x + r.w) - x), h = snapH(snap(r.y + r.h) - y);
     let parent = containerFor({ x, y, w, h });
     // Drawing a peer next to a Fill item in a horizontal / grid stack: the empty Fill item
     // stretches over the free space, so a similarly tall rectangle means "sibling", not "nest".
@@ -585,7 +588,7 @@
         x = tmp.x; w = tmp.w;
         gx.splice(0, gx.length, x, x + w);
       }
-      if (y2 - y1 >= SNAP * 3) { y = y1; h = y2 - y1; }
+      if (y2 - y1 >= SNAP * 3) { y = y1; h = snapH(y2 - y1); }
       createGuides = [gx, gy];
     }
     const rect = { x, y, w, h };
@@ -918,19 +921,22 @@
       const el = byId(g.orig.id), o = g.rect0, min = SNAP * 3;
       const dx = pt.x - g.start.x, dy = pt.y - g.start.y;
       if (!el.parent) {
-        let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
+        let x1 = Math.round(o.x), y1 = Math.round(o.y), x2 = Math.round(o.x + o.w), y2 = Math.round(o.y + o.h);
         const L = gridLines(), gx = [], gy = [];
         if (g.handle.includes('w')) x1 = Math.min(snapEdge(o.x + dx, L.starts, gx), x2 - min);
         if (g.handle.includes('e')) x2 = Math.max(snapEdge(o.x + o.w + dx, L.ends, gx), x1 + min);
         if (g.handle.includes('n')) y1 = Math.min(snapEdge(o.y + dy, L.ys, gy), y2 - min);
         if (g.handle.includes('s')) y2 = Math.max(snapEdge(o.y + o.h + dy, L.ys, gy), y1 + min);
+        // heights land on the 24px rhythm; the edge opposite the dragged handle stays put
+        const hh = snapH(y2 - y1);
+        if (g.handle.includes('n')) y1 = y2 - hh; else y2 = y1 + hh;
         Object.assign(el, { x: x1, y: y1, w: x2 - x1, h: y2 - y1, sizeW: el.sizeW === 'cols' ? 'cols' : 'fixed', sizeH: 'fixed' });
         if (el.sizeW === 'cols') { el.sizeW = 'fixed'; el.lockW = false; bindToColumns(el); }
         renderElements(); renderSelection(); hideInspector(); showGuides(gx, gy);
         return;
       } else {
         if (Math.abs(dx) >= SNAP / 2) { el.w = Math.max(min, snap(o.w + dx)); el.sizeW = 'fixed'; }
-        if (Math.abs(dy) >= SNAP / 2) { el.h = Math.max(min, snap(o.h + dy)); el.sizeH = 'fixed'; }
+        if (Math.abs(dy) >= SNAP / 2) { el.h = snapH(o.h + dy); el.sizeH = 'fixed'; }
       }
       renderElements(); renderSelection(); hideInspector();
     }
@@ -1005,7 +1011,7 @@
         const wasChild = !!el.parent;
         if (responsive.has(el.id)) { el.x = Math.round(el.x + g.dx); el.y = Math.round(el.y + g.dy); }
         else { el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy); }
-        if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snap(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
+        if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snapH(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
         if (el.type === 'card') { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
       }
@@ -1139,14 +1145,14 @@
     fields.forEach((f) => r.appendChild(f));
     return r;
   }
-  function numberCtl(label, value, onCommit, disabled) {
+  function numberCtl(label, value, onCommit, disabled, step) {
     const wrap = document.createElement('div');
     wrap.className = 'input num-input';
     const i = document.createElement('input');
     i.type = 'number';
     i.inputMode = 'numeric';
-    i.min = '8';
-    i.step = '8';
+    i.min = String(step || 8);
+    i.step = String(step || 8);
     i.value = Math.round(value);
     i.disabled = !!disabled;
     i.setAttribute('aria-label', label);
@@ -1306,8 +1312,8 @@
     }
     panelEl.appendChild(section('Size',
       field('Width', ...widthCtl),
-      field('Height', chips(PS.SIZE_MODES, el.sizeH, (v) => set(() => { if (v === 'fixed') el.h = snap(r.h); el.sizeH = v; }), parent ? [] : ['fill']),
-        numberCtl('Height in px', el.sizeH === 'fixed' ? el.h : r.h, (v) => set(() => { el.h = v; el.sizeH = 'fixed'; }), el.sizeH !== 'fixed')),
+      field('Height', chips(PS.SIZE_MODES, el.sizeH, (v) => set(() => { if (v === 'fixed') el.h = snapH(r.h); el.sizeH = v; }), parent ? [] : ['fill']),
+        numberCtl('Height in px', el.sizeH === 'fixed' ? el.h : r.h, (v) => set(() => { el.h = snapH(v); el.sizeH = 'fixed'; }), el.sizeH !== 'fixed', RHYTHM)),
     ));
 
     // appearance
@@ -1366,7 +1372,7 @@
         if (parent) placeInto(k, parent, siblingIndex + i);
         else {
           k.x = snap(r.x); k.y = snap(r.y);
-          if (k.type === 'card') { k.w = snap(r.w); k.h = snap(r.h); if (k.sizeW === 'fill') k.sizeW = 'fixed'; if (k.sizeH === 'fill') k.sizeH = 'fixed'; }
+          if (k.type === 'card') { k.w = snap(r.w); k.h = snapH(r.h); if (k.sizeW === 'fill') k.sizeW = 'fixed'; if (k.sizeH === 'fill') k.sizeH = 'fixed'; }
           placeInto(k, null, Infinity);
         }
       });

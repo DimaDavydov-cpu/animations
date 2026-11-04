@@ -67,6 +67,7 @@ Shortcuts: Cmd+Z / Cmd+Shift+Z, Delete, Cmd+D duplicate, G grid, 0 fit, +/- zoom
 
 ## Other features
 
+* **Card heights snap to the 24px rhythm** (minimum 24): when drawing, resizing with a handle, or typing a height in the panel. Hug and Fill heights follow their content / space
 * Layout grid overlay (grid toggle): Penta columns plus a light vertical rhythm, a faint line every 8px and a stronger one every 24px
 * Artboard presets: Desktop 1440, Tablet 834, Mobile 390, with the Penta 12 / 8 / 4 column grid overlay
 * Autosave in the browser. Save and open `.json` projects from the ••• menu
