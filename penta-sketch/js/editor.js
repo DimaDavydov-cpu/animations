@@ -377,8 +377,7 @@
     artboardEl.style.width = a.w + 'px';
     artboardEl.style.height = a.h + 'px';
     artboardEl.style.background = PS.colorCss(a.bg);
-    $('abHandles').style.width = a.w + 'px';
-    $('abHandles').style.height = a.h + 'px';
+    positionKnob();
     inkEl.setAttribute('viewBox', `0 0 ${a.w} ${a.h}`);
     inkEl.setAttribute('width', a.w);
     inkEl.setAttribute('height', a.h);
@@ -406,12 +405,24 @@
     hintEl.classList.toggle('is-hidden', doc.elements.length > 0);
   }
 
+  /* The resize knob stays at the vertical middle of the screen (fixed, never scrolls away);
+   * horizontally it sits just inside the canvas's right edge and follows it. */
+  const KNOB_W = 24;
+  function positionKnob() {
+    const knob = $('abKnob');
+    if (!knob) return;
+    const r = viewportEl.getBoundingClientRect();
+    const edge = r.left + view.x + doc.artboard.w * view.s - viewportEl.scrollLeft;
+    const left = clamp(edge - KNOB_W, r.left, window.innerWidth - KNOB_W);
+    knob.style.left = Math.round(left) + 'px';
+  }
   function applyView() {
     worldEl.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.s})`;
     worldEl.style.setProperty('--inv', 1 / view.s);
     $('zoomBtn').firstChild.nodeValue = Math.round(view.s * 100) + '% ';
     document.querySelectorAll('[data-zoom]').forEach((a) => a.classList.toggle('is-current', +a.dataset.zoom === view.s));
     positionInspector();
+    positionKnob();
   }
 
   function renderSelection() {
@@ -505,7 +516,6 @@
     if (h === doc.artboard.h) { updateScrollArea(); return; }
     doc.artboard.h = h;
     artboardEl.style.height = h + 'px';
-    $('abHandles').style.height = h + 'px';
     inkEl.setAttribute('viewBox', `0 0 ${doc.artboard.w} ${h}`);
     inkEl.setAttribute('height', h);
     updateScrollArea();
@@ -1009,6 +1019,7 @@
       if (w >= maxW && view.s === 1) { doc.artboard.preset = 'full'; doc.artboard.w = maxW; }
       else setArtboardSize(w);
       renderArtboard(); fit(); renderElements(); renderSelection();
+      $('abKnob').classList.add('is-dragging');
       return;
     }
     if (g.kind === 'move') {
@@ -1100,6 +1111,7 @@
       return;
     }
     if (g.kind === 'artboard') {
+      $('abKnob').classList.remove('is-dragging');
       if (!g.moved) return;
       if (cancelled) { restore(g.before); return; }
       past.push(g.before); future = [];
@@ -1658,6 +1670,7 @@
     select(null);
     ui.abEdit = true;
     worldEl.classList.add('is-ab-edit');
+    $('abKnob').classList.add('is-active');
     const pop = $('artboardPop');
     pop.classList.add('is-open');
     renderArtboard();
@@ -1670,6 +1683,7 @@
     if (!ui.abEdit) return;
     ui.abEdit = false;
     worldEl.classList.remove('is-ab-edit');
+    $('abKnob').classList.remove('is-active');
     $('artboardPop').classList.remove('is-open');
     document.activeElement && document.activeElement.blur && document.activeElement.blur();
   }

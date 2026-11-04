@@ -83,8 +83,7 @@ body {
   background: var(--surface-secondary);
 }
 .scroll-sizer { position: absolute; left: 0; top: 0; pointer-events: none; }
-.el.is-selected, .handle, .ab-handle { touch-action: none; }
-.viewport[data-tool="select"] { cursor: default; }
+.el.is-selected, .handle, .viewport[data-tool="select"] { cursor: default; }
 .viewport[data-tool="draw"] { cursor: crosshair; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
 .artboard {
@@ -349,18 +348,6 @@ button.swatch--btn { width: 36px; height: 36px; border-color: var(--border-prima
 .num-input input { min-height: 36px; height: 36px; padding: 0 8px; font-size: var(--text-sm); font-variant-numeric: tabular-nums; -webkit-user-select: text; user-select: text; }
 .num-input input:disabled { color: var(--foreground-disabled); background: var(--surface-secondary); }
 
-/* Artboard resize handles (outside the clipped artboard) */
-.ab-handles { position: absolute; left: 0; top: 0; pointer-events: none; }
-.ab-handle { position: absolute; pointer-events: auto; touch-action: none; }
-.ab-handle::after { content: ""; position: absolute; background: var(--grey-700); border-radius: var(--radius-full); transition: background-color var(--duration-base); }
-.ab-handle:hover::after, .ab-handle:active::after { background: var(--sel); }
-.ab-handle--e { top: 0; bottom: 0; right: calc(-28px * var(--inv, 1)); width: calc(28px * var(--inv, 1)); cursor: ew-resize; }
-.ab-handle--e::after { left: 50%; top: 50%; width: calc(6px * var(--inv, 1)); height: calc(48px * var(--inv, 1)); transform: translate(-50%, -50%); }
-.ab-handle--s { left: 0; right: 0; bottom: calc(-28px * var(--inv, 1)); height: calc(28px * var(--inv, 1)); cursor: ns-resize; }
-.ab-handle--s::after { left: 50%; top: 50%; width: calc(48px * var(--inv, 1)); height: calc(6px * var(--inv, 1)); transform: translate(-50%, -50%); }
-.ab-handle--se { right: calc(-32px * var(--inv, 1)); bottom: calc(-32px * var(--inv, 1)); width: calc(32px * var(--inv, 1)); height: calc(32px * var(--inv, 1)); cursor: nwse-resize; }
-.ab-handle--se::after { left: 50%; top: 50%; width: calc(12px * var(--inv, 1)); height: calc(12px * var(--inv, 1)); transform: translate(-50%, -50%); }
-
 /* Stack cards */
 .el-card { box-sizing: border-box; }
 .el-card.is-empty-stack { min-height: 24px; }
@@ -433,11 +420,8 @@ button.artboard-label {
 button.artboard-label:hover { background-color: var(--grey-300); }
 .world.is-ab-edit button.artboard-label { background-color: var(--sel); color: var(--foreground-on-accent); }
 /* handles only while editing the size */
-.ab-handles { display: none; }
-.world.is-ab-edit .ab-handles { display: block; }
-.world.is-ab-edit .artboard { outline: calc(2px * var(--inv, 1)) solid var(--sel); }
-.world.is-ab-edit .ab-handle::after { background: var(--sel); }
-
+.world.is-ab-edit .world.is-ab-edit .artboard { outline: calc(2px * var(--inv, 1)) solid var(--sel); }
+.world.is-ab-edit 
 .ab-popover { width: 280px; padding: var(--space-4); display: none; flex-direction: column; gap: var(--space-3); }
 .ab-popover.is-open { display: flex; }
 .ab-popover .select-sm { width: 100%; }
@@ -449,8 +433,7 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 
 /* Full screen: the artboard is the viewport, edge to edge at 100% */
 .world.is-full .artboard { box-shadow: none; }
-.world.is-full .ab-handles { display: none; }
-.zoom-label { cursor: pointer; }
+.world.is-full .zoom-label { cursor: pointer; }
 @media (max-width: 1100px) { .topbar__title { display: none; } }
 
 /* Scale control */
@@ -578,14 +561,6 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 }
 .zoom-btn button:hover { background: var(--surface-secondary); }
 .zoom-menu { left: auto; right: 0; }
-
-/* resize handle: always visible, inside the canvas's right edge */
-.ab-handles, .world.is-full .ab-handles { display: block; }
-.ab-handle--e { right: 0; width: calc(32px * var(--inv, 1)); }
-.ab-handle--e::after { left: auto; right: calc(6px * var(--inv, 1)); transform: translateY(-50%); background: var(--grey-600); }
-.ab-handle--e:hover::after, .ab-handle--e:active::after { background: var(--sel); }
-.ab-handle--e { width: calc(20px * var(--inv, 1)); }
-.ab-handle--e::after { top: calc(40vh * var(--inv, 1)); right: calc(5px * var(--inv, 1)); }
 
 /* several panel fields on one line */
 .field-row { display: grid; gap: 6px; }
@@ -748,3 +723,32 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 
 /* finger drawing: the browser must not claim finger drags (we scroll with two fingers) */
 .viewport[data-finger-draw="1"] { touch-action: none; }
+
+/* Canvas resize knob: fixed to the screen, vertically centered, rides the canvas's right edge */
+.ab-knob {
+  position: fixed;
+  top: 50%;
+  left: 0;                       /* x is set from JS (positionKnob) */
+  width: 24px;
+  height: 96px;                  /* generous touch target */
+  margin-top: -48px;
+  z-index: 12;                   /* above the canvas, below panels and the top bar */
+  touch-action: none;
+  cursor: ew-resize;
+}
+.ab-knob::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  width: 6px;
+  height: 56px;
+  margin-top: -28px;
+  border-radius: var(--radius-full);
+  background: var(--grey-600);
+  transition: background-color var(--duration-base), height var(--duration-base);
+}
+.ab-knob:hover::after, .ab-knob.is-active::after, .ab-knob.is-dragging::after { background: var(--sel); }
+.ab-knob.is-dragging::after { height: 72px; margin-top: -36px; }
+.viewport[data-tool="select"] { cursor: default; }
+.world.is-ab-edit .artboard { outline: calc(2px * var(--inv, 1)) solid var(--sel); }

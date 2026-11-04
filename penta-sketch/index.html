@@ -76,15 +76,14 @@
   <!-- ═══════════════ Canvas ═══════════════ -->
   <main class="viewport" id="viewport">
     <div class="scroll-sizer" id="scrollSizer" aria-hidden="true"></div>
+    <!-- canvas resize knob: fixed at the vertical middle of the screen, rides the canvas's right edge -->
+    <div class="ab-knob" id="abKnob" data-ab-handle="e" title="Drag to resize the canvas width" role="separator" aria-orientation="vertical" aria-label="Resize canvas width"></div>
     <div class="world" id="world">
       <div class="artboard" id="artboard">
         <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
         <div class="elements" id="elements"></div>
         <svg class="ink" id="ink" aria-hidden="true"></svg>
         <div class="selection" id="selection" aria-hidden="true"></div>
-      </div>
-      <div class="ab-handles" id="abHandles" aria-hidden="true">
-        <div class="ab-handle ab-handle--e" data-ab-handle="e" title="Drag to resize width"></div>
       </div>
     </div>
 
