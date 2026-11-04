@@ -701,3 +701,15 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .move-frame--r { top: calc(-2px * var(--inv, 1)); bottom: calc(-2px * var(--inv, 1)); right: calc(-18px * var(--inv, 1)); width: calc(16px * var(--inv, 1)); }
 .sel-box--text { outline-style: dashed; }
 .el-text.is-editing { touch-action: none; }
+
+/* Vertical rhythm: light line every 8px, stronger every 24px (with the layout grid toggle).
+   Lines stay 1 screen px thick at any scale. */
+.grid-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--grey-500) 45%, transparent) 0 calc(1px * var(--inv, 1)), transparent calc(1px * var(--inv, 1)) 24px),
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--grey-400) 30%, transparent) 0 calc(1px * var(--inv, 1)), transparent calc(1px * var(--inv, 1)) 8px);
+}
