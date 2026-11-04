@@ -137,17 +137,10 @@ body {
   color: var(--foreground-tertiary);
   pointer-events: none;
 }
-/* empty box: big target to write into */
-.el-text.is-editing .el-text__edit:empty,
-.el-text__edit:focus:empty {
-  display: block;
-  /* sized in screen px so the Scribble target stays big at any zoom */
-  min-width: calc(400px * var(--inv, 1));
-  min-height: calc(88px * var(--inv, 1));
-  border-radius: var(--radius-md);
-  outline: calc(1.5px * var(--inv, 1)) dashed var(--sel);
-  outline-offset: -12px;
-}
+/* empty text: the BOX itself is the writing target, so there is a single selection frame
+   (no second dashed outline) and it always matches the box */
+.el-text.is-empty:not(.has-w) { min-width: calc(240px * var(--inv, 1)); }
+.el-text.is-empty .el-text__edit { display: block; min-height: calc(48px * var(--inv, 1) + 24px); } /* +24: the edit area's own 12px padding is cancelled by its negative margin */
 
 /* Penta type ramp (Macan) */
 .t-display { font-size: 48px; line-height: 57px; font-weight: 700; }
@@ -716,7 +709,7 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 
 /* a text box bound to grid columns: the edit area fills it (no 400px empty-state minimum) */
 .el-text.has-w .el-text__edit { min-width: 0 !important; }
-.el-text.has-w .el-text__edit:empty, .el-text.has-w .el-text__edit:focus:empty { min-height: calc(40px * var(--inv, 1)); }
+.el-text.has-w.is-empty .el-text__edit { min-height: calc(48px * var(--inv, 1) + 24px); }
 
 /* Wide, short shape chooser */
 .shape-choice.is-open { display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 12px; }
@@ -752,3 +745,6 @@ button.artboard-label:hover { background-color: var(--grey-300); }
   .zoom-btn button svg { display: none; }
   .topbar .zoom-btn button, .zoom-anchor #zoomBtn { padding: 0 4px; }
 }
+
+/* finger drawing: the browser must not claim finger drags (we scroll with two fingers) */
+.viewport[data-finger-draw="1"] { touch-action: none; }

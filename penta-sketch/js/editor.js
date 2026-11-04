@@ -31,7 +31,7 @@
   });
   let doc = newDoc('full');
   const view = { x: 0, y: 0, s: 1 };
-  const ui = { zoom: 1, tool: 'draw', fingerDraws: false, grid: true, selectedId: null, editingId: null, lastLevel: 'body' };
+  const ui = { zoom: 1, tool: 'draw', fingerDraws: true, grid: true, selectedId: null, editingId: null, lastLevel: 'body' };
   let past = [], future = [], editSnapshot = null;
 
   const snapDoc = () => JSON.stringify(doc);
@@ -198,6 +198,7 @@
           node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}`;
           if (el.variant === 'input') node.firstChild.dataset.placeholder = 'Input';
           node.classList.toggle('has-w', !!el.w && !parent);
+          node.classList.toggle('is-empty', !el.text && el.variant !== 'input');
           const extra = parent ? [] : [['max-width', Math.max(48, doc.artboard.w - el.x) + 'px']];
           applyCss(node, [...PS.sizeCss(el, parent), ...extra, ...PS.textColorCss(el)]);
           const edit = node.firstChild;
@@ -793,6 +794,7 @@
     const el = node && byId(node.dataset.id);
     if (!el) return;
     el.text = e.target.innerText.replace(/\n$/, '');
+    node.classList.toggle('is-empty', !el.text && el.variant !== 'input');
     renderSelection();
     positionInspector();
     clearTimeout(saveTimer);
@@ -828,7 +830,13 @@
   function roleFor(e) {
     if (e.pointerType === 'pen') return ui.tool === 'select' ? 'nav' : 'draw';
     if (e.pointerType === 'mouse') return ui.tool === 'select' || spaceDown || e.button === 1 ? 'nav' : 'draw';
-    return ui.fingerDraws && ui.tool === 'draw' ? 'draw' : 'nav';
+    // finger: draws in Draw mode, except on text (tap = edit / place caret) 
+    const onText = e.target.closest && e.target.closest('.el-text');
+    return ui.fingerDraws && ui.tool === 'draw' && !onText ? 'draw' : 'nav';
+  }
+  function syncFingerMode() {
+    viewportEl.dataset.fingerDraw = ui.fingerDraws && ui.tool === 'draw' ? '1' : '0';
+    $('fingerState').textContent = ui.fingerDraws ? 'On' : 'Off';
   }
   const pressure = (e) => (e.pointerType === 'pen' ? e.pressure || 0.5 : 0.5);
 
@@ -860,7 +868,9 @@
       if (gesture && (gesture.kind === 'move' || gesture.kind === 'resize' || gesture.kind === 'artboard') && gesture.moved) restore(gesture.before);
       if (gesture && gesture.kind === 'draw') gesture.path.remove();
       dropMarker.remove();
-      gesture = { kind: 'pinch' }; // the browser scrolls; we just wait for the fingers to lift
+      // two fingers: the browser scrolls natively, except while finger drawing blocks it (then we scroll by hand)
+      const [a, b] = touches;
+      gesture = { kind: 'pinch', manual: ui.fingerDraws && ui.tool === 'draw', c0: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, s0: { left: viewportEl.scrollLeft, top: viewportEl.scrollTop } };
       return;
     }
     // a lost pointerup (e.g. the OS took the touch) must not block the next stroke
@@ -959,6 +969,14 @@
     if (!gesture) return;
 
     if (gesture.kind === 'pinch') {
+      if (gesture.manual) {
+        const t2 = [...pointers.values()].filter((p) => p.type === 'touch');
+        if (t2.length >= 2) {
+          const c = { x: (t2[0].x + t2[1].x) / 2, y: (t2[0].y + t2[1].y) / 2 };
+          viewportEl.scrollTop = gesture.s0.top - (c.y - gesture.c0.y);
+          viewportEl.scrollLeft = gesture.s0.left - (c.x - gesture.c0.x);
+        }
+      }
       return;
     }
     if (e.pointerId !== gesture.id) return;
@@ -1138,7 +1156,7 @@
   viewportEl.addEventListener('touchend', (e) => {
     const t = e.changedTouches[0];
     const editable = e.target.closest && e.target.closest('.el-text__edit');
-    if (editable && t && t.touchType !== 'stylus' && !ui.fingerDraws) {
+    if (editable && t && t.touchType !== 'stylus') {
       if (document.activeElement !== editable) {
         // finger tap on text: edit with the caret at the end (focus inside the touch gesture so the keyboard opens)
         e.preventDefault();
@@ -1156,7 +1174,8 @@
     if (!t || !e.target.closest) return;
     const stylus = t.touchType === 'stylus';
     if (stylus && e.target.closest('.el-text__edit')) return; // Scribble
-    const drawing = ui.tool === 'draw' && (stylus || ui.fingerDraws);
+    const onText = !!e.target.closest('.el-text');
+    const drawing = ui.tool === 'draw' && (stylus || (ui.fingerDraws && !onText));
     const sel = e.target.closest('.el');
     const ed = e.target.closest('.el-text__edit');
     const ours = e.target.closest('[data-handle], [data-ab-handle], [data-move-frame]') || (sel && sel.dataset.id === ui.selectedId) || (ed && document.activeElement === ed);
@@ -1603,6 +1622,7 @@
       w.classList.toggle('is-current', on);
     });
     viewportEl.dataset.tool = t;
+    syncFingerMode();
   }
   document.querySelectorAll('[data-tool]').forEach((w) => w.addEventListener('click', () => setTool(w.dataset.tool)));
   $('undoBtn').addEventListener('click', undo);
@@ -1681,8 +1701,8 @@
     if (act === 'grid') { ui.grid = !ui.grid; renderArtboard(); }
     if (act === 'finger') {
       ui.fingerDraws = !ui.fingerDraws;
-      $('fingerState').textContent = ui.fingerDraws ? 'On' : 'Off';
-      toast(ui.fingerDraws ? 'Finger draws in Draw mode. Two fingers pan and zoom.' : 'Pencil draws, finger selects');
+      syncFingerMode();
+      toast(ui.fingerDraws ? 'Finger mode on: finger draws in Draw mode, two fingers scroll' : 'Finger mode off: Pencil draws, finger selects and scrolls');
     }
     if (act === 'clear') {
       mutate(() => { doc.elements = []; doc.artboard.bg = '--color-white'; ui.selectedId = null; });

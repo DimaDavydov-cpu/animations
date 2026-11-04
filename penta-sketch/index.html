@@ -63,7 +63,7 @@
           <a href="#" data-action="save">Save project (.json)</a>
           <a href="#" data-action="open">Open project…</a>
           <a href="#" data-action="grid" class="menu-grid">Layout grid: <b id="gridState">On</b></a>
-          <a href="#" data-action="finger">Draw with finger: <b id="fingerState">Off</b></a>
+          <a href="#" data-action="finger">Finger mode: <b id="fingerState">On</b></a>
           <a href="#" data-action="help">How to use</a>
           <a href="#" data-action="clear" class="danger">Clear artboard</a>
         </div>
@@ -93,9 +93,9 @@
       <ul>
         <li><b>Draw a rectangle</b> (it can be open) to create a card · a wide, short one asks Card or Input</li>
         <li><b>Draw a line</b> (or tap) with Pencil to add text, then write in the box</li>
-        <li><b>Tap the background</b> with your finger to set its color</li>
-        <li><b>Tap a card</b> with your finger to see its stack, size and style</li>
-        <li><b>Finger</b>: tap an item to select it, then drag to move it · drag elsewhere to scroll</li>
+        <li><b>Finger mode is on</b>: your finger draws like Pencil · two fingers scroll</li>
+        <li>Switch to <b>Select</b> to tap a card (panel) or the background (color) and to move things</li>
+        <li><b>Tap text</b> to edit it · drag across it to select</li>
       </ul>
     </div>
   </main>
@@ -187,14 +187,14 @@
       </div>
       <dl class="help">
         <dt>Card</dt><dd>Draw a rectangle or square with Pencil. One stroke or several, then pause. Every card is a stack: what you add inside flows vertically or horizontally with a Penta gap and padding.</dd>
-        <dt>Card properties</dt><dd>Tap a card with your finger. The panel shows direction, gap, padding, alignment, size (Fixed, Fill, Hug), fill, border, radius and elevation.</dd>
+        <dt>Card properties</dt><dd>In Select mode (or with Finger mode off) tap a card. The panel shows direction, gap, padding, alignment, size (Fixed, Fill, Hug), fill, border, radius and elevation.</dd>
         <dt>Nesting</dt><dd>Draw a rectangle inside a card to nest one. Draw a rectangle around existing items to wrap them in a new stack.</dd>
         <dt>Text</dt><dd>Draw a straight horizontal line with Pencil (at least two grid columns wide on the canvas) or tap where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
         <dt>Edit text</dt><dd>Write over existing text with Pencil. Scratch out words to delete them (Scribble gestures).</dd>
-        <dt>Background</dt><dd>Tap the empty artboard with your finger to choose its color. Use the hex field for exact values.</dd>
-        <dt>Select / move</dt><dd>Finger tap selects. Drag an item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers pan.</dd>
+        <dt>Background</dt><dd>In Select mode (or with Finger mode off) tap the empty artboard to choose its color. Use the hex field for exact values.</dd>
+        <dt>Select / move</dt><dd>In Select mode a finger tap selects; drag a selected item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers scroll the page.</dd>
         <dt>Canvas width</dt><dd>Adaptive (default) uses the full available width. Drag the handle on the canvas's right edge to resize it, pick iPad or Mobile, or tap the width next to the scale (for example 1194 px) to type an exact width. Height is automatic.</dd><dt>Scale</dt><dd>Tap the percentage in the top bar to switch between 100%, 75% and 50%. Touch never changes the scale: two fingers only pan.</dd><dt>Grid snapping</dt><dd>Card edges snap to the layout grid's columns and margins when within 20 px. A red guide shows the line they snapped to.</dd>
-        <dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>
+        <dt>Finger mode</dt><dd>On by default: in Draw mode your finger draws like Pencil, and two fingers scroll. Turn it off in the ••• menu to select and scroll with one finger.</dd><dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>
       </dl>
     </div>
   </div>
