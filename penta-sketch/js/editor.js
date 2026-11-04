@@ -1,13 +1,14 @@
-/* Penta Sketch: main app.
- * Pencil draws (rectangles become cards, a tap places a text box for Scribble),
- * finger selects / moves / pans / zooms, finger tap on the background picks its color. */
+/* Penta Sketch: main editor.
+ * Pencil draws (rectangles become stack cards, a tap places a text box for Scribble),
+ * finger selects / moves / pans / zooms, finger tap on the background picks its color.
+ * Cards are flex stacks: children flow vertically or horizontally with Penta gap/padding. */
 (function () {
   const PS = window.PS;
   const $ = (id) => document.getElementById(id);
 
   const viewportEl = $('viewport'), worldEl = $('world'), artboardEl = $('artboard');
   const elementsEl = $('elements'), inkEl = $('ink'), selectionEl = $('selection');
-  const gridEl = $('gridOverlay'), inspectorEl = $('inspector'), hintEl = $('emptyHint');
+  const gridEl = $('gridOverlay'), inspectorEl = $('inspector'), panelEl = $('panel'), hintEl = $('emptyHint');
   const colorPop = $('colorPopover'), toastEl = $('toast');
 
   const STORAGE_KEY = 'penta-sketch:v1';
@@ -15,12 +16,13 @@
   const snap = (v) => Math.round(v / SNAP) * SNAP;
   const uid = () => Math.random().toString(36).slice(2, 9);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const ARTBOARD_MIN = 240, ARTBOARD_MAX = 4000;
 
   const PLAINTEXT_OK = (() => { const d = document.createElement('div'); try { d.contentEditable = 'plaintext-only'; } catch (e) { return false; } return d.contentEditable === 'plaintext-only'; })();
 
   /* ─────────────── State ─────────────── */
   const newDoc = (preset = 'desktop') => ({
-    version: 1,
+    version: 2,
     artboard: { preset, w: PS.PRESETS[preset].w, h: PS.PRESETS[preset].h, bg: '--color-white' },
     elements: [],
   });
@@ -31,6 +33,24 @@
 
   const snapDoc = () => JSON.stringify(doc);
   const byId = (id) => doc.elements.find((e) => e.id === id);
+  const childrenOf = (pid) => doc.elements.filter((e) => (e.parent || null) === (pid || null));
+
+  /* v1 projects: cards had absolute children. Give cards a stack and order children by position. */
+  function migrate(d) {
+    for (const e of d.elements) {
+      if (e.type !== 'card') continue;
+      if (!e.layout) e.layout = PS.defaultLayout();
+      if (!e.sizeW) e.sizeW = 'fixed';
+      if (!e.sizeH) e.sizeH = 'fixed';
+    }
+    if ((d.version || 1) < 2) {
+      const top = d.elements.filter((e) => !e.parent);
+      const kids = d.elements.filter((e) => e.parent).sort((a, b) => a.y - b.y || a.x - b.x);
+      d.elements = top.concat(kids);
+      d.version = 2;
+    }
+    return d;
+  }
 
   function checkpoint() {
     if (ui.editingId && editSnapshot != null) {
@@ -48,7 +68,7 @@
     render();
   }
   function restore(json) {
-    doc = JSON.parse(json);
+    doc = migrate(JSON.parse(json));
     if (ui.selectedId && !byId(ui.selectedId)) ui.selectedId = null;
     render(true);
   }
@@ -65,32 +85,58 @@
     restore(future.pop());
   }
 
-  /* ─────────────── Tree helpers ─────────────── */
+  /* ─────────────── Geometry & tree helpers ─────────────── */
+  function toArtboard(cx, cy) {
+    const r = viewportEl.getBoundingClientRect();
+    return { x: (cx - r.left - view.x) / view.s, y: (cy - r.top - view.y) / view.s };
+  }
+  /* element rect in artboard coordinates, measured from the DOM (works for flowed children) */
+  function rectOf(id) {
+    const n = nodes.get(id);
+    if (!n) return { x: 0, y: 0, w: 0, h: 0 };
+    const r = n.getBoundingClientRect();
+    const a = toArtboard(r.left, r.top);
+    return { x: a.x, y: a.y, w: r.width / view.s, h: r.height / view.s };
+  }
   function descendants(id) {
     const out = [];
     const walk = (pid) => doc.elements.forEach((e) => { if (e.parent === pid) { out.push(e); walk(e.id); } });
     walk(id);
     return out;
   }
-  /* Smallest card that fully contains the rect (excluding `excludeIds`). */
-  function containerFor(rect, excludeIds = new Set()) {
-    let best = null;
+  const rectInside = (a, b) => a.x >= b.x - 2 && a.y >= b.y - 2 && a.x + a.w <= b.x + b.w + 2 && a.y + a.h <= b.y + b.h + 2;
+  /* deepest (smallest) card that fully contains the rect */
+  function containerFor(rect, exclude = new Set()) {
+    let best = null, bestArea = Infinity;
     for (const e of doc.elements) {
-      if (e.type !== 'card' || excludeIds.has(e.id)) continue;
-      if (rect.x >= e.x - 2 && rect.y >= e.y - 2 && rect.x + rect.w <= e.x + e.w + 2 && rect.y + rect.h <= e.y + e.h + 2) {
-        if (!best || e.w * e.h < best.w * best.h) best = e;
-      }
+      if (e.type !== 'card' || exclude.has(e.id)) continue;
+      const r = rectOf(e.id);
+      if (rectInside(rect, r) && r.w * r.h < bestArea) { best = e; bestArea = r.w * r.h; }
     }
     return best;
   }
-  /* Move an element and its subtree to the end of the paint order (front). */
-  function bringSubtreeToFront(el) {
-    const ids = new Set([el.id, ...descendants(el.id).map((d) => d.id)]);
-    const moving = doc.elements.filter((e) => ids.has(e.id));
-    doc.elements = doc.elements.filter((e) => !ids.has(e.id)).concat(moving);
+  /* where along the stack's main axis a point falls */
+  function insertionIndex(card, pt, excludeId) {
+    const sibs = childrenOf(card.id).filter((s) => s.id !== excludeId);
+    const row = card.layout.dir === 'row';
+    for (let i = 0; i < sibs.length; i++) {
+      const r = rectOf(sibs[i].id);
+      if (row && card.layout.wrap && (pt.y < r.y || pt.y > r.y + r.h)) { if (pt.y < r.y) return i; continue; }
+      const mid = row ? r.x + r.w / 2 : r.y + r.h / 2;
+      if ((row ? pt.x : pt.y) < mid) return i;
+    }
+    return sibs.length;
   }
-  function surfaceUnder(el) {
-    const p = el.parent ? byId(el.parent) : null;
+  /* put `el` into card at sibling index (array order = stack order) */
+  function placeInto(el, card, index) {
+    doc.elements = doc.elements.filter((e) => e !== el);
+    el.parent = card ? card.id : null;
+    const sibs = childrenOf(el.parent);
+    if (index < sibs.length) doc.elements.splice(doc.elements.indexOf(sibs[index]), 0, el);
+    else doc.elements.push(el);
+  }
+  function surfaceUnder(parentId) {
+    const p = parentId ? byId(parentId) : null;
     return p ? p.fill : doc.artboard.bg;
   }
   function isDark(color) {
@@ -103,38 +149,13 @@
 
   /* ─────────────── Rendering ─────────────── */
   const nodes = new Map();
-
-  function cardCss(el, node) {
-    const b = PS.BORDERS.find((x) => x.id === el.border);
-    const r = PS.RADII.find((x) => x.id === el.radius);
-    const e = PS.ELEVATIONS.find((x) => x.id === el.elevation);
-    Object.assign(node.style, {
-      left: el.x + 'px', top: el.y + 'px', width: el.w + 'px', height: el.h + 'px',
-      background: PS.colorCss(el.fill),
-      border: b && b.token ? `1px solid var(${b.token})` : 'none',
-      borderRadius: r && r.token ? `var(${r.token})` : '0',
-      boxShadow: e && e.token ? `var(${e.token})` : 'none',
-    });
-  }
-
-  function textCss(el, node) {
-    const c = PS.TEXT_COLORS.find((x) => x.id === el.color) || PS.TEXT_COLORS[0];
-    const parent = el.parent ? byId(el.parent) : null;
-    const right = parent ? parent.x + parent.w : doc.artboard.w;
-    node.className = `el el-text t-${PS.level(el.level).id}`;
-    Object.assign(node.style, {
-      left: el.x + 'px', top: el.y + 'px', color: `var(${c.token})`,
-      maxWidth: Math.max(48, right - el.x) + 'px',
-      width: el.w ? el.w + 'px' : '',
-    });
-  }
+  const applyCss = (node, pairs) => { node.style.cssText = ''; pairs.forEach(([k, v]) => node.style.setProperty(k, v)); };
 
   function makeNode(el) {
     const node = document.createElement('div');
     node.dataset.id = el.id;
-    if (el.type === 'card') {
-      node.className = 'el el-card';
-    } else {
+    if (el.type === 'card') node.className = 'el el-card';
+    else {
       const edit = document.createElement('div');
       edit.className = 'el-text__edit';
       edit.contentEditable = PLAINTEXT_OK ? 'plaintext-only' : 'true';
@@ -147,42 +168,59 @@
   }
 
   function renderElements(force) {
+    const kids = new Map();
+    for (const e of doc.elements) { const k = e.parent || ''; if (!kids.has(k)) kids.set(k, []); kids.get(k).push(e); }
     const seen = new Set();
-    doc.elements.forEach((el, i) => {
-      let node = nodes.get(el.id);
-      if (!node || force) {
-        if (node && node.contains(document.activeElement)) { /* keep focused node */ }
-        else {
-          if (node) node.remove();
+    const place = (container, list, parent) => {
+      list.forEach((el, i) => {
+        let node = nodes.get(el.id);
+        if (!node || (force && !node.contains(document.activeElement))) {
+          const old = node;
           node = makeNode(el);
+          if (old) old.replaceWith(node);
           nodes.set(el.id, node);
         }
-      }
-      seen.add(el.id);
-      if (el.type === 'card') cardCss(el, node);
-      else {
-        textCss(el, node);
-        const edit = node.firstChild;
-        if (document.activeElement !== edit && edit.textContent !== el.text) edit.textContent = el.text;
-      }
-      node.classList.toggle('is-selected', ui.selectedId === el.id);
-      if (elementsEl.children[i] !== node) elementsEl.insertBefore(node, elementsEl.children[i] || null);
-    });
+        seen.add(el.id);
+        const ref = container.children[i];
+        if (ref !== node) container.insertBefore(node, ref || null);
+        if (el.type === 'card') {
+          applyCss(node, [...PS.sizeCss(el, parent), ...PS.stackCss(el), ...PS.skinCss(el)]);
+          const ch = kids.get(el.id) || [];
+          place(node, ch, el);
+          while (node.children.length > ch.length) node.lastChild.remove();
+        } else {
+          node.className = `el el-text t-${PS.level(el.level).id}`;
+          const extra = parent ? [] : [['max-width', Math.max(48, doc.artboard.w - el.x) + 'px']];
+          applyCss(node, [...PS.sizeCss(el, parent), ...extra, ...PS.textColorCss(el)]);
+          const edit = node.firstChild;
+          if (document.activeElement !== edit && edit.textContent !== el.text) edit.textContent = el.text;
+        }
+        node.classList.toggle('is-selected', ui.selectedId === el.id);
+        node.classList.toggle('is-empty-stack', el.type === 'card' && !(kids.get(el.id) || []).length);
+      });
+    };
+    place(elementsEl, kids.get('') || [], null);
     for (const [id, node] of nodes) if (!seen.has(id)) { node.remove(); nodes.delete(id); }
   }
+
+  function columnsFor(w) { return w >= 1024 ? 12 : w >= 600 ? 8 : 4; }
 
   function renderArtboard() {
     const a = doc.artboard;
     artboardEl.style.width = a.w + 'px';
     artboardEl.style.height = a.h + 'px';
     artboardEl.style.background = PS.colorCss(a.bg);
+    $('abHandles').style.width = a.w + 'px';
+    $('abHandles').style.height = a.h + 'px';
     inkEl.setAttribute('viewBox', `0 0 ${a.w} ${a.h}`);
     inkEl.setAttribute('width', a.w);
     inkEl.setAttribute('height', a.h);
-    $('artboardLabel').textContent = `${PS.PRESETS[a.preset].label} · ${a.w} × ${a.h}`;
+    const label = a.preset === 'custom' ? 'Custom' : PS.PRESETS[a.preset].label;
+    $('artboardLabel').textContent = `${label} · ${a.w} × ${a.h}`;
     $('presetSelect').value = a.preset;
-    // layout grid overlay (Penta 12 / 8 / 4 columns)
-    const cols = PS.PRESETS[a.preset].columns;
+    if (document.activeElement !== $('abW')) $('abW').value = a.w;
+    if (document.activeElement !== $('abH')) $('abH').value = a.h;
+    const cols = columnsFor(a.w);
     if (gridEl.childElementCount !== cols) {
       gridEl.innerHTML = '';
       for (let i = 0; i < cols; i++) gridEl.appendChild(document.createElement('span'));
@@ -205,23 +243,28 @@
     selectionEl.innerHTML = '';
     const el = ui.selectedId && byId(ui.selectedId);
     if (!el) return;
-    const node = nodes.get(el.id);
+    const r = rectOf(el.id);
     const box = document.createElement('div');
     box.className = 'sel-box';
-    const w = el.type === 'card' ? el.w : node.offsetWidth;
-    const h = el.type === 'card' ? el.h : node.offsetHeight;
-    Object.assign(box.style, { left: el.x + 'px', top: el.y + 'px', width: w + 'px', height: h + 'px' });
+    Object.assign(box.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' });
     if (el.type === 'card') {
-      for (const k of ['nw', 'ne', 'sw', 'se']) {
+      const handles = el.parent ? ['se'] : ['nw', 'ne', 'sw', 'se'];
+      for (const k of handles) {
         const hd = document.createElement('div');
         hd.className = `handle handle--${k}`;
         hd.dataset.handle = k;
         box.appendChild(hd);
       }
-      const size = document.createElement('div');
-      size.className = 'sel-size';
-      size.textContent = `${Math.round(el.w)} × ${Math.round(el.h)}`;
-      box.appendChild(size);
+      const L = el.layout;
+      const badge = document.createElement('div');
+      badge.className = 'sel-size';
+      badge.textContent = `${L.dir === 'row' ? '→ Horizontal' : '↓ Vertical'} · gap ${PS.spacePx(L.gap)} · ${Math.round(r.w)} × ${Math.round(r.h)}`;
+      box.appendChild(badge);
+      // padding visualisation
+      const pad = document.createElement('div');
+      pad.className = 'sel-pad';
+      Object.assign(pad.style, { borderWidth: `${PS.spacePx(L.padY)}px ${PS.spacePx(L.padX)}px` });
+      box.appendChild(pad);
     }
     selectionEl.appendChild(box);
   }
@@ -243,23 +286,19 @@
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) { const d = JSON.parse(raw); if (d && d.artboard && Array.isArray(d.elements)) doc = d; }
+      if (raw) { const d = JSON.parse(raw); if (d && d.artboard && Array.isArray(d.elements)) doc = migrate(d); }
     } catch (e) { /* ignore */ }
   }
 
   /* ─────────────── View ─────────────── */
   function fit() {
     const r = viewportEl.getBoundingClientRect();
-    const pad = 48;
+    const pad = 56;
     const a = doc.artboard;
     view.s = clamp(Math.min((r.width - pad * 2) / a.w, (r.height - pad * 2) / a.h), 0.1, 1);
     view.x = (r.width - a.w * view.s) / 2;
     view.y = Math.max(pad, (r.height - a.h * view.s) / 2);
     applyView();
-  }
-  function toArtboard(cx, cy) {
-    const r = viewportEl.getBoundingClientRect();
-    return { x: (cx - r.left - view.x) / view.s, y: (cy - r.top - view.y) / view.s };
   }
   function zoomAt(cx, cy, s) {
     const r = viewportEl.getBoundingClientRect();
@@ -269,6 +308,17 @@
     view.x = px - wx * view.s;
     view.y = py - wy * view.s;
     applyView();
+    renderSelection();
+  }
+
+  /* ─────────────── Artboard size ─────────────── */
+  function setArtboardSize(w, h, preset) {
+    w = clamp(Math.round(w), ARTBOARD_MIN, ARTBOARD_MAX);
+    h = clamp(Math.round(h), ARTBOARD_MIN, ARTBOARD_MAX);
+    const match = Object.keys(PS.PRESETS).find((k) => PS.PRESETS[k].w === w && PS.PRESETS[k].h === h);
+    doc.artboard.w = w;
+    doc.artboard.h = h;
+    doc.artboard.preset = preset || match || 'custom';
   }
 
   /* ─────────────── Ink & recognition ─────────────── */
@@ -280,11 +330,9 @@
     for (const p of pending.strokes.flat()) { x1 = Math.min(x1, p.x); y1 = Math.min(y1, p.y); x2 = Math.max(x2, p.x); y2 = Math.max(y2, p.y); }
     return { x1, y1, x2, y2 };
   }
-
   function fadeInk(paths, cls = 'is-fading') {
     paths.forEach((p) => { p.classList.add(cls); setTimeout(() => p.remove(), 400); });
   }
-
   function flushPending() {
     clearTimeout(pending.timer);
     const { strokes, paths } = pending;
@@ -297,9 +345,7 @@
     } else {
       fadeInk(paths);
       const many = strokes.length > 2 || res.reason === 'interior';
-      toast(many
-        ? 'To write text: tap with Pencil first, then write inside the box'
-        : 'Not recognized. Draw a closed rectangle to make a card');
+      toast(many ? 'To write text: tap with Pencil first, then write inside the box' : 'Not recognized. Draw a closed rectangle to make a card');
     }
   }
 
@@ -311,41 +357,55 @@
     const card = {
       id: uid(), type: 'card', parent: parent ? parent.id : null, x, y, w, h,
       fill: '--color-white', border: 'secondary', radius: 'lg', elevation: 'none',
+      layout: PS.defaultLayout(), sizeW: 'fixed', sizeH: 'fixed',
     };
+    // siblings fully enclosed by the drawn rectangle become the card's stack items
+    const enclosed = childrenOf(card.parent).map((e) => ({ e, r: rectOf(e.id) })).filter((o) => rectInside(o.r, rect));
+    if (enclosed.length >= 2) {
+      const xs = enclosed.map((o) => o.r.x + o.r.w / 2), ys = enclosed.map((o) => o.r.y + o.r.h / 2);
+      if (Math.max(...xs) - Math.min(...xs) > Math.max(...ys) - Math.min(...ys)) card.layout.dir = 'row';
+    }
+    if (parent) {
+      // inside a stack: fixed along the main axis, fill across it
+      const row = parent.layout.dir === 'row';
+      card.sizeW = row ? 'fixed' : 'fill';
+      card.sizeH = row ? 'fill' : 'fixed';
+      if (enclosed.length) card.sizeH = row ? 'fill' : 'hug';
+    }
+    const center = { x: x + w / 2, y: y + h / 2 };
+    const index = parent ? insertionIndex(parent, center) : 0;
     mutate(() => {
-      // adopt elements the new card fully encloses (siblings at the same level)
-      const enclosed = doc.elements.filter((e) => e.parent === card.parent && inside(e, rect));
-      const firstIdx = enclosed.length ? Math.min(...enclosed.map((e) => doc.elements.indexOf(e))) : -1;
-      enclosed.forEach((e) => (e.parent = card.id));
-      if (firstIdx >= 0) doc.elements.splice(firstIdx, 0, card);
-      else doc.elements.push(card);
+      if (parent) {
+        const firstEnclosed = enclosed.length ? childrenOf(parent.id).indexOf(enclosed[0].e) : -1;
+        placeInto(card, parent, firstEnclosed >= 0 ? firstEnclosed : index);
+      } else {
+        const firstIdx = enclosed.length ? Math.min(...enclosed.map((o) => doc.elements.indexOf(o.e))) : -1;
+        if (firstIdx >= 0) doc.elements.splice(firstIdx, 0, card); else doc.elements.push(card);
+      }
+      const row = card.layout.dir === 'row';
+      enclosed.sort((a, b) => (row ? a.r.x - b.r.x : a.r.y - b.r.y))
+        .forEach((o) => placeInto(o.e, card, Infinity));
       ui.selectedId = card.id;
     });
     const node = nodes.get(card.id);
     if (node) { node.classList.add('el--enter'); setTimeout(() => node.classList.remove('el--enter'), 400); }
   }
 
-  function inside(e, rect) {
-    const n = nodes.get(e.id);
-    const w = e.type === 'card' ? e.w : n ? n.offsetWidth : 0;
-    const h = e.type === 'card' ? e.h : n ? n.offsetHeight : 0;
-    return e.x >= rect.x && e.y >= rect.y && e.x + w <= rect.x + rect.w && e.y + h <= rect.y + rect.h;
-  }
-
-  function createTextAt(pt) {
-    const lvl = PS.level(ui.lastLevel);
-    const x = snap(pt.x), y = snap(pt.y - lvl.line / 2);
-    const parent = containerFor({ x, y, w: 1, h: 1 });
+  function createTextAt(pt, cx, cy) {
     blurEditing();
+    const under = document.elementFromPoint(cx, cy);
+    const cardNode = under && under.closest && under.closest('.el-card');
+    const parent = cardNode ? byId(cardNode.dataset.id) : null;
+    const lvl = PS.level(ui.lastLevel);
     const before = snapDoc();
-    const el = { id: uid(), type: 'text', parent: parent ? parent.id : null, x, y, text: '', level: lvl.id, color: 'primary' };
-    el.color = isDark(surfaceUnder(el)) ? 'inverse' : 'primary';
-    doc.elements.push(el);
+    const el = { id: uid(), type: 'text', parent: null, x: snap(pt.x), y: snap(pt.y - lvl.line / 2), text: '', level: lvl.id, color: 'primary' };
+    el.color = isDark(surfaceUnder(parent && parent.id)) ? 'inverse' : 'primary';
+    if (parent) placeInto(el, parent, insertionIndex(parent, pt));
+    else doc.elements.push(el);
     ui.selectedId = el.id;
     render();
-    const edit = nodes.get(el.id).firstChild;
     editSnapshot = before;
-    edit.focus();
+    nodes.get(el.id).firstChild.focus();
   }
 
   /* ─────────────── Text editing ─────────────── */
@@ -360,13 +420,13 @@
     ui.selectedId = node.dataset.id;
     if (editSnapshot == null) editSnapshot = snapDoc();
     node.classList.add('is-editing');
+    renderElements();
     renderSelection();
     renderInspector();
   });
   elementsEl.addEventListener('input', (e) => {
     const node = e.target.closest('.el-text');
-    if (!node) return;
-    const el = byId(node.dataset.id);
+    const el = node && byId(node.dataset.id);
     if (!el) return;
     el.text = e.target.innerText.replace(/\n$/, '');
     renderSelection();
@@ -394,15 +454,18 @@
 
   /* ─────────────── Pointer input ─────────────── */
   const pointers = new Map();
-  let gesture = null; // { kind: 'draw'|'tapOrPan'|'move'|'resize'|'pinch'|'pan', ... }
+  let gesture = null;
   let spaceDown = false;
   let lastTap = { id: null, t: 0 };
+  const dropMarker = document.createElement('div');
+  dropMarker.className = 'drop-marker';
 
   function roleFor(e) {
     if (e.pointerType === 'pen') return ui.tool === 'select' ? 'nav' : 'draw';
     if (e.pointerType === 'mouse') return ui.tool === 'select' || spaceDown || e.button === 1 ? 'nav' : 'draw';
     return ui.fingerDraws && ui.tool === 'draw' ? 'draw' : 'nav';
   }
+  const pressure = (e) => (e.pointerType === 'pen' ? e.pressure || 0.5 : 0.5);
 
   viewportEl.addEventListener('pointerdown', (e) => {
     if (e.button === 2) return;
@@ -410,31 +473,46 @@
     if (colorPop.classList.contains('is-open')) { closeColor(); if (e.pointerType !== 'pen') return; }
     const role = roleFor(e);
     const editable = e.target.closest('.el-text__edit');
+    const abHandle = e.target.closest('[data-ab-handle]');
 
     // Pencil / mouse on a text box: hand over to the browser (Scribble, caret).
-    if (role === 'draw' && editable) return;
+    if (role === 'draw' && editable && !abHandle) return;
 
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType });
     e.preventDefault();
 
-    // Second finger: switch to pinch / pan.
     const touches = [...pointers.values()].filter((p) => p.type === 'touch');
     if (e.pointerType === 'touch' && touches.length === 2) {
-      if (gesture && gesture.kind === 'move' && gesture.moved) { restore(gesture.before); past.pop(); }
-      if (gesture && gesture.kind === 'draw') { gesture.path.remove(); }
+      if (gesture && (gesture.kind === 'move' || gesture.kind === 'resize' || gesture.kind === 'artboard') && gesture.moved) restore(gesture.before);
+      if (gesture && gesture.kind === 'draw') gesture.path.remove();
+      dropMarker.remove();
       const [a, b] = touches;
       gesture = { kind: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y), c0: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, v0: { ...view } };
       return;
+    }
+    // a lost pointerup (e.g. the OS took the touch) must not block the next stroke
+    if (gesture && e.pointerType !== 'touch' && gesture.kind !== 'pinch') {
+      if (gesture.kind === 'draw') gesture.path.remove();
+      const n = gesture.elId && nodes.get(gesture.elId);
+      if (n) { n.classList.remove('is-dragging'); n.style.transform = ''; }
+      pointers.delete(gesture.id);
+      gesture = null;
     }
     if (gesture) return;
 
     try { viewportEl.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     const pt = toArtboard(e.clientX, e.clientY);
 
+    // artboard resize handles work with any input
+    if (abHandle) {
+      blurEditing();
+      gesture = { kind: 'artboard', id: e.pointerId, edge: abHandle.dataset.abHandle, start: pt, w0: doc.artboard.w, h0: doc.artboard.h, before: snapDoc(), moved: false };
+      return;
+    }
+
     if (role === 'draw') {
       blurEditing();
       clearTimeout(pending.timer);
-      // a stroke far from the pending group starts a new group
       if (pending.strokes.length) {
         const b = pendingBounds(), m = 160;
         if (pt.x < b.x1 - m || pt.x > b.x2 + m || pt.y < b.y1 - m || pt.y > b.y2 + m) flushPending();
@@ -446,33 +524,47 @@
       return;
     }
 
-    // nav role
     const handle = e.target.closest('[data-handle]');
     const elNode = e.target.closest('.el');
     if (handle && ui.selectedId) {
       const el = byId(ui.selectedId);
-      gesture = { kind: 'resize', id: e.pointerId, handle: handle.dataset.handle, start: pt, orig: { ...el }, before: snapDoc(), moved: false };
+      gesture = { kind: 'resize', id: e.pointerId, handle: handle.dataset.handle, start: pt, orig: { ...el, ...(el.parent ? {} : { x: el.x, y: el.y }) }, rect0: rectOf(el.id), before: snapDoc(), moved: false };
       return;
     }
     if (elNode) {
-      const el = byId(elNode.dataset.id);
-      const subtree = [el, ...descendants(el.id)];
-      gesture = {
-        kind: 'move', id: e.pointerId, elId: el.id, start: pt, sx: e.clientX, sy: e.clientY,
-        origins: subtree.map((x) => ({ id: x.id, x: x.x, y: x.y })), before: snapDoc(), moved: false,
-      };
+      gesture = { kind: 'move', id: e.pointerId, elId: elNode.dataset.id, start: pt, sx: e.clientX, sy: e.clientY, rect0: rectOf(elNode.dataset.id), before: snapDoc(), moved: false, target: null };
       return;
     }
     gesture = { kind: 'tapOrPan', id: e.pointerId, sx: e.clientX, sy: e.clientY, v0: { ...view }, moved: false, pt };
   });
 
-  function pressure(e) {
-    if (e.pointerType === 'pen') return e.pressure || 0.5;
-    return 0.5;
-  }
+  function drawPath() { gesture.path.setAttribute('d', PS.strokePath(gesture.pts, 3.4 / view.s)); }
 
-  function drawPath() {
-    gesture.path.setAttribute('d', PS.strokePath(gesture.pts, 3.4 / view.s));
+  /* drop target while dragging: deepest card under the finger (not the dragged subtree) */
+  function updateDropTarget(g, cx, cy, pt) {
+    const under = document.elementFromPoint(cx, cy);
+    const cardNode = under && under.closest && under.closest('.el-card');
+    const card = cardNode ? byId(cardNode.dataset.id) : null;
+    if (!card || card.id === g.elId) { g.target = null; dropMarker.remove(); return; }
+    const index = insertionIndex(card, pt, g.elId);
+    g.target = { card, index };
+    // marker between stack items
+    const row = card.layout.dir === 'row';
+    const sibs = childrenOf(card.id).filter((s) => s.id !== g.elId);
+    const cr = rectOf(card.id), gap = PS.spacePx(card.layout.gap);
+    const px = PS.spacePx(card.layout.padX), py = PS.spacePx(card.layout.padY);
+    let m;
+    if (!sibs.length) m = row ? { x: cr.x + px, y: cr.y + py, w: 0, h: cr.h - py * 2 } : { x: cr.x + px, y: cr.y + py, w: cr.w - px * 2, h: 0 };
+    else if (index < sibs.length) {
+      const r = rectOf(sibs[index].id);
+      m = row ? { x: r.x - gap / 2, y: r.y, w: 0, h: r.h } : { x: r.x, y: r.y - gap / 2, w: r.w, h: 0 };
+    } else {
+      const r = rectOf(sibs[sibs.length - 1].id);
+      m = row ? { x: r.x + r.w + gap / 2, y: r.y, w: 0, h: r.h } : { x: r.x, y: r.y + r.h + gap / 2, w: r.w, h: 0 };
+    }
+    dropMarker.classList.toggle('is-row', row);
+    Object.assign(dropMarker.style, { left: m.x + 'px', top: m.y + 'px', width: m.w + 'px', height: m.h + 'px' });
+    if (!dropMarker.parentNode) selectionEl.appendChild(dropMarker);
   }
 
   viewportEl.addEventListener('pointermove', (e) => {
@@ -492,50 +584,60 @@
       view.x = c.x - r.left - wx * s;
       view.y = c.y - r.top - wy * s;
       applyView();
+      renderSelection();
       return;
     }
     if (e.pointerId !== gesture.id) return;
+    const g = gesture;
 
-    if (gesture.kind === 'draw') {
+    if (g.kind === 'draw') {
       const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
-      for (const ev of evs.length ? evs : [e]) {
-        const p = toArtboard(ev.clientX, ev.clientY);
-        gesture.pts.push({ ...p, p: pressure(ev) });
-      }
-      gesture.travel = Math.max(gesture.travel, Math.hypot(e.clientX - gesture.sx, e.clientY - gesture.sy));
+      for (const ev of evs.length ? evs : [e]) g.pts.push({ ...toArtboard(ev.clientX, ev.clientY), p: pressure(ev) });
+      g.travel = Math.max(g.travel, Math.hypot(e.clientX - g.sx, e.clientY - g.sy));
       drawPath();
       return;
     }
-
-    const dist = Math.hypot(e.clientX - gesture.sx, e.clientY - gesture.sy);
-    if (gesture.kind === 'tapOrPan') {
-      if (dist > 6) gesture.moved = true;
-      if (gesture.moved) {
-        view.x = gesture.v0.x + (e.clientX - gesture.sx);
-        view.y = gesture.v0.y + (e.clientY - gesture.sy);
-        applyView();
-      }
+    if (g.kind === 'tapOrPan') {
+      if (Math.hypot(e.clientX - g.sx, e.clientY - g.sy) > 6) g.moved = true;
+      if (g.moved) { view.x = g.v0.x + (e.clientX - g.sx); view.y = g.v0.y + (e.clientY - g.sy); applyView(); }
       return;
     }
     const pt = toArtboard(e.clientX, e.clientY);
-    if (gesture.kind === 'move') {
-      if (!gesture.moved && dist < 6) return;
-      if (!gesture.moved) { gesture.moved = true; blurEditing(); ui.selectedId = gesture.elId; }
-      const dx = snap(pt.x - gesture.start.x), dy = snap(pt.y - gesture.start.y);
-      for (const o of gesture.origins) { const el = byId(o.id); el.x = o.x + dx; el.y = o.y + dy; }
-      renderElements(); renderSelection(); hideInspector();
+    if (g.kind === 'artboard') {
+      g.moved = true;
+      const w = g.edge.includes('e') ? snap(g.w0 + pt.x - g.start.x) : g.w0;
+      const h = g.edge.includes('s') ? snap(g.h0 + pt.y - g.start.y) : g.h0;
+      setArtboardSize(w, h);
+      renderArtboard(); renderElements(); renderSelection();
       return;
     }
-    if (gesture.kind === 'resize') {
-      gesture.moved = true;
-      const o = gesture.orig, el = byId(o.id), min = SNAP * 3;
-      let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
-      const dx = pt.x - gesture.start.x, dy = pt.y - gesture.start.y;
-      if (gesture.handle.includes('w')) x1 = Math.min(snap(o.x + dx), x2 - min);
-      if (gesture.handle.includes('e')) x2 = Math.max(snap(o.x + o.w + dx), x1 + min);
-      if (gesture.handle.includes('n')) y1 = Math.min(snap(o.y + dy), y2 - min);
-      if (gesture.handle.includes('s')) y2 = Math.max(snap(o.y + o.h + dy), y1 + min);
-      Object.assign(el, { x: x1, y: y1, w: x2 - x1, h: y2 - y1 });
+    if (g.kind === 'move') {
+      if (!g.moved && Math.hypot(e.clientX - g.sx, e.clientY - g.sy) < 6) return;
+      const node = nodes.get(g.elId);
+      if (!g.moved) { g.moved = true; blurEditing(); ui.selectedId = g.elId; node.classList.add('is-dragging'); hideInspector(); selectionEl.innerHTML = ''; }
+      const dx = pt.x - g.start.x, dy = pt.y - g.start.y;
+      const el = byId(g.elId);
+      const sdx = el.parent ? dx : snap(g.rect0.x + dx) - g.rect0.x, sdy = el.parent ? dy : snap(g.rect0.y + dy) - g.rect0.y;
+      node.style.transform = `translate(${sdx}px, ${sdy}px)`;
+      g.dx = sdx; g.dy = sdy;
+      updateDropTarget(g, e.clientX, e.clientY, pt);
+      return;
+    }
+    if (g.kind === 'resize') {
+      g.moved = true;
+      const el = byId(g.orig.id), o = g.rect0, min = SNAP * 3;
+      const dx = pt.x - g.start.x, dy = pt.y - g.start.y;
+      if (!el.parent) {
+        let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
+        if (g.handle.includes('w')) x1 = Math.min(snap(o.x + dx), x2 - min);
+        if (g.handle.includes('e')) x2 = Math.max(snap(o.x + o.w + dx), x1 + min);
+        if (g.handle.includes('n')) y1 = Math.min(snap(o.y + dy), y2 - min);
+        if (g.handle.includes('s')) y2 = Math.max(snap(o.y + o.h + dy), y1 + min);
+        Object.assign(el, { x: x1, y: y1, w: x2 - x1, h: y2 - y1, sizeW: 'fixed', sizeH: 'fixed' });
+      } else {
+        if (Math.abs(dx) >= SNAP / 2) { el.w = Math.max(min, snap(o.w + dx)); el.sizeW = 'fixed'; }
+        if (Math.abs(dy) >= SNAP / 2) { el.h = Math.max(min, snap(o.h + dy)); el.sizeH = 'fixed'; }
+      }
       renderElements(); renderSelection(); hideInspector();
     }
   });
@@ -544,25 +646,21 @@
     if (!pointers.has(e.pointerId)) return;
     pointers.delete(e.pointerId);
     if (!gesture) return;
-
     if (gesture.kind === 'pinch') {
-      if ([...pointers.values()].filter((p) => p.type === 'touch').length < 2) {
-        gesture = null;
-        pointers.clear();
-      }
+      if ([...pointers.values()].filter((p) => p.type === 'touch').length < 2) { gesture = null; pointers.clear(); }
       return;
     }
     if (e.pointerId !== gesture.id) return;
     const g = gesture;
     gesture = null;
+    dropMarker.remove();
 
     if (g.kind === 'draw') {
       if (cancelled) { g.path.remove(); return; }
-      const isTap = g.travel < 6 && performance.now() - g.t0 < 400;
-      if (isTap) {
+      if (g.travel < 6 && performance.now() - g.t0 < 400) {
         g.path.remove();
         flushPending();
-        createTextAt(g.pts[0]);
+        createTextAt(g.pts[0], e.clientX, e.clientY);
         return;
       }
       pending.strokes.push(g.pts);
@@ -578,31 +676,41 @@
       if (onArtboard) openColor({ kind: 'artboard' }, e.clientX, e.clientY);
       return;
     }
+    if (g.kind === 'artboard') {
+      if (!g.moved) return;
+      if (cancelled) { restore(g.before); return; }
+      past.push(g.before); future = [];
+      render();
+      return;
+    }
     if (g.kind === 'move') {
+      const node = nodes.get(g.elId);
+      if (node) { node.classList.remove('is-dragging'); node.style.transform = ''; }
       if (!g.moved) {
         const now = performance.now();
         const el = byId(g.elId);
-        // double tap on text with a finger: edit with keyboard
-        if (el.type === 'text' && lastTap.id === el.id && now - lastTap.t < 350) {
-          nodes.get(el.id).firstChild.focus();
-        } else {
-          blurEditing();
-          select(g.elId);
-        }
+        if (el.type === 'text' && lastTap.id === el.id && now - lastTap.t < 350) nodes.get(el.id).firstChild.focus();
+        else { blurEditing(); select(g.elId); }
         lastTap = { id: g.elId, t: now };
         return;
       }
       if (cancelled) { restore(g.before); return; }
-      // commit move: reparent by drop location
       const el = byId(g.elId);
-      const node = nodes.get(el.id);
-      const w = el.type === 'card' ? el.w : node.offsetWidth, h = el.type === 'card' ? el.h : node.offsetHeight;
-      const exclude = new Set([el.id, ...descendants(el.id).map((d) => d.id)]);
-      const cx = el.x + w / 2, cy = el.y + h / 2;
-      const parent = containerFor({ x: cx, y: cy, w: 0, h: 0 }, exclude);
       past.push(g.before); future = [];
-      const newParent = parent ? parent.id : null;
-      if (newParent !== el.parent) { el.parent = newParent; bringSubtreeToFront(el); }
+      if (g.target) {
+        placeInto(el, g.target.card, g.target.index);
+        if (el.type === 'card') {
+          const row = g.target.card.layout.dir === 'row';
+          if (row && el.sizeH === 'fixed') el.sizeH = 'fill';
+          if (!row && el.sizeW === 'fixed') el.sizeW = 'fill';
+        }
+      } else {
+        const r = g.rect0;
+        const wasChild = !!el.parent;
+        el.x = snap(r.x + g.dx); el.y = snap(r.y + g.dy);
+        if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snap(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
+        if (wasChild) placeInto(el, null, Infinity);
+      }
       render();
       return;
     }
@@ -623,7 +731,6 @@
     if (editable && t && t.touchType !== 'stylus' && document.activeElement !== editable && !ui.fingerDraws) e.preventDefault();
   }, { passive: false });
   document.addEventListener('gesturestart', (e) => e.preventDefault());
-  document.addEventListener('dblclick', (e) => { if (viewportEl.contains(e.target) && !e.target.closest('.el-text__edit')) e.preventDefault(); });
 
   viewportEl.addEventListener('wheel', (e) => {
     e.preventDefault();
@@ -631,34 +738,56 @@
     else { view.x -= e.deltaX; view.y -= e.deltaY; applyView(); }
   }, { passive: false });
 
-  /* ─────────────── Selection & inspector ─────────────── */
+  /* ─────────────── Selection, text toolbar, card panel ─────────────── */
   function select(id) {
     ui.selectedId = id;
     renderElements();
     renderSelection();
     renderInspector();
   }
-
   function hideInspector() { inspectorEl.classList.remove('is-open'); }
 
-  function chip(label, active, onTap, title) {
+  function chip(label, active, onTap, title, disabled) {
     const wrap = document.createElement('div');
     wrap.className = 'button small ' + (active ? 'is-current' : 'gost');
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = label;
     if (title) b.title = title;
+    b.disabled = !!disabled;
     b.setAttribute('aria-pressed', active ? 'true' : 'false');
     b.addEventListener('click', onTap);
     wrap.appendChild(b);
     return wrap;
   }
-  function group(label, ...children) {
+  function chips(options, value, onPick, disabledIds = []) {
+    const row = document.createElement('div');
+    row.className = 'chips';
+    options.forEach((o) => row.appendChild(chip(o.icon ? `${o.icon} ${o.label}` : o.label, o.id === value, () => onPick(o.id), o.title, disabledIds.includes(o.id))));
+    return row;
+  }
+  function field(label, ...children) {
     const g = document.createElement('div');
-    g.className = 'insp-group';
-    if (label) { const l = document.createElement('span'); l.className = 'insp-label'; l.textContent = label; g.appendChild(l); }
-    children.forEach((c) => g.appendChild(c));
+    g.className = 'field';
+    const l = document.createElement('span');
+    l.className = 'field__label';
+    l.textContent = label;
+    g.appendChild(l);
+    const c = document.createElement('div');
+    c.className = 'field__control';
+    children.forEach((x) => c.appendChild(x));
+    g.appendChild(c);
     return g;
+  }
+  function section(title, ...children) {
+    const s = document.createElement('section');
+    s.className = 'panel__section';
+    const h = document.createElement('h4');
+    h.className = 'panel__heading';
+    h.textContent = title;
+    s.appendChild(h);
+    children.forEach((c) => s.appendChild(c));
+    return s;
   }
   function selectCtl(label, options, value, onChange) {
     const s = document.createElement('select');
@@ -668,6 +797,23 @@
     s.value = value;
     s.addEventListener('change', () => onChange(s.value));
     return s;
+  }
+  const spaceOptions = () => PS.SPACING.map((t) => ({ id: t, label: `${PS.spacePx(t)}  ·  ${t.replace('--', '')}` }));
+  function numberCtl(label, value, onCommit, disabled) {
+    const wrap = document.createElement('div');
+    wrap.className = 'input num-input';
+    const i = document.createElement('input');
+    i.type = 'number';
+    i.inputMode = 'numeric';
+    i.min = '8';
+    i.step = '8';
+    i.value = Math.round(value);
+    i.disabled = !!disabled;
+    i.setAttribute('aria-label', label);
+    i.addEventListener('change', () => { const v = parseInt(i.value, 10); if (v > 0) onCommit(v); });
+    i.addEventListener('keydown', (e) => { if (e.key === 'Enter') i.blur(); });
+    wrap.appendChild(i);
+    return wrap;
   }
   function iconBtn(svg, label, onTap, cls = 'gost') {
     const wrap = document.createElement('div');
@@ -683,44 +829,102 @@
   }
   const ICON_TRASH = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
   const ICON_DUP = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 3V2.5H2.5V11H3" stroke="currentColor" stroke-width="1.5"/></svg>';
+  const ICON_UP = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ICON_CLOSE = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 
   function renderInspector() {
     inspectorEl.innerHTML = '';
+    panelEl.innerHTML = '';
     const el = ui.selectedId && byId(ui.selectedId);
+    panelEl.classList.toggle('is-open', !!el && el.type === 'card');
     if (!el) { hideInspector(); return; }
+    if (el.type === 'text') renderTextToolbar(el);
+    else { hideInspector(); renderCardPanel(el); }
+  }
 
-    if (el.type === 'text') {
-      const levels = document.createElement('div');
-      levels.className = 'insp-chips';
-      PS.TEXT_LEVELS.forEach((l) => levels.appendChild(chip(l.label, el.level === l.id, () => {
-        ui.lastLevel = l.id;
-        mutate(() => { el.level = l.id; });
-      }, `${l.size}/${l.line}`)));
-      inspectorEl.appendChild(group('Text', levels));
-      inspectorEl.appendChild(group('Color', selectCtl('Text color', PS.TEXT_COLORS, el.color, (v) => mutate(() => { el.color = v; }))));
-    } else {
-      const fillBtn = document.createElement('button');
-      fillBtn.type = 'button';
-      fillBtn.className = 'swatch swatch--btn';
-      fillBtn.style.background = PS.colorCss(el.fill);
-      fillBtn.setAttribute('aria-label', 'Fill color');
-      fillBtn.addEventListener('click', () => {
-        const r = fillBtn.getBoundingClientRect();
-        openColor({ kind: 'card', id: el.id }, r.left + r.width / 2, r.bottom);
-      });
-      inspectorEl.appendChild(group('Fill', fillBtn));
-      inspectorEl.appendChild(group('Border', selectCtl('Border', PS.BORDERS, el.border, (v) => mutate(() => { el.border = v; }))));
-      inspectorEl.appendChild(group('Radius', selectCtl('Corner radius', PS.RADII, el.radius, (v) => mutate(() => { el.radius = v; }))));
-      inspectorEl.appendChild(group('Elevation', selectCtl('Elevation', PS.ELEVATIONS, el.elevation, (v) => mutate(() => { el.elevation = v; }))));
-    }
-    inspectorEl.appendChild(group(null,
-      iconBtn(ICON_DUP, 'Duplicate', () => duplicate(el.id)),
-      iconBtn(ICON_TRASH, 'Delete', () => removeSelected())));
+  function renderTextToolbar(el) {
+    const levels = document.createElement('div');
+    levels.className = 'insp-chips';
+    PS.TEXT_LEVELS.forEach((l) => levels.appendChild(chip(l.label, el.level === l.id, () => {
+      ui.lastLevel = l.id;
+      mutate(() => { el.level = l.id; });
+    }, `${l.size}/${l.line}`)));
+    const g = (label, ...c) => { const d = document.createElement('div'); d.className = 'insp-group'; if (label) { const s = document.createElement('span'); s.className = 'insp-label'; s.textContent = label; d.appendChild(s); } c.forEach((x) => d.appendChild(x)); return d; };
+    inspectorEl.appendChild(g('Text', levels));
+    inspectorEl.appendChild(g('Color', selectCtl('Text color', PS.TEXT_COLORS, el.color, (v) => mutate(() => { el.color = v; }))));
+    const tools = [iconBtn(ICON_DUP, 'Duplicate', () => duplicate(el.id)), iconBtn(ICON_TRASH, 'Delete', () => removeSelected())];
+    if (el.parent) tools.unshift(iconBtn(ICON_UP, 'Select parent card', () => { blurEditing(); select(el.parent); }));
+    inspectorEl.appendChild(g(null, ...tools));
     inspectorEl.classList.add('is-open');
     positionInspector();
   }
 
-  // keep focus in the text box while tapping inspector chips
+  function renderCardPanel(el) {
+    const L = el.layout;
+    const parent = el.parent ? byId(el.parent) : null;
+    const set = (fn) => mutate(fn);
+
+    // header
+    const head = document.createElement('div');
+    head.className = 'panel__head';
+    const title = document.createElement('div');
+    const count = childrenOf(el.id).length;
+    title.innerHTML = `<div class="panel__title">${parent ? 'Nested card' : 'Card'}</div><div class="panel__sub">${L.dir === 'row' ? 'Horizontal' : 'Vertical'} stack · ${count} item${count === 1 ? '' : 's'}</div>`;
+    const actions = document.createElement('div');
+    actions.className = 'panel__actions';
+    if (parent) actions.appendChild(iconBtn(ICON_UP, 'Select parent card', () => select(parent.id)));
+    actions.appendChild(iconBtn(ICON_DUP, 'Duplicate', () => duplicate(el.id)));
+    actions.appendChild(iconBtn(ICON_TRASH, 'Delete', () => removeSelected()));
+    actions.appendChild(iconBtn(ICON_CLOSE, 'Close', () => select(null)));
+    head.append(title, actions);
+    panelEl.appendChild(head);
+
+    // stack
+    const dirControls = [chips(PS.DIRECTIONS, L.dir, (v) => set(() => { L.dir = v; if (v === 'column') L.wrap = false; }))];
+    if (L.dir === 'row') dirControls.push(chips([{ id: 'wrap', label: 'Wrap', title: 'Wrap items onto new rows' }], L.wrap ? 'wrap' : null, () => set(() => { L.wrap = !L.wrap; })));
+    panelEl.appendChild(section('Stack',
+      field('Direction', ...dirControls),
+      field('Gap', selectCtl('Gap', spaceOptions(), L.gap, (v) => set(() => { L.gap = v; }))),
+      field('Padding left / right', selectCtl('Horizontal padding', spaceOptions(), L.padX, (v) => set(() => { L.padX = v; }))),
+      field('Padding top / bottom', selectCtl('Vertical padding', spaceOptions(), L.padY, (v) => set(() => { L.padY = v; }))),
+      field(L.dir === 'row' ? 'Align (vertical)' : 'Align (horizontal)', chips(PS.ALIGNS, L.align, (v) => set(() => { L.align = v; }))),
+      field(L.dir === 'row' ? 'Distribute (horizontal)' : 'Distribute (vertical)', chips(PS.JUSTIFIES, L.justify, (v) => set(() => { L.justify = v; }))),
+    ));
+
+    // size
+    const r = rectOf(el.id);
+    const noFill = parent ? [] : ['fill'];
+    panelEl.appendChild(section('Size',
+      field('Width', chips(PS.SIZE_MODES, el.sizeW, (v) => set(() => { if (v === 'fixed') el.w = snap(r.w); el.sizeW = v; }), noFill),
+        numberCtl('Width in px', el.sizeW === 'fixed' ? el.w : r.w, (v) => set(() => { el.w = v; el.sizeW = 'fixed'; }), el.sizeW !== 'fixed')),
+      field('Height', chips(PS.SIZE_MODES, el.sizeH, (v) => set(() => { if (v === 'fixed') el.h = snap(r.h); el.sizeH = v; }), noFill),
+        numberCtl('Height in px', el.sizeH === 'fixed' ? el.h : r.h, (v) => set(() => { el.h = v; el.sizeH = 'fixed'; }), el.sizeH !== 'fixed')),
+    ));
+
+    // appearance
+    const fillBtn = document.createElement('button');
+    fillBtn.type = 'button';
+    fillBtn.className = 'swatch swatch--btn';
+    fillBtn.style.background = PS.colorCss(el.fill);
+    fillBtn.setAttribute('aria-label', 'Fill color');
+    fillBtn.addEventListener('click', () => { const b = fillBtn.getBoundingClientRect(); openColor({ kind: 'card', id: el.id }, b.left + b.width / 2, b.bottom); });
+    const fillName = document.createElement('span');
+    fillName.className = 'field__hint';
+    fillName.textContent = el.fill.startsWith('--') ? el.fill.replace('--', '') : el.fill.toUpperCase();
+    panelEl.appendChild(section('Appearance',
+      field('Fill', fillBtn, fillName),
+      field('Border', selectCtl('Border', PS.BORDERS, el.border, (v) => set(() => { el.border = v; }))),
+      field('Radius', selectCtl('Corner radius', PS.RADII, el.radius, (v) => set(() => { el.radius = v; }))),
+      field('Elevation', selectCtl('Elevation', PS.ELEVATIONS, el.elevation, (v) => set(() => { el.elevation = v; }))),
+    ));
+
+    const tip = document.createElement('p');
+    tip.className = 'panel__tip';
+    tip.textContent = 'Tap with Pencil inside the card to add text. Draw a rectangle inside to nest a card. Drag items to reorder them.';
+    panelEl.appendChild(tip);
+  }
+
+  // keep focus in the text box while tapping toolbar chips
   inspectorEl.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
 
   function positionInspector() {
@@ -730,12 +934,11 @@
     if (!node) return;
     const r = node.getBoundingClientRect();
     const ir = inspectorEl.getBoundingClientRect();
-    const top = $('viewport').getBoundingClientRect().top;
+    const top = viewportEl.getBoundingClientRect().top;
     let y = r.top - ir.height - 16;
     if (y < top + 8) y = r.bottom + 16;
     if (y + ir.height > window.innerHeight - 8) y = window.innerHeight - ir.height - 16;
-    let x = r.left + r.width / 2 - ir.width / 2;
-    x = clamp(x, 8, window.innerWidth - ir.width - 8);
+    const x = clamp(r.left + r.width / 2 - ir.width / 2, 8, window.innerWidth - ir.width - 8);
     inspectorEl.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
   }
 
@@ -743,11 +946,21 @@
     const id = ui.selectedId;
     if (!id) return;
     blurEditing();
-    if (!byId(id)) return;
+    const el = byId(id);
+    if (!el) return;
+    const kids = childrenOf(id).map((k) => ({ k, r: rectOf(k.id) }));
+    const siblingIndex = childrenOf(el.parent).indexOf(el);
+    const parent = el.parent ? byId(el.parent) : null;
     mutate(() => {
-      const el = byId(id);
-      // children move up to the removed element's parent
-      doc.elements.forEach((e) => { if (e.parent === id) e.parent = el.parent; });
+      // children are kept: they move up to where the card was
+      kids.forEach(({ k, r }, i) => {
+        if (parent) placeInto(k, parent, siblingIndex + i);
+        else {
+          k.x = snap(r.x); k.y = snap(r.y);
+          if (k.type === 'card') { k.w = snap(r.w); k.h = snap(r.h); if (k.sizeW === 'fill') k.sizeW = 'fixed'; if (k.sizeH === 'fill') k.sizeH = 'fixed'; }
+          placeInto(k, null, Infinity);
+        }
+      });
       doc.elements = doc.elements.filter((e) => e.id !== id);
       ui.selectedId = null;
     });
@@ -760,10 +973,15 @@
     mutate(() => {
       const map = new Map();
       const subtree = [el, ...descendants(el.id)];
-      const copies = subtree.map((s) => { const c = { ...s, id: uid(), x: s.x + 24, y: s.y + 24 }; map.set(s.id, c.id); return c; });
-      copies.forEach((c) => { if (map.has(c.parent)) c.parent = map.get(c.parent); });
-      doc.elements.push(...copies);
-      ui.selectedId = copies[0].id;
+      const copies = subtree.map((s) => { const c = JSON.parse(JSON.stringify(s)); c.id = uid(); map.set(s.id, c.id); return c; });
+      copies.forEach((c, i) => { if (i > 0) c.parent = map.get(c.parent); });
+      const root = copies[0];
+      if (!root.parent) { root.x += 24; root.y += 24; }
+      // copy sits right after the original in its stack
+      const pos = doc.elements.indexOf(el) + 1;
+      doc.elements.splice(pos, 0, root);
+      doc.elements.push(...copies.slice(1));
+      ui.selectedId = root.id;
     });
   }
 
@@ -797,14 +1015,12 @@
       wrap.appendChild(row);
     });
   }
-
   function currentColor() {
     if (!colorTarget) return null;
     if (colorTarget.kind === 'artboard') return doc.artboard.bg;
     const el = byId(colorTarget.id);
     return el ? el.fill : null;
   }
-
   function syncColorUI() {
     const c = currentColor();
     const hex = c && c.startsWith('--') ? PS.tokenValue(c) : PS.normalizeHex(c);
@@ -816,7 +1032,6 @@
     else { tokenEl.textContent = 'Custom value, not a Penta token'; tokenEl.classList.add('is-custom'); }
     colorPop.querySelectorAll('.swatch[data-token]').forEach((b) => b.classList.toggle('is-current', b.dataset.token === token));
   }
-
   function applyColor(value) {
     if (!colorTarget) return;
     if (!colorCheckpointed) { checkpoint(); colorCheckpointed = true; }
@@ -825,7 +1040,6 @@
     render();
     syncColorUI();
   }
-
   function openColor(target, cx, cy) {
     closeMenu();
     colorTarget = target;
@@ -844,10 +1058,10 @@
     colorTarget = null;
     $('hexInput').blur();
   }
-
   $('hexInput').addEventListener('input', (e) => {
+    const raw = e.target.value.replace('#', '');
     const hex = PS.normalizeHex(e.target.value);
-    if (!hex || e.target.value.replace('#', '').length < 6 && e.target.value.replace('#', '').length !== 3) return;
+    if (!hex || (raw.length !== 6 && raw.length !== 3)) return;
     applyColor(PS.tokenForHex(hex) || hex);
   });
   $('hexInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === 'Escape') closeColor(); });
@@ -874,8 +1088,20 @@
   $('gridToggle').addEventListener('click', () => { ui.grid = !ui.grid; renderArtboard(); });
   $('presetSelect').addEventListener('change', (e) => {
     const p = PS.PRESETS[e.target.value];
-    mutate(() => { doc.artboard.preset = e.target.value; doc.artboard.w = p.w; doc.artboard.h = p.h; });
+    if (!p) { renderArtboard(); return; }
+    mutate(() => setArtboardSize(p.w, p.h, e.target.value));
     fit();
+  });
+  const commitSize = () => {
+    const w = parseInt($('abW').value, 10), h = parseInt($('abH').value, 10);
+    if (!(w > 0 && h > 0)) { renderArtboard(); return; }
+    if (w === doc.artboard.w && h === doc.artboard.h) return;
+    mutate(() => setArtboardSize(w, h));
+    fit();
+  };
+  ['abW', 'abH'].forEach((id) => {
+    $(id).addEventListener('change', commitSize);
+    $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $(id).blur(); });
   });
 
   function closeMenu() { $('menu').classList.remove('show'); }
@@ -906,7 +1132,7 @@
       const d = JSON.parse(await f.text());
       if (!d.artboard || !Array.isArray(d.elements)) throw new Error('bad file');
       checkpoint();
-      doc = d;
+      doc = migrate(d);
       ui.selectedId = null;
       render(true);
       fit();
@@ -923,7 +1149,6 @@
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
-  /* Export */
   let exported = '';
   $('exportBtn').addEventListener('click', () => {
     blurEditing();
@@ -944,11 +1169,10 @@
     catch (err) {
       const r = document.createRange(); r.selectNodeContents($('exportCode'));
       const s = getSelection(); s.removeAllRanges(); s.addRange(r);
-      toast('Selected. Use Copy from the menu');
+      toast('Code selected. Use Copy from the edit menu');
     }
   });
 
-  /* Keyboard (for desktop testing / iPad keyboard) */
   document.addEventListener('keydown', (e) => {
     if (e.key === ' ' && !isTyping()) spaceDown = true;
     if (isTyping()) { if (e.key === 'Escape') blurEditing(); return; }
@@ -972,7 +1196,6 @@
     return a && (a.isContentEditable || a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT');
   }
 
-  /* Toast */
   let toastTimer = null;
   function toast(msg) {
     toastEl.textContent = msg;
@@ -987,11 +1210,11 @@
   setTool('draw');
   render(true);
   fit();
-  window.addEventListener('resize', fit);
+  renderSelection();
+  window.addEventListener('resize', () => { fit(); renderSelection(); });
   window.addEventListener('pagehide', save);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
   if (document.fonts) document.fonts.ready.then(() => { renderSelection(); positionInspector(); });
 
-  // test / debug hook
   PS.app = { get doc() { return doc; }, view, ui, fit, flushPending, undo, redo };
 })();

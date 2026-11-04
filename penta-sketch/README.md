@@ -25,12 +25,14 @@ Without it the app falls back to Helvetica.
 
 | Gesture | Result |
 |---|---|
-| Draw a rectangle or square with Pencil (one stroke or several, then pause) | Creates a Penta card (white, hairline border, radius 12, 8px snapping) |
+| Draw a rectangle or square with Pencil (one stroke or several, then pause) | Creates a Penta card. Every card is a flex **stack** (vertical by default, gap 16, padding 24) |
+| Draw a rectangle inside a card / around existing items | Nests a card in the stack / wraps those items in a new stack |
+| Finger tap on a card | Opens the **card panel**: direction, wrap, gap, padding, align, distribute, size (Fixed / Fill / Hug), fill, border, radius, elevation |
 | Tap with Pencil | Places a text box. Handwrite inside it and iPadOS **Scribble** converts it to text |
 | Text toolbar | Display, H1, H2, H3, H4, Subtitle, Body, Body S, Caption, Overline + color role |
 | Finger tap on the empty artboard | Background color picker: Penta palette + exact hex (shows the token name, or flags off-system values) |
-| Finger tap on an element | Selects it. Drag moves it (cards take their contents along). Corner handles resize |
-| Card toolbar | Fill, border, radius, elevation (Z1 to Z4), duplicate, delete |
+| Finger drag an item | Reorders it in its stack, moves it into another card, or out onto the artboard |
+| Artboard edge handles / W × H fields | Resize the artboard (or pick a preset) |
 | Two fingers | Pan and pinch zoom |
 | Write over existing text with Pencil | Edit it. Scratch out words to delete them (Scribble gestures) |
 
@@ -53,6 +55,6 @@ app.css           tool chrome; non-Penta CSS is marked PENTA-FALLBACK
 js/tokens.js      palette, type ramp, radius, border, elevation (token names only, values read from CSS)
 js/ink.js         pressure-sensitive stroke rendering
 js/recognize.js   rectangle recognizer (geometry, runs locally)
-js/export.js      HTML export
-js/app.js         state, input handling, inspector, color picker
+js/export.js      shared stack/size/skin CSS builders + HTML export
+js/editor.js      state, input, stacks, card panel, text toolbar, color picker
 ```

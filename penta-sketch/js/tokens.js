@@ -100,3 +100,33 @@
   PS.cssVar = (token) => (token ? `var(${token})` : null);
   PS.read = read;
 })();
+
+/* ── Stack (auto-layout) options for cards ── */
+(function () {
+  const PS = window.PS;
+  /* Penta spacing scale from ds_penta.css (gap + padding) */
+  PS.SPACING = ['--space-0', '--space-1', '--space-2', '--space-3', '--space-4', '--space-5', '--space-6', '--space-7', '--space-8', '--space-10', '--space-12', '--space-16', '--space-20'];
+  PS.spacePx = (t) => parseInt(PS.read(t), 10) || 0;
+  PS.DIRECTIONS = [
+    { id: 'column', label: 'Vertical', icon: '↓' },
+    { id: 'row', label: 'Horizontal', icon: '→' },
+  ];
+  PS.ALIGNS = [
+    { id: 'flex-start', label: 'Start' },
+    { id: 'center', label: 'Center' },
+    { id: 'flex-end', label: 'End' },
+    { id: 'stretch', label: 'Stretch' },
+  ];
+  PS.JUSTIFIES = [
+    { id: 'flex-start', label: 'Start' },
+    { id: 'center', label: 'Center' },
+    { id: 'flex-end', label: 'End' },
+    { id: 'space-between', label: 'Between' },
+  ];
+  PS.SIZE_MODES = [
+    { id: 'fixed', label: 'Fixed' },
+    { id: 'fill', label: 'Fill' },
+    { id: 'hug', label: 'Hug' },
+  ];
+  PS.defaultLayout = () => ({ dir: 'column', gap: '--space-4', padX: '--space-6', padY: '--space-6', align: 'stretch', justify: 'flex-start', wrap: false });
+})();
