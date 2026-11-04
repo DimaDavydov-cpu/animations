@@ -21,14 +21,12 @@ python3 -m http.server 8000
 `npx serve .` works too. The only network request is the Macan font from the Fiverr CDN.
 Without it the app falls back to Helvetica.
 
-## Resolutions and scale
+## Width and scale
 
-The canvas is always shown at **100%**. Pick the resolution in the top bar:
-
-* **Full screen** (default): the artboard is exactly your screen, edge to edge, and follows rotation
-* **iPad** 834 × 1194 and **Mobile** 390 × 844: fixed size at 100%, centered; pan with two fingers to see the rest
-
-Pinch still zooms. Tap the zoom percentage or the 100% button to go back.
+* **Adaptive** (default): the artboard is your screen's width, edge to edge, and follows rotation
+* **iPad** 834 and **Mobile** 390 in the top bar, or tap the artboard title to type any width or drag its right edge
+* Only the width is a design decision. The height is automatic: it fills the screen and grows with your content
+* **Scale** is set only from the percentage control in the top bar: 100%, 75% or 50%. Touch never changes it; two fingers just pan
 
 ## How to use
 
@@ -43,7 +41,7 @@ Pinch still zooms. Tap the zoom percentage or the 100% button to go back.
 | Finger drag an item | Reorders it in its stack, moves it into another card, or out onto the artboard |
 | Tap the artboard title (above its top-left corner) | Opens size editing: preset, exact W × H, and edge handles to drag. Size is not editable otherwise |
 | Draw / move / resize a card near the layout grid | Its edges snap to column edges, page margins and artboard edges within 20 px (red guide). Otherwise 8 px snapping |
-| Two fingers | Pan and pinch zoom |
+| Two fingers | Pan (scale only changes from the top-bar control) |
 | Write over existing text with Pencil | Edit it. Scratch out words to delete them (Scribble gestures) |
 
 Scribble must be on: iPad Settings → Apple Pencil → Scribble.

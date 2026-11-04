@@ -28,7 +28,7 @@
   });
   let doc = newDoc('full');
   const view = { x: 0, y: 0, s: 1 };
-  const ui = { tool: 'draw', fingerDraws: false, grid: false, selectedId: null, editingId: null, lastLevel: 'body' };
+  const ui = { zoom: 1, tool: 'draw', fingerDraws: false, grid: false, selectedId: null, editingId: null, lastLevel: 'body' };
   let past = [], future = [], editSnapshot = null;
 
   const snapDoc = () => JSON.stringify(doc);
@@ -69,7 +69,7 @@
   }
   function restore(json) {
     doc = migrate(JSON.parse(json));
-    if (doc.artboard.preset === 'full') { const r = viewportEl.getBoundingClientRect(); doc.artboard.w = Math.round(r.width); doc.artboard.h = Math.round(r.height); }
+    if (doc.artboard.preset === 'full') doc.artboard.w = Math.round(viewportEl.getBoundingClientRect().width);
     if (ui.selectedId && !byId(ui.selectedId)) ui.selectedId = null;
     render(true);
   }
@@ -215,7 +215,7 @@
     const cw = (a.w - 2 * M - (n - 1) * G) / n;
     const xs = [0, a.w];
     for (let i = 0; i < n; i++) { const x = M + i * (cw + G); xs.push(Math.round(x), Math.round(x + cw)); }
-    return { xs, ys: [0, M, a.h - M, a.h] };
+    return { xs, ys: [0, M] };
   }
   function nearestLine(v, lines) {
     let best = null;
@@ -259,7 +259,7 @@
     inkEl.setAttribute('width', a.w);
     inkEl.setAttribute('height', a.h);
     const label = a.preset === 'custom' ? 'Custom' : PS.PRESETS[a.preset].label;
-    $('artboardLabel').textContent = `${label} · ${a.w} × ${a.h}`;
+    $('artboardLabel').textContent = `${label} · ${a.w} px`;
     $('presetSelect').value = a.preset;
     document.querySelectorAll('[data-preset]').forEach((w) => {
       const on = w.dataset.preset === a.preset;
@@ -268,7 +268,6 @@
     });
     worldEl.classList.toggle('is-full', a.preset === 'full');
     if (document.activeElement !== $('abW')) $('abW').value = a.w;
-    if (document.activeElement !== $('abH')) $('abH').value = a.h;
     const cols = columnsFor(a.w);
     if (gridEl.childElementCount !== cols) {
       gridEl.innerHTML = '';
@@ -284,7 +283,8 @@
   function applyView() {
     worldEl.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.s})`;
     worldEl.style.setProperty('--inv', 1 / view.s);
-    $('zoomLabel').textContent = Math.round(view.s * 100) + '%';
+    $('zoomBtn').firstChild.nodeValue = Math.round(view.s * 100) + '% ';
+    document.querySelectorAll('[data-zoom]').forEach((a) => a.classList.toggle('is-current', +a.dataset.zoom === view.s));
     positionInspector();
   }
 
@@ -322,6 +322,7 @@
   function render(force) {
     renderArtboard();
     renderElements(force);
+    updateAutoHeight();
     renderSelection();
     renderInspector();
     clearTimeout(saveTimer);
@@ -340,51 +341,54 @@
   }
 
   /* ─────────────── View ─────────────── */
-  /* Scaling strategy: always 100%. Full screen fills the viewport edge to edge;
-   * fixed resolutions (iPad, Mobile, custom) sit centered at 100% and you pan to see more. */
+  /* Scaling strategy: the scale is only set by the zoom control in the top bar
+   * (100% / 75% / 50%), never by touch. Only the artboard WIDTH is a design decision:
+   * Full screen = the screen's width, edge to edge; presets or a typed width otherwise.
+   * The height is automatic: it fills the screen and grows with the content. */
+  const LABEL_BAND = 32;
+  const ZOOMS = [1, 0.75, 0.5];
   const isFull = () => doc.artboard.preset === 'full';
   function sizeToViewport() {
+    doc.artboard.w = Math.round(viewportEl.getBoundingClientRect().width);
+  }
+  function updateAutoHeight() {
     const r = viewportEl.getBoundingClientRect();
-    doc.artboard.w = Math.round(r.width);
-    doc.artboard.h = Math.round(r.height);
+    let bottom = 0;
+    for (const e of childrenOf(null)) { const rr = rectOf(e.id); bottom = Math.max(bottom, rr.y + rr.h); }
+    const h = Math.max(Math.ceil((r.height - LABEL_BAND) / view.s), Math.ceil(bottom + 64));
+    if (h === doc.artboard.h) return;
+    doc.artboard.h = h;
+    artboardEl.style.height = h + 'px';
+    $('abHandles').style.height = h + 'px';
+    inkEl.setAttribute('viewBox', `0 0 ${doc.artboard.w} ${h}`);
+    inkEl.setAttribute('height', h);
   }
   function fit() {
     const r = viewportEl.getBoundingClientRect();
     const a = doc.artboard;
-    view.s = 1;
+    view.s = ui.zoom;
     worldEl.classList.toggle('is-full', isFull());
-    if (isFull()) {
-      view.x = 0;
-      view.y = 0;
-    } else {
-      const pad = 48;
-      view.x = a.w + pad * 2 <= r.width ? Math.round((r.width - a.w) / 2) : pad;
-      view.y = pad;
-    }
+    view.x = a.w * view.s <= r.width ? Math.round((r.width - a.w * view.s) / 2) : 0;
+    view.y = LABEL_BAND;
     applyView();
+    updateAutoHeight();
+  }
+  function setZoom(z) {
+    ui.zoom = z;
+    fit();
+    renderSelection();
+    positionInspector();
   }
   function setPreset(id) {
     if (id === 'full') { doc.artboard.preset = 'full'; sizeToViewport(); }
     else { const p = PS.PRESETS[id]; setArtboardSize(p.w, p.h, id); }
   }
-  function zoomAt(cx, cy, s) {
-    const r = viewportEl.getBoundingClientRect();
-    const px = cx - r.left, py = cy - r.top;
-    const wx = (px - view.x) / view.s, wy = (py - view.y) / view.s;
-    view.s = clamp(s, 0.1, 4);
-    view.x = px - wx * view.s;
-    view.y = py - wy * view.s;
-    applyView();
-    renderSelection();
-  }
 
   /* ─────────────── Artboard size ─────────────── */
   function setArtboardSize(w, h, preset) {
     w = clamp(Math.round(w), ARTBOARD_MIN, ARTBOARD_MAX);
-    h = clamp(Math.round(h), ARTBOARD_MIN, ARTBOARD_MAX);
-    const match = Object.keys(PS.PRESETS).find((k) => !PS.PRESETS[k].dynamic && PS.PRESETS[k].w === w && PS.PRESETS[k].h === h);
+    const match = Object.keys(PS.PRESETS).find((k) => !PS.PRESETS[k].dynamic && PS.PRESETS[k].w === w);
     doc.artboard.w = w;
-    doc.artboard.h = h;
     doc.artboard.preset = preset || match || 'custom';
   }
 
@@ -568,7 +572,7 @@
       if (gesture && gesture.kind === 'draw') gesture.path.remove();
       dropMarker.remove();
       const [a, b] = touches;
-      gesture = { kind: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y), c0: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, v0: { ...view } };
+      gesture = { kind: 'pinch', c0: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, v0: { ...view } };
       return;
     }
     // a lost pointerup (e.g. the OS took the touch) must not block the next stroke
@@ -657,13 +661,10 @@
       const touches = [...pointers.values()].filter((p) => p.type === 'touch');
       if (touches.length < 2) return;
       const [a, b] = touches;
-      const d = Math.hypot(a.x - b.x, a.y - b.y), c = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-      const r = viewportEl.getBoundingClientRect();
-      const s = clamp(gesture.v0.s * (d / gesture.d0), 0.1, 4);
-      const wx = (gesture.c0.x - r.left - gesture.v0.x) / gesture.v0.s, wy = (gesture.c0.y - r.top - gesture.v0.y) / gesture.v0.s;
-      view.s = s;
-      view.x = c.x - r.left - wx * s;
-      view.y = c.y - r.top - wy * s;
+      // two fingers only pan; the scale is set from the zoom control
+      const c = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      view.x = gesture.v0.x + (c.x - gesture.c0.x);
+      view.y = gesture.v0.y + (c.y - gesture.c0.y);
       applyView();
       renderSelection();
       return;
@@ -687,8 +688,7 @@
     if (g.kind === 'artboard') {
       g.moved = true;
       const w = g.edge.includes('e') ? snap(g.w0 + pt.x - g.start.x) : g.w0;
-      const h = g.edge.includes('s') ? snap(g.h0 + pt.y - g.start.y) : g.h0;
-      setArtboardSize(w, h);
+      setArtboardSize(w);
       renderArtboard(); renderElements(); renderSelection();
       return;
     }
@@ -831,8 +831,8 @@
 
   viewportEl.addEventListener('wheel', (e) => {
     e.preventDefault();
-    if (e.ctrlKey || e.metaKey) zoomAt(e.clientX, e.clientY, view.s * Math.exp(-e.deltaY * 0.01));
-    else { view.x -= e.deltaX; view.y -= e.deltaY; applyView(); }
+    if (e.ctrlKey || e.metaKey) return; // no gesture zoom
+    view.x -= e.deltaX; view.y -= e.deltaY; applyView();
   }, { passive: false });
 
   /* ─────────────── Selection, text toolbar, card panel ─────────────── */
@@ -1166,6 +1166,7 @@
   document.addEventListener('pointerdown', (e) => {
     if (colorPop.classList.contains('is-open') && !colorPop.contains(e.target) && !viewportEl.contains(e.target) && !e.target.closest('.swatch--btn')) closeColor();
     if (!e.target.closest('.menu-anchor')) closeMenu();
+    if (!e.target.closest('.zoom-anchor')) $('zoomMenu').classList.remove('show');
   });
 
   /* ─────────────── Top bar ─────────────── */
@@ -1181,7 +1182,14 @@
   document.querySelectorAll('[data-tool]').forEach((w) => w.addEventListener('click', () => setTool(w.dataset.tool)));
   $('undoBtn').addEventListener('click', undo);
   $('redoBtn').addEventListener('click', redo);
-  $('fitBtn').addEventListener('click', fit);
+  $('zoomBtn').addEventListener('click', () => $('zoomMenu').classList.toggle('show'));
+  $('zoomMenu').addEventListener('click', (e) => {
+    const a = e.target.closest('[data-zoom]');
+    if (!a) return;
+    e.preventDefault();
+    $('zoomMenu').classList.remove('show');
+    setZoom(+a.dataset.zoom);
+  });
   $('gridToggle').addEventListener('click', () => { ui.grid = !ui.grid; renderArtboard(); });
   $('presetSelect').addEventListener('change', (e) => {
     const p = PS.PRESETS[e.target.value];
@@ -1222,13 +1230,14 @@
   $('abClose').addEventListener('click', closeArtboardEdit);
   $('abDone').addEventListener('click', () => { commitSize(); closeArtboardEdit(); });
   const commitSize = () => {
-    const w = parseInt($('abW').value, 10), h = parseInt($('abH').value, 10);
-    if (!(w > 0 && h > 0)) { renderArtboard(); return; }
-    if (w === doc.artboard.w && h === doc.artboard.h) return;
-    mutate(() => setArtboardSize(w, h));
+    const w = parseInt($('abW').value, 10);
+    if (!(w > 0)) { renderArtboard(); return; }
+    if (w === doc.artboard.w) return;
+    mutate(() => setArtboardSize(w));
     fit();
+    if (ui.abEdit) openArtboardEdit();
   };
-  ['abW', 'abH'].forEach((id) => {
+  ['abW'].forEach((id) => {
     $(id).addEventListener('change', commitSize);
     $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $(id).blur(); });
   });
@@ -1316,8 +1325,8 @@
     else if (e.key === 'p' || e.key === 'P') setTool('draw');
     else if (e.key === 'g' || e.key === 'G') { ui.grid = !ui.grid; renderArtboard(); }
     else if (e.key === '0') fit();
-    else if (e.key === '=' || e.key === '+') { const r = viewportEl.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, view.s * 1.2); }
-    else if (e.key === '-') { const r = viewportEl.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, view.s / 1.2); }
+    else if (e.key === '=' || e.key === '+') { const i = ZOOMS.indexOf(ui.zoom); setZoom(ZOOMS[Math.max(0, i - 1)]); }
+    else if (e.key === '-') { const i = ZOOMS.indexOf(ui.zoom); setZoom(ZOOMS[Math.min(ZOOMS.length - 1, i + 1)]); }
   });
   document.addEventListener('keyup', (e) => { if (e.key === ' ') spaceDown = false; });
   function isTyping() {
@@ -1343,11 +1352,10 @@
   renderSelection();
   // Full screen follows the screen (rotation, split view); not an undo step
   window.addEventListener('resize', () => {
-    if (isFull()) { sizeToViewport(); renderArtboard(); renderElements(); save(); }
+    if (isFull()) { sizeToViewport(); renderArtboard(); renderElements(); }
     fit();
     renderSelection();
   });
-  $('zoomLabel').addEventListener('click', fit);
   window.addEventListener('pagehide', save);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
   if (document.fonts) document.fonts.ready.then(() => { renderSelection(); positionInspector(); });
