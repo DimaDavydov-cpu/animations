@@ -894,8 +894,9 @@
       $('fingerState').textContent = ui.fingerDraws ? 'On' : 'Off';
       toast(ui.fingerDraws ? 'Finger draws in Draw mode. Two fingers pan and zoom.' : 'Pencil draws, finger selects');
     }
-    if (act === 'clear' && confirm('Clear the artboard? You can undo this.')) {
+    if (act === 'clear') {
       mutate(() => { doc.elements = []; doc.artboard.bg = '--color-white'; ui.selectedId = null; });
+      toast('Artboard cleared. Undo brings it back');
     }
   });
   $('fileInput').addEventListener('change', async (e) => {
