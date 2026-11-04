@@ -21,6 +21,15 @@ python3 -m http.server 8000
 `npx serve .` works too. The only network request is the Macan font from the Fiverr CDN.
 Without it the app falls back to Helvetica.
 
+## Resolutions and scale
+
+The canvas is always shown at **100%**. Pick the resolution in the top bar:
+
+* **Full screen** (default): the artboard is exactly your screen, edge to edge, and follows rotation
+* **iPad** 834 × 1194 and **Mobile** 390 × 844: fixed size at 100%, centered; pan with two fingers to see the rest
+
+Pinch still zooms. Tap the zoom percentage or the 100% button to go back.
+
 ## How to use
 
 | Gesture | Result |

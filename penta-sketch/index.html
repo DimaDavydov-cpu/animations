@@ -35,10 +35,21 @@
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M12 4l3.5 3.5L12 11M15 7.5H7.5a4.5 4.5 0 000 9H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button></div>
       <span class="topbar__divider"></span>
+      <div class="segmented" role="tablist" aria-label="Resolution">
+        <div class="button small gost" data-preset="full"><button type="button" title="Full screen: the artboard is your screen at 100%">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          Full screen</button></div>
+        <div class="button small gost" data-preset="tablet"><button type="button" title="iPad 834 × 1194 at 100%">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          iPad</button></div>
+        <div class="button small gost" data-preset="mobile"><button type="button" title="Mobile 390 × 844 at 100%">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4.5" y="1.5" width="7" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          Mobile</button></div>
+      </div>
       <div class="button small icon gost" id="gridToggleWrap"><button type="button" id="gridToggle" title="Layout grid (G)" aria-label="Toggle layout grid">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.8 2.5v13M11.2 2.5v13" stroke="currentColor" stroke-width="1.5"/></svg>
       </button></div>
-      <div class="button small icon gost"><button type="button" id="fitBtn" title="Fit to screen (0)" aria-label="Fit to screen">
+      <div class="button small icon gost"><button type="button" id="fitBtn" title="Back to 100% (0)" aria-label="Back to 100%">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 6.5v-4h4M15.5 6.5v-4h-4M2.5 11.5v4h4M15.5 11.5v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button></div>
       <span class="zoom-label" id="zoomLabel">100%</span>
@@ -104,9 +115,9 @@
       </button></div>
     </div>
     <select id="presetSelect" class="select-sm" aria-label="Artboard preset">
-      <option value="desktop">Desktop 1440 × 1024</option>
-      <option value="tablet">Tablet 834 × 1194</option>
+      <option value="tablet">iPad 834 × 1194</option>
       <option value="mobile">Mobile 390 × 844</option>
+      <option value="desktop">Desktop 1440 × 1024</option>
       <option value="custom">Custom</option>
     </select>
     <div class="size-fields" role="group" aria-label="Artboard size in pixels">

@@ -21,12 +21,12 @@
   const PLAINTEXT_OK = (() => { const d = document.createElement('div'); try { d.contentEditable = 'plaintext-only'; } catch (e) { return false; } return d.contentEditable === 'plaintext-only'; })();
 
   /* ─────────────── State ─────────────── */
-  const newDoc = (preset = 'desktop') => ({
+  const newDoc = (preset = 'full') => ({
     version: 2,
-    artboard: { preset, w: PS.PRESETS[preset].w, h: PS.PRESETS[preset].h, bg: '--color-white' },
+    artboard: { preset, w: PS.PRESETS[preset].w || 1194, h: PS.PRESETS[preset].h || 778, bg: '--color-white' },
     elements: [],
   });
-  let doc = newDoc();
+  let doc = newDoc('full');
   const view = { x: 0, y: 0, s: 1 };
   const ui = { tool: 'draw', fingerDraws: false, grid: false, selectedId: null, editingId: null, lastLevel: 'body' };
   let past = [], future = [], editSnapshot = null;
@@ -69,6 +69,7 @@
   }
   function restore(json) {
     doc = migrate(JSON.parse(json));
+    if (doc.artboard.preset === 'full') { const r = viewportEl.getBoundingClientRect(); doc.artboard.w = Math.round(r.width); doc.artboard.h = Math.round(r.height); }
     if (ui.selectedId && !byId(ui.selectedId)) ui.selectedId = null;
     render(true);
   }
@@ -260,6 +261,12 @@
     const label = a.preset === 'custom' ? 'Custom' : PS.PRESETS[a.preset].label;
     $('artboardLabel').textContent = `${label} · ${a.w} × ${a.h}`;
     $('presetSelect').value = a.preset;
+    document.querySelectorAll('[data-preset]').forEach((w) => {
+      const on = w.dataset.preset === a.preset;
+      w.classList.toggle('gost', !on);
+      w.classList.toggle('is-current', on);
+    });
+    worldEl.classList.toggle('is-full', a.preset === 'full');
     if (document.activeElement !== $('abW')) $('abW').value = a.w;
     if (document.activeElement !== $('abH')) $('abH').value = a.h;
     const cols = columnsFor(a.w);
@@ -333,14 +340,32 @@
   }
 
   /* ─────────────── View ─────────────── */
+  /* Scaling strategy: always 100%. Full screen fills the viewport edge to edge;
+   * fixed resolutions (iPad, Mobile, custom) sit centered at 100% and you pan to see more. */
+  const isFull = () => doc.artboard.preset === 'full';
+  function sizeToViewport() {
+    const r = viewportEl.getBoundingClientRect();
+    doc.artboard.w = Math.round(r.width);
+    doc.artboard.h = Math.round(r.height);
+  }
   function fit() {
     const r = viewportEl.getBoundingClientRect();
-    const pad = 56;
     const a = doc.artboard;
-    view.s = clamp(Math.min((r.width - pad * 2) / a.w, (r.height - pad * 2) / a.h), 0.1, 1);
-    view.x = (r.width - a.w * view.s) / 2;
-    view.y = Math.max(pad, (r.height - a.h * view.s) / 2);
+    view.s = 1;
+    worldEl.classList.toggle('is-full', isFull());
+    if (isFull()) {
+      view.x = 0;
+      view.y = 0;
+    } else {
+      const pad = 48;
+      view.x = a.w + pad * 2 <= r.width ? Math.round((r.width - a.w) / 2) : pad;
+      view.y = pad;
+    }
     applyView();
+  }
+  function setPreset(id) {
+    if (id === 'full') { doc.artboard.preset = 'full'; sizeToViewport(); }
+    else { const p = PS.PRESETS[id]; setArtboardSize(p.w, p.h, id); }
   }
   function zoomAt(cx, cy, s) {
     const r = viewportEl.getBoundingClientRect();
@@ -357,7 +382,7 @@
   function setArtboardSize(w, h, preset) {
     w = clamp(Math.round(w), ARTBOARD_MIN, ARTBOARD_MAX);
     h = clamp(Math.round(h), ARTBOARD_MIN, ARTBOARD_MAX);
-    const match = Object.keys(PS.PRESETS).find((k) => PS.PRESETS[k].w === w && PS.PRESETS[k].h === h);
+    const match = Object.keys(PS.PRESETS).find((k) => !PS.PRESETS[k].dynamic && PS.PRESETS[k].w === w && PS.PRESETS[k].h === h);
     doc.artboard.w = w;
     doc.artboard.h = h;
     doc.artboard.preset = preset || match || 'custom';
@@ -1161,10 +1186,17 @@
   $('presetSelect').addEventListener('change', (e) => {
     const p = PS.PRESETS[e.target.value];
     if (!p) { renderArtboard(); return; }
-    mutate(() => setArtboardSize(p.w, p.h, e.target.value));
+    mutate(() => setPreset(e.target.value));
     fit();
     if (ui.abEdit) openArtboardEdit();
   });
+  document.querySelectorAll('[data-preset]').forEach((w) => w.addEventListener('click', () => {
+    const id = w.dataset.preset;
+    closeArtboardEdit();
+    if (id !== doc.artboard.preset) mutate(() => setPreset(id));
+    fit();
+    renderSelection();
+  }));
   function openArtboardEdit() {
     blurEditing();
     closeColor();
@@ -1303,12 +1335,19 @@
 
   /* ─────────────── Boot ─────────────── */
   load();
+  if (isFull()) sizeToViewport();
   buildRamps();
   setTool('draw');
   render(true);
   fit();
   renderSelection();
-  window.addEventListener('resize', () => { fit(); renderSelection(); });
+  // Full screen follows the screen (rotation, split view); not an undo step
+  window.addEventListener('resize', () => {
+    if (isFull()) { sizeToViewport(); renderArtboard(); renderElements(); save(); }
+    fit();
+    renderSelection();
+  });
+  $('zoomLabel').addEventListener('click', fit);
   window.addEventListener('pagehide', save);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
   if (document.fonts) document.fonts.ready.then(() => { renderSelection(); positionInspector(); });

@@ -449,3 +449,10 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .ab-popover .num-input { width: 96px; }
 .ab-popover__tip { margin: 0; font-size: var(--text-xs); line-height: 18px; color: var(--foreground-secondary); }
 .ab-popover .button.small button { width: 100%; }
+
+/* Full screen: the artboard is the viewport, edge to edge at 100% */
+.world.is-full .artboard { box-shadow: none; }
+.world.is-full .artboard-label, .world.is-full .ab-handles { display: none; }
+.zoom-label { cursor: pointer; }
+@media (max-width: 1100px) { .topbar__title { display: none; } }
+@media (max-width: 900px) { [data-preset] button svg { display: none; } }

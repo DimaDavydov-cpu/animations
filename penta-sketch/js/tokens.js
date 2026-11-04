@@ -90,10 +90,12 @@
   ];
 
   /* Artboard presets with the Penta column grid (12 / 8 / 4, gutter 16, margin 32). */
+  /* full = the artboard is the screen itself (size follows the viewport, 100% scale) */
   PS.PRESETS = {
-    desktop: { label: 'Desktop', w: 1440, h: 1024, columns: 12 },
-    tablet: { label: 'Tablet', w: 834, h: 1194, columns: 8 },
+    full: { label: 'Full screen', dynamic: true },
+    tablet: { label: 'iPad', w: 834, h: 1194, columns: 8 },
     mobile: { label: 'Mobile', w: 390, h: 844, columns: 4 },
+    desktop: { label: 'Desktop', w: 1440, h: 1024, columns: 12 },
   };
   PS.GRID = { gutter: 16, margin: 32, snap: 8 };
 
