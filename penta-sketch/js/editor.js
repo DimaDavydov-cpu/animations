@@ -205,6 +205,48 @@
 
   function columnsFor(w) { return w >= 1024 ? 12 : w >= 600 ? 8 : 4; }
 
+  /* ─────────────── Grid snapping ───────────────
+   * Card edges snap to the layout grid (column edges, page margins, artboard edges)
+   * when within GRID_SNAP design px; otherwise they fall back to the 8px grid. */
+  const GRID_SNAP = 20;
+  function gridLines() {
+    const a = doc.artboard, n = columnsFor(a.w), M = PS.GRID.margin, G = PS.GRID.gutter;
+    const cw = (a.w - 2 * M - (n - 1) * G) / n;
+    const xs = [0, a.w];
+    for (let i = 0; i < n; i++) { const x = M + i * (cw + G); xs.push(Math.round(x), Math.round(x + cw)); }
+    return { xs, ys: [0, M, a.h - M, a.h] };
+  }
+  function nearestLine(v, lines) {
+    let best = null;
+    for (const l of lines) { const d = Math.abs(v - l); if (!best || d < best.d) best = { line: l, d }; }
+    return best && best.d <= GRID_SNAP ? best : null;
+  }
+  /* one moving edge (resize / drawn edge) */
+  function snapEdge(v, lines, guides) {
+    const n = nearestLine(v, lines);
+    if (n) { guides.push(n.line); return n.line; }
+    return snap(v);
+  }
+  /* a whole span moving together (drag): snap whichever edge is closer */
+  function snapSpan(v1, v2, lines, guides) {
+    const a = nearestLine(v1, lines), b = nearestLine(v2, lines);
+    if (a && (!b || a.d <= b.d)) { guides.push(a.line); return a.line; }
+    if (b) { guides.push(b.line); return v1 + (b.line - v2); }
+    return snap(v1);
+  }
+  function showGuides(gx, gy) {
+    selectionEl.querySelectorAll('.snap-guide').forEach((n) => n.remove());
+    const a = doc.artboard;
+    gx.forEach((x) => { const d = document.createElement('div'); d.className = 'snap-guide snap-guide--v'; d.style.left = x + 'px'; d.style.height = a.h + 'px'; selectionEl.appendChild(d); });
+    gy.forEach((y) => { const d = document.createElement('div'); d.className = 'snap-guide snap-guide--h'; d.style.top = y + 'px'; d.style.width = a.w + 'px'; selectionEl.appendChild(d); });
+  }
+  let guideTimer = null;
+  function flashGuides(gx, gy) {
+    showGuides(gx, gy);
+    clearTimeout(guideTimer);
+    guideTimer = setTimeout(() => showGuides([], []), 700);
+  }
+
   function renderArtboard() {
     const a = doc.artboard;
     artboardEl.style.width = a.w + 'px';
@@ -349,11 +391,22 @@
     }
   }
 
+  let createGuides = null;
   function createCard(r) {
-    const x = snap(r.x), y = snap(r.y);
-    const w = Math.max(SNAP * 3, snap(r.x + r.w) - x), h = Math.max(SNAP * 3, snap(r.y + r.h) - y);
+  createGuides = null;
+    let x = snap(r.x), y = snap(r.y);
+    let w = Math.max(SNAP * 3, snap(r.x + r.w) - x), h = Math.max(SNAP * 3, snap(r.y + r.h) - y);
+    const parent = containerFor({ x, y, w, h });
+    if (!parent) {
+      // a top-level card's drawn edges snap to the layout grid
+      const L = gridLines(), gx = [], gy = [];
+      const x1 = snapEdge(r.x, L.xs, gx), x2 = snapEdge(r.x + r.w, L.xs, gx);
+      const y1 = snapEdge(r.y, L.ys, gy), y2 = snapEdge(r.y + r.h, L.ys, gy);
+      if (x2 - x1 >= SNAP * 3) { x = x1; w = x2 - x1; }
+      if (y2 - y1 >= SNAP * 3) { y = y1; h = y2 - y1; }
+      createGuides = [gx, gy];
+    }
     const rect = { x, y, w, h };
-    const parent = containerFor(rect);
     const card = {
       id: uid(), type: 'card', parent: parent ? parent.id : null, x, y, w, h,
       fill: '--color-white', border: 'secondary', radius: 'lg', elevation: 'none',
@@ -387,6 +440,7 @@
         .forEach((o) => placeInto(o.e, card, Infinity));
       ui.selectedId = card.id;
     });
+    if (createGuides && (createGuides[0].length || createGuides[1].length)) flashGuides(createGuides[0], createGuides[1]);
     const node = nodes.get(card.id);
     if (node) { node.classList.add('el--enter'); setTimeout(() => node.classList.remove('el--enter'), 400); }
   }
@@ -474,6 +528,8 @@
     const role = roleFor(e);
     const editable = e.target.closest('.el-text__edit');
     const abHandle = e.target.closest('[data-ab-handle]');
+    if (e.target.closest('#artboardLabel')) { e.preventDefault(); openArtboardEdit(); return; }
+    if (ui.abEdit && !abHandle) { closeArtboardEdit(); if (e.pointerType !== 'pen') return; }
 
     // Pencil / mouse on a text box: hand over to the browser (Scribble, caret).
     if (role === 'draw' && editable && !abHandle) return;
@@ -617,10 +673,23 @@
       if (!g.moved) { g.moved = true; blurEditing(); ui.selectedId = g.elId; node.classList.add('is-dragging'); hideInspector(); selectionEl.innerHTML = ''; }
       const dx = pt.x - g.start.x, dy = pt.y - g.start.y;
       const el = byId(g.elId);
-      const sdx = el.parent ? dx : snap(g.rect0.x + dx) - g.rect0.x, sdy = el.parent ? dy : snap(g.rect0.y + dy) - g.rect0.y;
+      updateDropTarget(g, e.clientX, e.clientY, pt);
+      let sdx = dx, sdy = dy;
+      const gx = [], gy = [];
+      if (!g.target) {
+        // landing on the artboard: snap to the layout grid, else to 8px
+        const r = g.rect0, L = gridLines();
+        if (el.type === 'card') {
+          sdx = snapSpan(r.x + dx, r.x + r.w + dx, L.xs, gx) - r.x;
+          sdy = snapSpan(r.y + dy, r.y + r.h + dy, L.ys, gy) - r.y;
+        } else {
+          sdx = snapEdge(r.x + dx, L.xs, gx) - r.x;
+          sdy = snap(r.y + dy) - r.y;
+        }
+      }
+      showGuides(gx, gy);
       node.style.transform = `translate(${sdx}px, ${sdy}px)`;
       g.dx = sdx; g.dy = sdy;
-      updateDropTarget(g, e.clientX, e.clientY, pt);
       return;
     }
     if (g.kind === 'resize') {
@@ -629,11 +698,14 @@
       const dx = pt.x - g.start.x, dy = pt.y - g.start.y;
       if (!el.parent) {
         let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
-        if (g.handle.includes('w')) x1 = Math.min(snap(o.x + dx), x2 - min);
-        if (g.handle.includes('e')) x2 = Math.max(snap(o.x + o.w + dx), x1 + min);
-        if (g.handle.includes('n')) y1 = Math.min(snap(o.y + dy), y2 - min);
-        if (g.handle.includes('s')) y2 = Math.max(snap(o.y + o.h + dy), y1 + min);
+        const L = gridLines(), gx = [], gy = [];
+        if (g.handle.includes('w')) x1 = Math.min(snapEdge(o.x + dx, L.xs, gx), x2 - min);
+        if (g.handle.includes('e')) x2 = Math.max(snapEdge(o.x + o.w + dx, L.xs, gx), x1 + min);
+        if (g.handle.includes('n')) y1 = Math.min(snapEdge(o.y + dy, L.ys, gy), y2 - min);
+        if (g.handle.includes('s')) y2 = Math.max(snapEdge(o.y + o.h + dy, L.ys, gy), y1 + min);
         Object.assign(el, { x: x1, y: y1, w: x2 - x1, h: y2 - y1, sizeW: 'fixed', sizeH: 'fixed' });
+        renderElements(); renderSelection(); hideInspector(); showGuides(gx, gy);
+        return;
       } else {
         if (Math.abs(dx) >= SNAP / 2) { el.w = Math.max(min, snap(o.w + dx)); el.sizeW = 'fixed'; }
         if (Math.abs(dy) >= SNAP / 2) { el.h = Math.max(min, snap(o.h + dy)); el.sizeH = 'fixed'; }
@@ -707,7 +779,7 @@
       } else {
         const r = g.rect0;
         const wasChild = !!el.parent;
-        el.x = snap(r.x + g.dx); el.y = snap(r.y + g.dy);
+        el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy);
         if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snap(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
       }
@@ -1091,7 +1163,32 @@
     if (!p) { renderArtboard(); return; }
     mutate(() => setArtboardSize(p.w, p.h, e.target.value));
     fit();
+    if (ui.abEdit) openArtboardEdit();
   });
+  function openArtboardEdit() {
+    blurEditing();
+    closeColor();
+    select(null);
+    ui.abEdit = true;
+    worldEl.classList.add('is-ab-edit');
+    const pop = $('artboardPop');
+    pop.classList.add('is-open');
+    renderArtboard();
+    const r = $('artboardLabel').getBoundingClientRect();
+    const pr = pop.getBoundingClientRect();
+    const x = clamp(r.left, 8, window.innerWidth - pr.width - 8);
+    const y = clamp(r.bottom + 8, 8, window.innerHeight - pr.height - 8);
+    pop.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+  }
+  function closeArtboardEdit() {
+    if (!ui.abEdit) return;
+    ui.abEdit = false;
+    worldEl.classList.remove('is-ab-edit');
+    $('artboardPop').classList.remove('is-open');
+    document.activeElement && document.activeElement.blur && document.activeElement.blur();
+  }
+  $('abClose').addEventListener('click', closeArtboardEdit);
+  $('abDone').addEventListener('click', () => { commitSize(); closeArtboardEdit(); });
   const commitSize = () => {
     const w = parseInt($('abW').value, 10), h = parseInt($('abH').value, 10);
     if (!(w > 0 && h > 0)) { renderArtboard(); return; }
@@ -1182,7 +1279,7 @@
     if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); if (ui.selectedId) duplicate(ui.selectedId); return; }
     if (mod) return;
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeSelected(); }
-    else if (e.key === 'Escape') { closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
+    else if (e.key === 'Escape') { closeArtboardEdit(); closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
     else if (e.key === 'v' || e.key === 'V') setTool('select');
     else if (e.key === 'p' || e.key === 'P') setTool('draw');
     else if (e.key === 'g' || e.key === 'G') { ui.grid = !ui.grid; renderArtboard(); }

@@ -35,17 +35,6 @@
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M12 4l3.5 3.5L12 11M15 7.5H7.5a4.5 4.5 0 000 9H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button></div>
       <span class="topbar__divider"></span>
-      <select id="presetSelect" class="select-sm" aria-label="Artboard size">
-        <option value="desktop">Desktop 1440</option>
-        <option value="tablet">Tablet 834</option>
-        <option value="mobile">Mobile 390</option>
-        <option value="custom">Custom</option>
-      </select>
-      <div class="size-fields" role="group" aria-label="Artboard size in pixels">
-        <div class="input num-input"><input type="number" id="abW" inputmode="numeric" min="240" max="4000" step="8" aria-label="Artboard width"></div>
-        <span class="size-fields__x">×</span>
-        <div class="input num-input"><input type="number" id="abH" inputmode="numeric" min="240" max="4000" step="8" aria-label="Artboard height"></div>
-      </div>
       <div class="button small icon gost" id="gridToggleWrap"><button type="button" id="gridToggle" title="Layout grid (G)" aria-label="Toggle layout grid">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.8 2.5v13M11.2 2.5v13" stroke="currentColor" stroke-width="1.5"/></svg>
       </button></div>
@@ -80,7 +69,7 @@
         <svg class="ink" id="ink" aria-hidden="true"></svg>
         <div class="selection" id="selection" aria-hidden="true"></div>
       </div>
-      <div class="artboard-label" id="artboardLabel"></div>
+      <button type="button" class="artboard-label" id="artboardLabel" title="Tap to change the artboard size"></button>
       <div class="ab-handles" id="abHandles" aria-hidden="true">
         <div class="ab-handle ab-handle--e" data-ab-handle="e" title="Drag to resize width"></div>
         <div class="ab-handle ab-handle--s" data-ab-handle="s" title="Drag to resize height"></div>
@@ -105,6 +94,28 @@
 
   <!-- ═══════════════ Floating text toolbar ═══════════════ -->
   <div class="inspector" id="inspector" role="toolbar" aria-label="Element properties"></div>
+
+  <!-- ═══════════════ Artboard size (opened from the artboard title) ═══════════════ -->
+  <div class="popover ab-popover" id="artboardPop" role="dialog" aria-label="Artboard size">
+    <div class="color-popover__head">
+      <span class="color-popover__title">Artboard size</span>
+      <div class="button small icon gost"><button type="button" id="abClose" aria-label="Done">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button></div>
+    </div>
+    <select id="presetSelect" class="select-sm" aria-label="Artboard preset">
+      <option value="desktop">Desktop 1440 × 1024</option>
+      <option value="tablet">Tablet 834 × 1194</option>
+      <option value="mobile">Mobile 390 × 844</option>
+      <option value="custom">Custom</option>
+    </select>
+    <div class="size-fields" role="group" aria-label="Artboard size in pixels">
+      <label class="size-fields__item"><span>W</span><div class="input num-input"><input type="number" id="abW" inputmode="numeric" min="240" max="4000" step="8" aria-label="Artboard width"></div></label>
+      <label class="size-fields__item"><span>H</span><div class="input num-input"><input type="number" id="abH" inputmode="numeric" min="240" max="4000" step="8" aria-label="Artboard height"></div></label>
+    </div>
+    <p class="ab-popover__tip">Or drag the handles on the artboard's right and bottom edges.</p>
+    <div class="button small"><button type="button" id="abDone">Done</button></div>
+  </div>
 
   <!-- ═══════════════ Color picker ═══════════════ -->
   <div class="popover color-popover" id="colorPopover" role="dialog" aria-label="Choose color">
@@ -160,7 +171,7 @@
         <dt>Edit text</dt><dd>Write over existing text with Pencil. Scratch out words to delete them (Scribble gestures).</dd>
         <dt>Background</dt><dd>Tap the empty artboard with your finger to choose its color. Use the hex field for exact values.</dd>
         <dt>Select / move</dt><dd>Finger tap selects. Drag an item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers pan and pinch to zoom.</dd>
-        <dt>Artboard size</dt><dd>Drag the handles on the artboard's right and bottom edges, type exact W × H in the top bar, or pick a preset.</dd>
+        <dt>Artboard size</dt><dd>Tap the artboard title above its top-left corner. Pick a preset, type exact W × H, or drag the edge handles that appear. Tap Done when finished.</dd><dt>Grid snapping</dt><dd>Card edges snap to the layout grid's columns and margins when within 20 px. A red guide shows the line they snapped to.</dd>
         <dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>
       </dl>
     </div>

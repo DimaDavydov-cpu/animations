@@ -32,7 +32,8 @@ Without it the app falls back to Helvetica.
 | Text toolbar | Display, H1, H2, H3, H4, Subtitle, Body, Body S, Caption, Overline + color role |
 | Finger tap on the empty artboard | Background color picker: Penta palette + exact hex (shows the token name, or flags off-system values) |
 | Finger drag an item | Reorders it in its stack, moves it into another card, or out onto the artboard |
-| Artboard edge handles / W × H fields | Resize the artboard (or pick a preset) |
+| Tap the artboard title (above its top-left corner) | Opens size editing: preset, exact W × H, and edge handles to drag. Size is not editable otherwise |
+| Draw / move / resize a card near the layout grid | Its edges snap to column edges, page margins and artboard edges within 20 px (red guide). Otherwise 8 px snapping |
 | Two fingers | Pan and pinch zoom |
 | Write over existing text with Pencil | Edit it. Scratch out words to delete them (Scribble gestures) |
 
