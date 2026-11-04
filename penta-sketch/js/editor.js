@@ -646,6 +646,7 @@
     ui.editingId = node.dataset.id;
     ui.selectedId = node.dataset.id;
     if (editSnapshot == null) editSnapshot = snapDoc();
+    ui.panelHidden = false;
     node.classList.add('is-editing');
     renderElements();
     renderSelection();
@@ -1110,7 +1111,7 @@
     if ((el ? el.id : null) !== ui.panelFor) { if (el) ui.panelHidden = false; ui.panelFor = el ? el.id : null; }
     panelEl.classList.toggle('is-open', !!el && el.type === 'card' && !ui.panelHidden);
     if (!el) { hideInspector(); return; }
-    if (el.type === 'text') renderTextToolbar(el);
+    if (el.type === 'text') { if (ui.panelHidden) hideInspector(); else renderTextToolbar(el); }
     else { hideInspector(); renderCardPanel(el); }
   }
 
@@ -1129,6 +1130,8 @@
     inspectorEl.appendChild(g('Color', selectCtl('Text color', PS.TEXT_COLORS, el.color, (v) => mutate(() => { el.color = v; }))));
     const tools = [iconBtn(ICON_DUP, 'Duplicate', () => duplicate(el.id)), iconBtn(ICON_TRASH, 'Delete', () => removeSelected())];
     if (el.parent) tools.unshift(iconBtn(ICON_UP, 'Select parent card', () => { blurEditing(); select(el.parent); }));
+    // close hides the toolbar only: the text stays selected (and in editing, if it was)
+    tools.push(iconBtn(ICON_CLOSE, 'Close toolbar', () => { ui.panelHidden = true; renderInspector(); }));
     inspectorEl.appendChild(g(null, ...tools));
     inspectorEl.classList.add('is-open');
     positionInspector();

@@ -38,7 +38,7 @@ Without it the app falls back to Helvetica.
 * Inside a horizontal stack or a **Grid** stack, cards **Fill** by default and share the space. Set one to Fixed and it keeps its width while the others resize around it
 * **Grid stack columns**: *Count* (2 to 6 fixed columns) or *Auto-fit*: `repeat(auto-fit, minmax(MIN, 1fr))`, where MIN is a number in px, %, vw, vh or rem. On the canvas vw / vh mean the canvas width / visible height (it behaves like an iframe). Exported CSS keeps the real units
 * **Mobile reflow** (4-column grid): cards narrower than 5 of 12 columns that sit beside a main card (more than half the grid) move under it, stacked in reading order at the main card's width, and the main card spans the full mobile width. Content below moves down. This is display only: Adaptive / iPad show the original layout
-* Closing the card panel (×) keeps the card selected: you can still resize or drag it, and tapping it again brings the panel back. Tap empty canvas to deselect
+* Closing the card panel or the text toolbar (×) keeps the item selected: you can still resize, drag or keep writing, and tapping it again (finger or Pencil) brings the controls back. Tap empty canvas to deselect
 * To move an item with a finger: tap it to select it, then drag. A finger drag on anything else scrolls the page
 * Settings panels are dark, compact, and can be dragged by their header / grip. They always stay inside the visible area below the top bar
 
