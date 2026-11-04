@@ -26,7 +26,16 @@ Without it the app falls back to Helvetica.
 * **Adaptive** (default): the artboard is your screen's width, edge to edge, and follows rotation
 * **iPad** 834 and **Mobile** 390 in the top bar, or tap the artboard title to type any width or drag its right edge
 * Only the width is a design decision. The height is automatic: it fills the screen and grows with your content
-* **Scale** is set only from the percentage control in the top bar: 100%, 75% or 50%. Touch never changes it; two fingers just pan
+* **Scale** is set only from the percentage control in the top bar: 100%, 75% or 50%. Touch never changes it
+* The canvas does not pan: the page **scrolls** like a web page (finger or trackpad), and the artboard sits in it like a resizable iframe
+
+## Cards and the grid
+
+* A card whose edges snap onto the layout grid is **bound to those columns** (Width: Columns). When the artboard width changes it keeps spanning the same columns
+* Width **Fixed** keeps the px width whatever the artboard does. **Hug** fits the content
+* Inside a horizontal stack or a **Grid** stack, cards **Fill** by default and share the space. Set one to Fixed and it keeps its width while the others resize around it
+* To move an item with a finger: tap it to select it, then drag. A finger drag on anything else scrolls the page
+* Settings panels are dark, compact, and can be dragged by their header / grip
 
 ## How to use
 
@@ -41,7 +50,7 @@ Without it the app falls back to Helvetica.
 | Finger drag an item | Reorders it in its stack, moves it into another card, or out onto the artboard |
 | Tap the artboard title (above its top-left corner) | Opens size editing: preset, exact W × H, and edge handles to drag. Size is not editable otherwise |
 | Draw / move / resize a card near the layout grid | Its edges snap to column edges, page margins and artboard edges within 20 px (red guide). Otherwise 8 px snapping |
-| Two fingers | Pan (scale only changes from the top-bar control) |
+| Finger drag on the background | Scrolls the page |
 | Write over existing text with Pencil | Edit it. Scratch out words to delete them (Scribble gestures) |
 
 Scribble must be on: iPad Settings → Apple Pencil → Scribble.

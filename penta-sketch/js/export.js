@@ -7,8 +7,25 @@
   PS.colorCss = (v) => (!v ? 'transparent' : v.startsWith('--') ? `var(${v})` : v);
 
   /* Card as a flex stack: direction, gap, padding, alignment. */
-  PS.stackCss = function (el) {
+  /* kids: the card's children in order (Grid uses them to build its column tracks:
+   * a Fixed-width child keeps its px track, every other column shares the rest). */
+  PS.stackCss = function (el, kids = []) {
     const L = el.layout;
+    if (L.dir === 'grid') {
+      const n = L.cols || 2;
+      const tracks = [];
+      for (let i = 0; i < n; i++) {
+        const k = kids[i];
+        tracks.push(k && k.type === 'card' && k.sizeW === 'fixed' ? `${k.w}px` : 'minmax(0, 1fr)');
+      }
+      return [
+        ['display', 'grid'],
+        ['grid-template-columns', tracks.join(' ')],
+        ['gap', `var(${L.gap})`],
+        ['padding', `var(${L.padY}) var(${L.padX})`],
+        ['align-items', L.align],
+      ];
+    }
     const out = [
       ['display', 'flex'],
       ['flex-direction', L.dir],
@@ -39,6 +56,7 @@
     if (!parent) {
       out.push(['position', 'absolute'], ['left', el.x + 'px'], ['top', el.y + 'px']);
       if (el.type === 'card') {
+        // 'cols': width derived from the layout grid columns it spans (x/w kept in sync)
         out.push(['width', el.sizeW === 'hug' ? 'max-content' : el.w + 'px']);
         out.push(el.sizeH === 'hug' ? ['min-height', '24px'] : ['height', el.h + 'px']);
       }
@@ -46,6 +64,15 @@
     }
     out.push(['position', 'relative']);
     if (el.type !== 'card') { out.push(['min-width', '0']); return out; }
+    if (parent.layout.dir === 'grid') {
+      // grid cell: Fixed width is the column track itself; Fill/Hug live inside the cell
+      if (el.sizeW === 'hug') out.push(['justify-self', 'start']);
+      out.push(['min-width', '0']);
+      if (el.sizeH === 'fixed') out.push(['height', el.h + 'px']);
+      else if (el.sizeH === 'fill') out.push(['align-self', 'stretch']);
+      else if (parent.layout.align === 'stretch') out.push(['align-self', 'start']);
+      return out;
+    }
     const row = parent.layout.dir === 'row';
     const main = row ? el.sizeW : el.sizeH, cross = row ? el.sizeH : el.sizeW;
     const mainProp = row ? 'width' : 'height', crossProp = row ? 'height' : 'width';
@@ -94,7 +121,7 @@
       const parent = el.parent ? index.get(el.parent) : null;
       const pad = '  '.repeat(depth);
       if (el.type === 'card') {
-        const style = toStyle([...PS.sizeCss(el, parent), ...PS.stackCss(el), ...PS.skinCss(el)]);
+        const style = toStyle([...PS.sizeCss(el, parent), ...PS.stackCss(el, kids.get(el.id) || []), ...PS.skinCss(el)]);
         const inner = render(el.id, depth + 1);
         return `${pad}<div class="card" style="${style}">${inner ? '\n' + inner + '\n' + pad : ''}</div>`;
       }

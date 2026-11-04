@@ -112,7 +112,9 @@
   PS.DIRECTIONS = [
     { id: 'column', label: 'Vertical', icon: '↓' },
     { id: 'row', label: 'Horizontal', icon: '→' },
+    { id: 'grid', label: 'Grid', icon: '▦' },
   ];
+  PS.GRID_COLS = [2, 3, 4, 5, 6];
   PS.ALIGNS = [
     { id: 'flex-start', label: 'Start' },
     { id: 'center', label: 'Center' },
@@ -130,5 +132,5 @@
     { id: 'fill', label: 'Fill' },
     { id: 'hug', label: 'Hug' },
   ];
-  PS.defaultLayout = () => ({ dir: 'column', gap: '--space-4', padX: '--space-6', padY: '--space-6', align: 'stretch', justify: 'flex-start', wrap: false });
+  PS.defaultLayout = () => ({ dir: 'column', gap: '--space-4', padX: '--space-6', padY: '--space-6', align: 'stretch', justify: 'flex-start', wrap: false, cols: 2 });
 })();

@@ -89,7 +89,7 @@
   /* ─────────────── Geometry & tree helpers ─────────────── */
   function toArtboard(cx, cy) {
     const r = viewportEl.getBoundingClientRect();
-    return { x: (cx - r.left - view.x) / view.s, y: (cy - r.top - view.y) / view.s };
+    return { x: (cx - r.left + viewportEl.scrollLeft - view.x) / view.s, y: (cy - r.top + viewportEl.scrollTop - view.y) / view.s };
   }
   /* element rect in artboard coordinates, measured from the DOM (works for flowed children) */
   function rectOf(id) {
@@ -119,10 +119,11 @@
   /* where along the stack's main axis a point falls */
   function insertionIndex(card, pt, excludeId) {
     const sibs = childrenOf(card.id).filter((s) => s.id !== excludeId);
-    const row = card.layout.dir === 'row';
+    const row = card.layout.dir !== 'column';
+    const rows = card.layout.dir === 'grid' || (row && card.layout.wrap);
     for (let i = 0; i < sibs.length; i++) {
       const r = rectOf(sibs[i].id);
-      if (row && card.layout.wrap && (pt.y < r.y || pt.y > r.y + r.h)) { if (pt.y < r.y) return i; continue; }
+      if (rows && (pt.y < r.y || pt.y > r.y + r.h)) { if (pt.y < r.y) return i; continue; }
       const mid = row ? r.x + r.w / 2 : r.y + r.h / 2;
       if ((row ? pt.x : pt.y) < mid) return i;
     }
@@ -169,6 +170,7 @@
   }
 
   function renderElements(force) {
+    applyColumnBindings();
     const kids = new Map();
     for (const e of doc.elements) { const k = e.parent || ''; if (!kids.has(k)) kids.set(k, []); kids.get(k).push(e); }
     const seen = new Set();
@@ -185,7 +187,7 @@
         const ref = container.children[i];
         if (ref !== node) container.insertBefore(node, ref || null);
         if (el.type === 'card') {
-          applyCss(node, [...PS.sizeCss(el, parent), ...PS.stackCss(el), ...PS.skinCss(el)]);
+          applyCss(node, [...PS.sizeCss(el, parent), ...PS.stackCss(el, kids.get(el.id) || []), ...PS.skinCss(el)]);
           const ch = kids.get(el.id) || [];
           place(node, ch, el);
           while (node.children.length > ch.length) node.lastChild.remove();
@@ -213,9 +215,41 @@
   function gridLines() {
     const a = doc.artboard, n = columnsFor(a.w), M = PS.GRID.margin, G = PS.GRID.gutter;
     const cw = (a.w - 2 * M - (n - 1) * G) / n;
-    const xs = [0, a.w];
-    for (let i = 0; i < n; i++) { const x = M + i * (cw + G); xs.push(Math.round(x), Math.round(x + cw)); }
-    return { xs, ys: [0, M] };
+    const colStarts = [], colEnds = [];
+    for (let i = 0; i < n; i++) { const x = M + i * (cw + G); colStarts.push(Math.round(x)); colEnds.push(Math.round(x + cw)); }
+    // left edges snap to column starts (or the artboard edge), right edges to column ends
+    return { n, colStarts, colEnds, starts: [0, ...colStarts], ends: [...colEnds, a.w], xs: [0, a.w, ...colStarts, ...colEnds], ys: [0, M] };
+  }
+
+  /* A top-level card whose edges sit on the grid is BOUND to those columns (sizeW 'cols'):
+   * when the artboard width changes, it keeps spanning the same columns. -1 / n = bleed edge. */
+  function bindToColumns(el) {
+    if (!el || el.type !== 'card' || el.parent || el.sizeW === 'hug') return;
+    const L = gridLines(), x1 = el.x, x2 = el.x + el.w;
+    const start = x1 === 0 ? -1 : L.colStarts.indexOf(x1);
+    const end = x2 === doc.artboard.w ? L.n : L.colEnds.indexOf(x2);
+    if (start !== -1 || x1 === 0) {
+      if (end !== -1 && (start === -1 ? 0 : start) <= (end === L.n ? L.n - 1 : end) && !el.lockW) {
+        el.sizeW = 'cols';
+        el.col = { start, end, of: L.n };
+        return;
+      }
+    }
+    if (el.sizeW === 'cols') el.sizeW = 'fixed';
+  }
+  function colSpanRect(col) {
+    const L = gridLines(), n = L.n;
+    const map = (i, isEnd) => (i === -1 ? -1 : i === col.of ? n : clamp(Math.round(((i + (isEnd ? 1 : 0)) / col.of) * n) - (isEnd ? 1 : 0), 0, n - 1));
+    let s = map(col.start, false), e = map(col.end, true);
+    if (s !== -1 && e !== n && e < s) e = s;
+    const x1 = s === -1 ? 0 : L.colStarts[s];
+    const x2 = e === n ? doc.artboard.w : L.colEnds[e];
+    return { x: x1, w: Math.max(SNAP * 3, x2 - x1) };
+  }
+  function applyColumnBindings() {
+    for (const el of doc.elements) {
+      if (el.type === 'card' && !el.parent && el.sizeW === 'cols' && el.col) Object.assign(el, colSpanRect(el.col));
+    }
   }
   function nearestLine(v, lines) {
     let best = null;
@@ -229,8 +263,8 @@
     return snap(v);
   }
   /* a whole span moving together (drag): snap whichever edge is closer */
-  function snapSpan(v1, v2, lines, guides) {
-    const a = nearestLine(v1, lines), b = nearestLine(v2, lines);
+  function snapSpan(v1, v2, lines, guides, lines2 = lines) {
+    const a = nearestLine(v1, lines), b = nearestLine(v2, lines2);
     if (a && (!b || a.d <= b.d)) { guides.push(a.line); return a.line; }
     if (b) { guides.push(b.line); return v1 + (b.line - v2); }
     return snap(v1);
@@ -307,7 +341,7 @@
       const L = el.layout;
       const badge = document.createElement('div');
       badge.className = 'sel-size';
-      badge.textContent = `${L.dir === 'row' ? '→ Horizontal' : '↓ Vertical'} · gap ${PS.spacePx(L.gap)} · ${Math.round(r.w)} × ${Math.round(r.h)}`;
+      badge.textContent = `${L.dir === 'grid' ? `▦ Grid ${L.cols || 2}` : L.dir === 'row' ? '→ Horizontal' : '↓ Vertical'} · gap ${PS.spacePx(L.gap)} · ${Math.round(r.w)} × ${Math.round(r.h)}`;
       box.appendChild(badge);
       // padding visualisation
       const pad = document.createElement('div');
@@ -349,26 +383,32 @@
   const ZOOMS = [1, 0.75, 0.5];
   const isFull = () => doc.artboard.preset === 'full';
   function sizeToViewport() {
-    doc.artboard.w = Math.round(viewportEl.getBoundingClientRect().width);
+    doc.artboard.w = viewportEl.clientWidth;
+  }
+  /* The canvas behaves like an iframe in a scrolling page: no panning, the page scrolls. */
+  function updateScrollArea() {
+    const a = doc.artboard;
+    const sizer = $('scrollSizer');
+    sizer.style.width = Math.max(viewportEl.clientWidth, Math.ceil(a.w * view.s + view.x * 2)) + 'px';
+    sizer.style.height = Math.ceil(LABEL_BAND + a.h * view.s) + 'px';
   }
   function updateAutoHeight() {
-    const r = viewportEl.getBoundingClientRect();
     let bottom = 0;
     for (const e of childrenOf(null)) { const rr = rectOf(e.id); bottom = Math.max(bottom, rr.y + rr.h); }
-    const h = Math.max(Math.ceil((r.height - LABEL_BAND) / view.s), Math.ceil(bottom + 64));
-    if (h === doc.artboard.h) return;
+    const h = Math.max(Math.floor((viewportEl.clientHeight - LABEL_BAND) / view.s), Math.ceil(bottom + 64));
+    if (h === doc.artboard.h) { updateScrollArea(); return; }
     doc.artboard.h = h;
     artboardEl.style.height = h + 'px';
     $('abHandles').style.height = h + 'px';
     inkEl.setAttribute('viewBox', `0 0 ${doc.artboard.w} ${h}`);
     inkEl.setAttribute('height', h);
+    updateScrollArea();
   }
   function fit() {
-    const r = viewportEl.getBoundingClientRect();
-    const a = doc.artboard;
+    const a = doc.artboard, vw = viewportEl.clientWidth;
     view.s = ui.zoom;
     worldEl.classList.toggle('is-full', isFull());
-    view.x = a.w * view.s <= r.width ? Math.round((r.width - a.w * view.s) / 2) : 0;
+    view.x = a.w * view.s <= vw ? Math.round((vw - a.w * view.s) / 2) : 0;
     view.y = LABEL_BAND;
     applyView();
     updateAutoHeight();
@@ -425,11 +465,17 @@
   createGuides = null;
     let x = snap(r.x), y = snap(r.y);
     let w = Math.max(SNAP * 3, snap(r.x + r.w) - x), h = Math.max(SNAP * 3, snap(r.y + r.h) - y);
-    const parent = containerFor({ x, y, w, h });
+    let parent = containerFor({ x, y, w, h });
+    // Drawing a peer next to a Fill item in a horizontal / grid stack: the empty Fill item
+    // stretches over the free space, so a similarly tall rectangle means "sibling", not "nest".
+    if (parent && parent.parent && !childrenOf(parent.id).length && parent.sizeW === 'fill') {
+      const gp = byId(parent.parent);
+      if (gp && gp.layout.dir !== 'column' && h >= rectOf(parent.id).h * 0.6) parent = gp;
+    }
     if (!parent) {
       // a top-level card's drawn edges snap to the layout grid
       const L = gridLines(), gx = [], gy = [];
-      const x1 = snapEdge(r.x, L.xs, gx), x2 = snapEdge(r.x + r.w, L.xs, gx);
+      const x1 = snapEdge(r.x, L.starts, gx), x2 = snapEdge(r.x + r.w, L.ends, gx);
       const y1 = snapEdge(r.y, L.ys, gy), y2 = snapEdge(r.y + r.h, L.ys, gy);
       if (x2 - x1 >= SNAP * 3) { x = x1; w = x2 - x1; }
       if (y2 - y1 >= SNAP * 3) { y = y1; h = y2 - y1; }
@@ -448,12 +494,14 @@
       if (Math.max(...xs) - Math.min(...xs) > Math.max(...ys) - Math.min(...ys)) card.layout.dir = 'row';
     }
     if (parent) {
-      // inside a stack: fixed along the main axis, fill across it
-      const row = parent.layout.dir === 'row';
-      card.sizeW = row ? 'fixed' : 'fill';
+      // inside a stack: share the space (Fill); the drawn size only sets the height
+      const row = parent.layout.dir !== 'column';
+      card.sizeW = 'fill';
       card.sizeH = row ? 'fill' : 'fixed';
+      if (parent.layout.dir === 'grid') card.sizeH = 'fixed';
       if (enclosed.length) card.sizeH = row ? 'fill' : 'hug';
     }
+    if (!parent) bindToColumns(card);
     const center = { x: x + w / 2, y: y + h / 2 };
     const index = parent ? insertionIndex(parent, center) : 0;
     mutate(() => {
@@ -571,8 +619,7 @@
       if (gesture && (gesture.kind === 'move' || gesture.kind === 'resize' || gesture.kind === 'artboard') && gesture.moved) restore(gesture.before);
       if (gesture && gesture.kind === 'draw') gesture.path.remove();
       dropMarker.remove();
-      const [a, b] = touches;
-      gesture = { kind: 'pinch', c0: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, v0: { ...view } };
+      gesture = { kind: 'pinch' }; // the browser scrolls; we just wait for the fingers to lift
       return;
     }
     // a lost pointerup (e.g. the OS took the touch) must not block the next stroke
@@ -617,7 +664,8 @@
       return;
     }
     if (elNode) {
-      gesture = { kind: 'move', id: e.pointerId, elId: elNode.dataset.id, start: pt, sx: e.clientX, sy: e.clientY, rect0: rectOf(elNode.dataset.id), before: snapDoc(), moved: false, target: null };
+      const draggable = e.pointerType !== 'touch' || elNode.dataset.id === ui.selectedId;
+      gesture = { kind: 'move', draggable, id: e.pointerId, elId: elNode.dataset.id, start: pt, sx: e.clientX, sy: e.clientY, rect0: rectOf(elNode.dataset.id), before: snapDoc(), moved: false, target: null };
       return;
     }
     gesture = { kind: 'tapOrPan', id: e.pointerId, sx: e.clientX, sy: e.clientY, v0: { ...view }, moved: false, pt };
@@ -634,7 +682,7 @@
     const index = insertionIndex(card, pt, g.elId);
     g.target = { card, index };
     // marker between stack items
-    const row = card.layout.dir === 'row';
+    const row = card.layout.dir !== 'column';
     const sibs = childrenOf(card.id).filter((s) => s.id !== g.elId);
     const cr = rectOf(card.id), gap = PS.spacePx(card.layout.gap);
     const px = PS.spacePx(card.layout.padX), py = PS.spacePx(card.layout.padY);
@@ -658,15 +706,6 @@
     if (!gesture) return;
 
     if (gesture.kind === 'pinch') {
-      const touches = [...pointers.values()].filter((p) => p.type === 'touch');
-      if (touches.length < 2) return;
-      const [a, b] = touches;
-      // two fingers only pan; the scale is set from the zoom control
-      const c = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-      view.x = gesture.v0.x + (c.x - gesture.c0.x);
-      view.y = gesture.v0.y + (c.y - gesture.c0.y);
-      applyView();
-      renderSelection();
       return;
     }
     if (e.pointerId !== gesture.id) return;
@@ -680,8 +719,7 @@
       return;
     }
     if (g.kind === 'tapOrPan') {
-      if (Math.hypot(e.clientX - g.sx, e.clientY - g.sy) > 6) g.moved = true;
-      if (g.moved) { view.x = g.v0.x + (e.clientX - g.sx); view.y = g.v0.y + (e.clientY - g.sy); applyView(); }
+      if (Math.hypot(e.clientX - g.sx, e.clientY - g.sy) > 6) g.moved = true; // the page scrolls natively
       return;
     }
     const pt = toArtboard(e.clientX, e.clientY);
@@ -694,6 +732,7 @@
     }
     if (g.kind === 'move') {
       if (!g.moved && Math.hypot(e.clientX - g.sx, e.clientY - g.sy) < 6) return;
+      if (!g.draggable) { g.scrolled = true; return; }
       const node = nodes.get(g.elId);
       if (!g.moved) { g.moved = true; blurEditing(); ui.selectedId = g.elId; node.classList.add('is-dragging'); hideInspector(); selectionEl.innerHTML = ''; }
       const dx = pt.x - g.start.x, dy = pt.y - g.start.y;
@@ -705,10 +744,10 @@
         // landing on the artboard: snap to the layout grid, else to 8px
         const r = g.rect0, L = gridLines();
         if (el.type === 'card') {
-          sdx = snapSpan(r.x + dx, r.x + r.w + dx, L.xs, gx) - r.x;
+          sdx = snapSpan(r.x + dx, r.x + r.w + dx, L.starts, gx, L.ends) - r.x;
           sdy = snapSpan(r.y + dy, r.y + r.h + dy, L.ys, gy) - r.y;
         } else {
-          sdx = snapEdge(r.x + dx, L.xs, gx) - r.x;
+          sdx = snapEdge(r.x + dx, L.starts, gx) - r.x;
           sdy = snap(r.y + dy) - r.y;
         }
       }
@@ -724,11 +763,12 @@
       if (!el.parent) {
         let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
         const L = gridLines(), gx = [], gy = [];
-        if (g.handle.includes('w')) x1 = Math.min(snapEdge(o.x + dx, L.xs, gx), x2 - min);
-        if (g.handle.includes('e')) x2 = Math.max(snapEdge(o.x + o.w + dx, L.xs, gx), x1 + min);
+        if (g.handle.includes('w')) x1 = Math.min(snapEdge(o.x + dx, L.starts, gx), x2 - min);
+        if (g.handle.includes('e')) x2 = Math.max(snapEdge(o.x + o.w + dx, L.ends, gx), x1 + min);
         if (g.handle.includes('n')) y1 = Math.min(snapEdge(o.y + dy, L.ys, gy), y2 - min);
         if (g.handle.includes('s')) y2 = Math.max(snapEdge(o.y + o.h + dy, L.ys, gy), y1 + min);
-        Object.assign(el, { x: x1, y: y1, w: x2 - x1, h: y2 - y1, sizeW: 'fixed', sizeH: 'fixed' });
+        Object.assign(el, { x: x1, y: y1, w: x2 - x1, h: y2 - y1, sizeW: el.sizeW === 'cols' ? 'cols' : 'fixed', sizeH: 'fixed' });
+        if (el.sizeW === 'cols') { el.sizeW = 'fixed'; el.lockW = false; bindToColumns(el); }
         renderElements(); renderSelection(); hideInspector(); showGuides(gx, gy);
         return;
       } else {
@@ -783,6 +823,7 @@
     if (g.kind === 'move') {
       const node = nodes.get(g.elId);
       if (node) { node.classList.remove('is-dragging'); node.style.transform = ''; }
+      if ((cancelled || g.scrolled) && !g.moved) return;
       if (!g.moved) {
         const now = performance.now();
         const el = byId(g.elId);
@@ -797,9 +838,9 @@
       if (g.target) {
         placeInto(el, g.target.card, g.target.index);
         if (el.type === 'card') {
-          const row = g.target.card.layout.dir === 'row';
-          if (row && el.sizeH === 'fixed') el.sizeH = 'fill';
-          if (!row && el.sizeW === 'fixed') el.sizeW = 'fill';
+          // in a stack, cards share the space unless their width was set to Fixed
+          if (!el.lockW || el.sizeW === 'cols') { el.sizeW = 'fill'; el.lockW = false; }
+          if (g.target.card.layout.dir === 'row' && el.sizeH === 'fixed') el.sizeH = 'fill';
         }
       } else {
         const r = g.rect0;
@@ -807,6 +848,7 @@
         el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy);
         if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snap(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
+        if (el.type === 'card') { if (el.sizeW === 'cols') el.sizeW = 'fixed'; bindToColumns(el); }
       }
       render();
       return;
@@ -815,6 +857,8 @@
       if (!g.moved) return;
       if (cancelled) { restore(g.before); return; }
       past.push(g.before); future = [];
+      const rel = byId(g.orig.id);
+      if (rel && !rel.parent) { rel.lockW = false; bindToColumns(rel); }
       render();
     }
   }
@@ -829,11 +873,20 @@
   }, { passive: false });
   document.addEventListener('gesturestart', (e) => e.preventDefault());
 
-  viewportEl.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    if (e.ctrlKey || e.metaKey) return; // no gesture zoom
-    view.x -= e.deltaX; view.y -= e.deltaY; applyView();
+  // Native scrolling. Block it only where a touch is ours: Pencil drawing, dragging the
+  // selected item or a handle. Fingers elsewhere scroll the page like any web page.
+  viewportEl.addEventListener('touchstart', (e) => {
+    const t = e.changedTouches[0];
+    if (!t || !e.target.closest) return;
+    const stylus = t.touchType === 'stylus';
+    if (stylus && e.target.closest('.el-text__edit')) return; // Scribble
+    const drawing = ui.tool === 'draw' && (stylus || ui.fingerDraws);
+    const sel = e.target.closest('.el');
+    const ours = e.target.closest('[data-handle], [data-ab-handle]') || (sel && sel.dataset.id === ui.selectedId);
+    if (drawing || (ours && e.touches.length === 1)) e.preventDefault();
   }, { passive: false });
+  viewportEl.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false }); // no zoom gestures
+  viewportEl.addEventListener('scroll', () => positionInspector(), { passive: true });
 
   /* ─────────────── Selection, text toolbar, card panel ─────────────── */
   function select(id) {
@@ -924,6 +977,7 @@
     wrap.appendChild(b);
     return wrap;
   }
+  const GRIP = '<span class="grip" data-drag-handle title="Drag to move" aria-hidden="true"><svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor"><circle cx="2.5" cy="3" r="1.3"/><circle cx="7.5" cy="3" r="1.3"/><circle cx="2.5" cy="8" r="1.3"/><circle cx="7.5" cy="8" r="1.3"/><circle cx="2.5" cy="13" r="1.3"/><circle cx="7.5" cy="13" r="1.3"/></svg></span>';
   const ICON_TRASH = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
   const ICON_DUP = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 3V2.5H2.5V11H3" stroke="currentColor" stroke-width="1.5"/></svg>';
   const ICON_UP = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -940,6 +994,9 @@
   }
 
   function renderTextToolbar(el) {
+    const grip = document.createElement('span');
+    grip.innerHTML = GRIP;
+    inspectorEl.appendChild(grip.firstChild);
     const levels = document.createElement('div');
     levels.className = 'insp-chips';
     PS.TEXT_LEVELS.forEach((l) => levels.appendChild(chip(l.label, el.level === l.id, () => {
@@ -964,9 +1021,11 @@
     // header
     const head = document.createElement('div');
     head.className = 'panel__head';
+    head.dataset.dragHandle = '';
     const title = document.createElement('div');
+    title.className = 'panel__titles';
     const count = childrenOf(el.id).length;
-    title.innerHTML = `<div class="panel__title">${parent ? 'Nested card' : 'Card'}</div><div class="panel__sub">${L.dir === 'row' ? 'Horizontal' : 'Vertical'} stack · ${count} item${count === 1 ? '' : 's'}</div>`;
+    title.innerHTML = `${GRIP}<div class="panel__title">${parent ? 'Nested card' : 'Card'}</div><div class="panel__sub">${L.dir === 'grid' ? `Grid, ${L.cols || 2} columns` : L.dir === 'row' ? 'Horizontal stack' : 'Vertical stack'} · ${count} item${count === 1 ? '' : 's'}</div>`;
     const actions = document.createElement('div');
     actions.className = 'panel__actions';
     if (parent) actions.appendChild(iconBtn(ICON_UP, 'Select parent card', () => select(parent.id)));
@@ -977,24 +1036,62 @@
     panelEl.appendChild(head);
 
     // stack
-    const dirControls = [chips(PS.DIRECTIONS, L.dir, (v) => set(() => { L.dir = v; if (v === 'column') L.wrap = false; }))];
+    const dirControls = [chips(PS.DIRECTIONS, L.dir, (v) => set(() => { L.dir = v; if (v !== 'row') L.wrap = false; if (v === 'grid' && !L.cols) L.cols = 2; }))];
     if (L.dir === 'row') dirControls.push(chips([{ id: 'wrap', label: 'Wrap', title: 'Wrap items onto new rows' }], L.wrap ? 'wrap' : null, () => set(() => { L.wrap = !L.wrap; })));
+    const gridCols = L.dir === 'grid' ? [field('Grid columns', chips(PS.GRID_COLS.map((n) => ({ id: n, label: String(n) })), L.cols, (v) => set(() => { L.cols = v; })))] : [];
     panelEl.appendChild(section('Stack',
       field('Direction', ...dirControls),
+      ...gridCols,
       field('Gap', selectCtl('Gap', spaceOptions(), L.gap, (v) => set(() => { L.gap = v; }))),
       field('Padding left / right', selectCtl('Horizontal padding', spaceOptions(), L.padX, (v) => set(() => { L.padX = v; }))),
       field('Padding top / bottom', selectCtl('Vertical padding', spaceOptions(), L.padY, (v) => set(() => { L.padY = v; }))),
-      field(L.dir === 'row' ? 'Align (vertical)' : 'Align (horizontal)', chips(PS.ALIGNS, L.align, (v) => set(() => { L.align = v; }))),
-      field(L.dir === 'row' ? 'Distribute (horizontal)' : 'Distribute (vertical)', chips(PS.JUSTIFIES, L.justify, (v) => set(() => { L.justify = v; }))),
+      field(L.dir === 'column' ? 'Align (horizontal)' : 'Align (vertical)', chips(PS.ALIGNS, L.align, (v) => set(() => { L.align = v; }))),
+      ...(L.dir === 'grid' ? [] : [field(L.dir === 'row' ? 'Distribute (horizontal)' : 'Distribute (vertical)', chips(PS.JUSTIFIES, L.justify, (v) => set(() => { L.justify = v; })))]),
     ));
 
     // size
     const r = rectOf(el.id);
     const noFill = parent ? [] : ['fill'];
+    // width: top-level cards can follow the layout grid (Columns); in a stack they Fill
+    const widthModes = parent
+      ? PS.SIZE_MODES
+      : [{ id: 'cols', label: 'Columns', title: 'Span layout-grid columns; resizes with the artboard' }, { id: 'fixed', label: 'Fixed' }, { id: 'hug', label: 'Hug' }];
+    const pickWidth = (v) => set(() => {
+      el.lockW = v === 'fixed';
+      if (v === 'fixed') { el.w = Math.round(r.w); el.sizeW = 'fixed'; return; }
+      if (v === 'cols') {
+        const L2 = gridLines();
+        const near = (val, arr) => arr.reduce((a, b) => (Math.abs(b - val) < Math.abs(a - val) ? b : a));
+        el.x = near(el.x, L2.starts); const x2 = near(el.x + el.w, L2.ends.filter((e) => e > el.x));
+        el.w = x2 - el.x; el.sizeW = 'fixed'; bindToColumns(el); return;
+      }
+      el.sizeW = v;
+    });
+    const widthCtl = [chips(widthModes, el.sizeW, pickWidth, parent ? [] : noFill)];
+    if (el.sizeW === 'cols' && el.col) {
+      const L2 = gridLines();
+      const opts = [{ id: -1, label: 'Edge' }, ...L2.colStarts.map((_, i) => ({ id: i, label: String(i + 1) }))];
+      const optsEnd = [...L2.colEnds.map((_, i) => ({ id: i, label: String(i + 1) })), { id: L2.n, label: 'Edge' }];
+      const cur = colSpanRect(el.col);
+      const s0 = cur.x === 0 ? -1 : L2.colStarts.indexOf(cur.x), e0 = cur.x + cur.w === doc.artboard.w ? L2.n : L2.colEnds.indexOf(cur.x + cur.w);
+      const setSpan = (start, end) => set(() => { el.col = { start, end: Math.max(end, start === -1 ? 0 : start), of: L2.n }; });
+      widthCtl.push(selectCtl('From column', opts, s0, (v) => setSpan(+v, e0)), selectCtl('To column', optsEnd, e0, (v) => setSpan(s0, +v)));
+      const hint = document.createElement('span');
+      hint.className = 'field__hint';
+      hint.textContent = `${Math.round(el.w)} px · of ${L2.n} columns`;
+      widthCtl.push(hint);
+    } else {
+      widthCtl.push(numberCtl('Width in px', el.sizeW === 'fixed' ? el.w : r.w, (v) => set(() => { el.w = v; el.sizeW = 'fixed'; el.lockW = true; }), el.sizeW !== 'fixed'));
+    }
+    if (parent && parent.layout.dir !== 'column') {
+      const hint = document.createElement('span');
+      hint.className = 'field__hint';
+      hint.textContent = el.sizeW === 'fixed' ? 'Keeps its width; other items resize around it' : 'Shares the free space with the other items';
+      widthCtl.push(hint);
+    }
     panelEl.appendChild(section('Size',
-      field('Width', chips(PS.SIZE_MODES, el.sizeW, (v) => set(() => { if (v === 'fixed') el.w = snap(r.w); el.sizeW = v; }), noFill),
-        numberCtl('Width in px', el.sizeW === 'fixed' ? el.w : r.w, (v) => set(() => { el.w = v; el.sizeW = 'fixed'; }), el.sizeW !== 'fixed')),
-      field('Height', chips(PS.SIZE_MODES, el.sizeH, (v) => set(() => { if (v === 'fixed') el.h = snap(r.h); el.sizeH = v; }), noFill),
+      field('Width', ...widthCtl),
+      field('Height', chips(PS.SIZE_MODES, el.sizeH, (v) => set(() => { if (v === 'fixed') el.h = snap(r.h); el.sizeH = v; }), parent ? [] : ['fill']),
         numberCtl('Height in px', el.sizeH === 'fixed' ? el.h : r.h, (v) => set(() => { el.h = v; el.sizeH = 'fixed'; }), el.sizeH !== 'fixed')),
     ));
 
@@ -1025,7 +1122,7 @@
   inspectorEl.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
 
   function positionInspector() {
-    if (!inspectorEl.classList.contains('is-open')) return;
+    if (!inspectorEl.classList.contains('is-open') || inspectorEl.dataset.moved) return;
     const el = ui.selectedId && byId(ui.selectedId);
     const node = el && nodes.get(el.id);
     if (!node) return;
@@ -1144,6 +1241,7 @@
     $('colorTitle').textContent = target.kind === 'artboard' ? 'Background' : 'Card fill';
     colorPop.classList.add('is-open');
     syncColorUI();
+    if (colorPop.dataset.moved) return;
     const r = colorPop.getBoundingClientRect();
     const x = clamp(cx - r.width / 2, 8, window.innerWidth - r.width - 8);
     let y = cy + 12;
@@ -1214,6 +1312,7 @@
     const pop = $('artboardPop');
     pop.classList.add('is-open');
     renderArtboard();
+    if (pop.dataset.moved) return;
     const r = $('artboardLabel').getBoundingClientRect();
     const pr = pop.getBoundingClientRect();
     const x = clamp(r.left, 8, window.innerWidth - pr.width - 8);
@@ -1341,6 +1440,33 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove('is-open'), 2600);
   }
+
+  /* ─────────────── Movable controls ───────────────
+   * Every popped-up control (card panel, text toolbar, color picker, artboard size)
+   * can be dragged by its header / grip. It then stays where you put it. */
+  document.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('[data-drag-handle]');
+    if (!handle || e.target.closest('button, select, input, a')) return;
+    const box = handle.closest('.floating-ui');
+    if (!box) return;
+    e.preventDefault();
+    const r = box.getBoundingClientRect();
+    const start = { x: e.clientX, y: e.clientY };
+    box.classList.add('is-dragging-ui');
+    Object.assign(box.style, { left: '0px', top: '0px', right: 'auto', bottom: 'auto', height: box.id === 'panel' ? r.height + 'px' : '' });
+    const place = (cx, cy) => {
+      const x = clamp(r.left + cx - start.x, 8 - r.width + 60, window.innerWidth - 60);
+      const y = clamp(r.top + cy - start.y, 8, window.innerHeight - 40);
+      box.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    };
+    place(e.clientX, e.clientY);
+    box.dataset.moved = '1';
+    const move = (ev) => place(ev.clientX, ev.clientY);
+    const up = () => { box.classList.remove('is-dragging-ui'); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  });
 
   /* ─────────────── Boot ─────────────── */
   load();

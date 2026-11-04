@@ -76,10 +76,14 @@ body {
 .viewport {
   position: fixed;
   inset: calc(var(--topbar-h) + env(safe-area-inset-top)) 0 0 0;
-  overflow: hidden;
-  touch-action: none;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y; /* page-like scrolling; never pinch zoom */
   background: var(--surface-secondary);
 }
+.scroll-sizer { position: absolute; left: 0; top: 0; pointer-events: none; }
+.el.is-selected, .handle, .ab-handle { touch-action: none; }
 .viewport[data-tool="select"] { cursor: default; }
 .viewport[data-tool="draw"] { cursor: crosshair; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
@@ -194,7 +198,7 @@ body {
 
 /* ─────────────── Empty-state hint ─────────────── */
 .empty-hint {
-  position: absolute;
+  position: fixed;
   left: 50%;
   bottom: var(--space-8);
   transform: translateX(-50%);
@@ -467,3 +471,90 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 
 /* Draw / Select switch: icon only */
 [data-tool] button { padding: 8px 10px; }
+
+
+/* ═════════════ Dark settings UI (panel, text toolbar, popovers) ═════════════
+   Re-maps the Penta role tokens inside these surfaces to their dark values
+   (inverse surface + grey ramp), so the ds_penta button / input styles follow. */
+.dark-ui {
+  --surface-primary: var(--grey-1200);
+  --surface-secondary: var(--grey-1100);
+  --surface-tertiary: var(--grey-1000);
+  --surface-inverse: var(--color-white);
+  --foreground-primary: var(--color-white);
+  --foreground-secondary: var(--grey-700);
+  --foreground-tertiary: var(--grey-800);
+  --foreground-on-accent: var(--grey-1200);
+  --foreground-disabled: var(--grey-900);
+  --border-primary: var(--grey-1000);
+  --border-secondary: var(--grey-1100);
+  color: var(--foreground-primary);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-z4);
+}
+.dark-ui .gost button { color: var(--foreground-primary); }
+.dark-ui .gost button:hover, .dark-ui .chips .gost button:hover, .dark-ui .segmented .gost button:hover { background-color: var(--grey-1000); }
+.dark-ui .button.is-current button { background-color: var(--color-white); color: var(--grey-1200); }
+.dark-ui .button.is-current button:hover { background-color: var(--grey-300); }
+.dark-ui .button:not(.gost):not(.is-current) button { background-color: var(--color-white); color: var(--grey-1200); }
+.dark-ui button:disabled { background-color: transparent !important; color: var(--foreground-disabled) !important; }
+.dark-ui .button::before { background-color: var(--color-white); }
+.dark-ui input, .dark-ui textarea { color: var(--foreground-primary); background: var(--grey-1100); border-color: var(--grey-1000); }
+.dark-ui input:hover { border-color: var(--grey-700); }
+.dark-ui input:focus { outline-color: var(--color-white); }
+.dark-ui .num-input input:disabled { background: transparent; color: var(--foreground-disabled); }
+.dark-ui .select-sm {
+  background-color: var(--grey-1100);
+  border-color: var(--grey-1000);
+  color: var(--foreground-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5l3 3 3-3' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.dark-ui .select-sm:hover { border-color: var(--grey-700); }
+.dark-ui .select-sm option { background: var(--grey-1200); color: var(--color-white); }
+.dark-ui .chips { background: var(--grey-1100); }
+.dark-ui .panel__section { border-top-color: var(--grey-1100); }
+.dark-ui button.swatch { border-color: color-mix(in srgb, var(--color-white) 18%, transparent); }
+.dark-ui button.swatch.is-current { outline-color: var(--color-white); }
+.dark-ui .swatch--lg { border-color: var(--grey-1000); }
+.dark-ui .color-popover__token.is-custom { color: var(--orange-500); } /* warning, lighter step for dark */
+
+/* ═════════════ Compact controls ═════════════ */
+.dark-ui .button.small button { min-height: 0; height: 28px; max-height: 28px; padding: 4px 8px; font-size: 12px; line-height: 16px; border-radius: var(--radius-sm); }
+.dark-ui .button.small.icon button { width: 28px; padding: 4px; }
+.dark-ui .button.small.icon svg { width: 14px; height: 14px; }
+.dark-ui .chips .button.small button { height: 26px; padding: 4px 8px; font-size: 12px; }
+.dark-ui .insp-chips .button.small button { padding: 4px 7px; }
+.dark-ui .select-sm { height: 28px; font-size: 12px; padding: 0 26px 0 8px; background-position: right 8px center; border-radius: var(--radius-sm); }
+.dark-ui .num-input { width: 64px; }
+.dark-ui .num-input input { height: 28px; min-height: 28px; font-size: 12px; padding: 0 6px; border-radius: var(--radius-sm); }
+.dark-ui .hex-input input { min-height: 32px; height: 32px; padding: 0 10px; font-size: 13px; }
+.dark-ui .swatch--lg { width: 32px; height: 32px; }
+.dark-ui button.swatch { width: 22px; height: 22px; border-radius: var(--radius-xs); }
+.dark-ui button.swatch--btn { width: 28px; height: 28px; }
+.dark-ui .ramp__swatches { gap: 4px; }
+.dark-ui .field { gap: 2px; }
+.dark-ui .field__label, .dark-ui .insp-label, .dark-ui .field__hint { font-size: 11px; line-height: 16px; }
+.dark-ui .field__control { gap: 6px; }
+.dark-ui .field__control .select-sm { flex-basis: 96px; }
+.panel.dark-ui { width: 264px; padding: var(--space-3); gap: var(--space-3); }
+.dark-ui .panel__section { gap: var(--space-2); padding-top: var(--space-3); }
+.dark-ui .panel__title { font-size: 14px; line-height: 20px; }
+.dark-ui .panel__heading { font-size: 10px; line-height: 14px; }
+.dark-ui .panel__tip { font-size: 11px; line-height: 16px; }
+.inspector.dark-ui { padding: 4px 8px; gap: 4px 12px; }
+.color-popover.dark-ui { width: 272px; padding: var(--space-3); }
+.dark-ui .color-popover__head { margin: -2px -4px var(--space-2) 0; }
+.dark-ui .color-popover__title { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.dark-ui .color-popover__token { margin: 6px 0 var(--space-3); font-size: 11px; }
+.dark-ui .ramp__name, .dark-ui .ramp__note { font-size: 11px; }
+.ab-popover.dark-ui { width: 248px; padding: var(--space-3); gap: var(--space-2); }
+.dark-ui .size-fields__item { font-size: 12px; }
+
+/* ═════════════ Movable controls ═════════════ */
+[data-drag-handle] { cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; }
+.is-dragging-ui [data-drag-handle], .is-dragging-ui { cursor: grabbing; }
+.grip { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 24px; color: var(--grey-800); flex: none; cursor: grab; touch-action: none; }
+.grip:hover { color: var(--color-white); }
+.panel__titles { display: grid; grid-template-columns: auto 1fr; column-gap: 6px; align-items: center; }
+.panel__titles .grip { grid-row: span 2; }
+.is-dragging-ui { transition: none !important; opacity: 0.96; }
