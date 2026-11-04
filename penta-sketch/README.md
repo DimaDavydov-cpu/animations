@@ -26,6 +26,7 @@ Without it the app falls back to Helvetica.
 * **Adaptive** (default): the artboard is your screen's width, edge to edge, and follows rotation
 * Drag the **handle on the canvas's right edge** to resize it (it stays centered; dragging past the edge returns to Adaptive)
 * **iPad** 834 and **Mobile** 390 in the top bar, or tap the **width readout** next to the scale (e.g. `1194 px`) to type any width
+* The canvas is never narrower than **320px** (handle, typed width and saved projects are all held to it)
 * The canvas never scrolls sideways
 * Only the width is a design decision. The height is automatic: it fills the screen and grows with your content
 * **Scale** is set only from the percentage control in the top bar: 100%, 75% or 50%. Touch never changes it

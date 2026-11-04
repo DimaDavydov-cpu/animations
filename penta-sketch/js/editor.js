@@ -19,7 +19,7 @@
   const snapH = (v) => Math.max(RHYTHM, Math.round(v / RHYTHM) * RHYTHM);
   const uid = () => Math.random().toString(36).slice(2, 9);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const ARTBOARD_MIN = 240, ARTBOARD_MAX = 4000;
+  const ARTBOARD_MIN = 320, ARTBOARD_MAX = 4000;   // the canvas is never narrower than 320px
 
   const PLAINTEXT_OK = (() => { const d = document.createElement('div'); try { d.contentEditable = 'plaintext-only'; } catch (e) { return false; } return d.contentEditable === 'plaintext-only'; })();
 
@@ -40,6 +40,7 @@
 
   /* v1 projects: cards had absolute children. Give cards a stack and order children by position. */
   function migrate(d) {
+    if (d.artboard && d.artboard.preset !== 'full' && d.artboard.w < 320) { d.artboard.w = 320; d.artboard.preset = 'custom'; }
     for (const e of d.elements) {
       if (e.type !== 'card') continue;
       if (!e.layout) e.layout = PS.defaultLayout();
@@ -1676,8 +1677,10 @@
   $('abClose').addEventListener('click', closeArtboardEdit);
   $('abDone').addEventListener('click', () => { commitSize(); closeArtboardEdit(); });
   const commitSize = () => {
-    const w = parseInt($('abW').value, 10);
-    if (!(w > 0)) { renderArtboard(); return; }
+    const typed = parseInt($('abW').value, 10);
+    if (!(typed > 0)) { renderArtboard(); return; }
+    const w = clamp(typed, ARTBOARD_MIN, ARTBOARD_MAX);
+    $('abW').value = w;                         // show the value that was actually applied
     if (w === doc.artboard.w) return;
     mutate(() => setArtboardSize(w));
     fit();
