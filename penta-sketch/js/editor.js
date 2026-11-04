@@ -981,7 +981,7 @@
     const s = document.createElement('select');
     s.className = 'select-sm';
     s.setAttribute('aria-label', label);
-    options.forEach((o) => { const op = document.createElement('option'); op.value = o.id; op.textContent = o.long || o.label; if (o.long) op.label = o.long; s.appendChild(op); });
+    options.forEach((o) => { const op = document.createElement('option'); op.value = o.id; op.textContent = o.long || o.label; s.appendChild(op); });
     s.value = value;
     if (options.some((o) => o.long)) {
       // show the short label while closed, the long one while choosing

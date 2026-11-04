@@ -684,3 +684,9 @@ button.artboard-label:hover { background-color: var(--grey-300); }
   #gridToggleWrap { display: none; }      /* moves into the ••• menu */
   .menu .menu-grid { display: flex; }
 }
+
+/* Layout grid: grey-400 at 50%, drawn above every canvas layer (content, ink, selection).
+   It stays inside the canvas, so the floating toolbar and panels remain above it. */
+.artboard { isolation: isolate; }
+.grid-overlay { z-index: 10; }
+.grid-overlay span { background: color-mix(in srgb, var(--grey-400) 50%, transparent); }
