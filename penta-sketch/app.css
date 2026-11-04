@@ -713,3 +713,7 @@ button.artboard-label:hover { background-color: var(--grey-300); }
     repeating-linear-gradient(to bottom, color-mix(in srgb, var(--grey-500) 45%, transparent) 0 calc(1px * var(--inv, 1)), transparent calc(1px * var(--inv, 1)) 24px),
     repeating-linear-gradient(to bottom, color-mix(in srgb, var(--grey-400) 30%, transparent) 0 calc(1px * var(--inv, 1)), transparent calc(1px * var(--inv, 1)) 8px);
 }
+
+/* a text box bound to grid columns: the edit area fills it (no 400px empty-state minimum) */
+.el-text.has-w .el-text__edit { min-width: 0 !important; }
+.el-text.has-w .el-text__edit:empty, .el-text.has-w .el-text__edit:focus:empty { min-height: calc(40px * var(--inv, 1)); }

@@ -196,6 +196,7 @@
           while (node.children.length > ch.length) node.lastChild.remove();
         } else {
           node.className = `el el-text t-${PS.level(el.level).id}`;
+          node.classList.toggle('has-w', !!el.w && !parent);
           const extra = parent ? [] : [['max-width', Math.max(48, doc.artboard.w - el.x) + 'px']];
           applyCss(node, [...PS.sizeCss(el, parent), ...extra, ...PS.textColorCss(el)]);
           const edit = node.firstChild;
@@ -288,7 +289,7 @@
   const LINE_TOL = 2; // px: DOM measurements are sub-pixel, grid lines are rounded
   const lineIndex = (v, arr) => arr.findIndex((l) => Math.abs(l - v) <= LINE_TOL);
   function bindToColumns(el) {
-    if (!el || el.type !== 'card' || el.parent || el.sizeW === 'hug') return;
+    if (!el || !(el.type === 'card' || (el.type === 'text' && el.w)) || el.parent || el.sizeW === 'hug') return;
     const L = gridLines();
     let x1 = el.x, x2 = el.x + el.w;
     if (Math.abs(x1) <= LINE_TOL) x1 = 0;
@@ -307,7 +308,7 @@
   /* If one edge of a top-level card sits on the grid, snap the other edge to the nearest
    * column line too, so the card is a whole number of columns wide, then bind it. */
   function snapToColumns(el) {
-    if (!el || el.type !== 'card' || el.parent || el.sizeW === 'hug' || el.lockW) return false;
+    if (!el || !(el.type === 'card' || (el.type === 'text' && el.w)) || el.parent || el.sizeW === 'hug' || el.lockW) return false;
     const L = gridLines();
     let x1 = el.x, x2 = el.x + el.w;
     const si = lineIndex(x1, L.starts), ei = lineIndex(x2, L.ends);
@@ -334,7 +335,7 @@
   }
   function applyColumnBindings() {
     for (const el of doc.elements) {
-      if (el.type === 'card' && !el.parent && el.sizeW === 'cols' && el.col) Object.assign(el, colSpanRect(el.col));
+      if ((el.type === 'card' || (el.type === 'text' && el.w)) && !el.parent && el.sizeW === 'cols' && el.col) Object.assign(el, colSpanRect(el.col));
     }
   }
   function nearestLine(v, lines) {
@@ -554,8 +555,12 @@
     pending = { strokes: [], paths: [], timer: null };
     if (!strokes.length) return;
     const res = PS.recognize(strokes);
+    const line = res.type === 'rect' ? null : PS.recognizeLine(strokes);
     if (res.type === 'rect') {
       createCard(res);
+      fadeInk(paths, 'is-absorbed');
+    } else if (line) {
+      createTextFromLine(line);
       fadeInk(paths, 'is-absorbed');
     } else {
       fadeInk(paths);
@@ -647,6 +652,41 @@
     render();
     editSnapshot = before;
     nodes.get(el.id).firstChild.focus();
+  }
+
+  /* A drawn horizontal line makes a text box, inside a card or out on the canvas.
+   * Out on the canvas it spans whole grid columns, never fewer than two, bound to them. */
+  function createTextFromLine(line) {
+    blurEditing();
+    const lvl = PS.level(ui.lastLevel);
+    const mid = (line.x1 + line.x2) / 2;
+    const parent = containerFor({ x: mid, y: line.y, w: 0, h: 0 });
+    const before = snapDoc();
+    const el = { id: uid(), type: 'text', parent: null, x: 0, y: snap(line.y - lvl.line / 2), text: '', level: lvl.id, color: 'primary' };
+    el.color = isDark(surfaceUnder(parent && parent.id)) ? 'inverse' : 'primary';
+    if (parent) {
+      placeInto(el, parent, insertionIndex(parent, { x: mid, y: line.y }));
+    } else {
+      const L = gridLines();
+      const nearIdx = (v, arr) => arr.reduce((bi, b, i) => (Math.abs(b - v) < Math.abs(arr[bi] - v) ? i : bi), 0);
+      let s0 = nearIdx(line.x1, L.colStarts), e0 = nearIdx(line.x2, L.colEnds);
+      if (e0 < s0 + 1) {              // at least two columns
+        e0 = Math.min(L.n - 1, s0 + 1);
+        s0 = Math.max(0, e0 - 1);
+      }
+      el.x = L.colStarts[s0];
+      el.w = L.colEnds[e0] - el.x;
+      el.sizeW = 'cols';
+      el.col = { start: s0, end: e0, of: L.n };
+      doc.elements.push(el);
+    }
+    ui.selectedId = el.id;
+    ui.panelHidden = false;
+    render();
+    editSnapshot = before;
+    const edit = nodes.get(el.id).firstChild;
+    edit.focus();
+    toast(parent ? 'Text added. Write in it' : `Text added across ${el.col.end - el.col.start + 1} columns. Write in it`);
   }
 
   /* ─────────────── Text editing ─────────────── */
@@ -1001,6 +1041,7 @@
       past.push(g.before); future = [];
       if (g.target) {
         placeInto(el, g.target.card, g.target.index);
+        if (el.type === 'text') { delete el.w; delete el.col; el.sizeW = 'fill'; }
         if (el.type === 'card') {
           // in a stack, cards share the space unless their width was set to Fixed
           if (!el.lockW || el.sizeW === 'cols') { el.sizeW = 'fill'; el.lockW = false; }
@@ -1013,7 +1054,7 @@
         else { el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy); }
         if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snapH(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
-        if (el.type === 'card') { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
+        if (el.type === 'card' || (el.type === 'text' && el.w)) { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
       }
       render();
       return;

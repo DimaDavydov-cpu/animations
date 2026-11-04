@@ -68,6 +68,7 @@
     const out = [];
     if (!parent) {
       out.push(['position', 'absolute'], ['left', el.x + 'px'], ['top', el.y + 'px']);
+      if (el.type === 'text' && el.w) out.push(['width', el.w + 'px']);
       if (el.type === 'card') {
         // 'cols': width derived from the layout grid columns it spans (x/w kept in sync)
         out.push(['width', el.sizeW === 'hug' ? 'max-content' : el.w + 'px']);

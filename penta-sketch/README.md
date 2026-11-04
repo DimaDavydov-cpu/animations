@@ -49,6 +49,7 @@ Without it the app falls back to Helvetica.
 | Draw a rectangle or square with Pencil (one stroke or several, then pause) | Creates a Penta card. Every card is a flex **stack** (vertical by default, gap 16, padding 24) |
 | Draw a rectangle inside a card / around existing items | Nests a card in the stack / wraps those items in a new stack |
 | Finger tap on a card | Opens the **card panel**: direction, wrap, gap, padding, align, distribute, size (Fixed / Fill / Hug), fill, border, radius, elevation |
+| Draw a straight horizontal line with Pencil | Adds a text box, inside a card or out on the canvas. On the canvas it snaps to whole grid columns (never fewer than two) and stays bound to them, so it follows the grid. Inside a card it joins the stack |
 | Tap with Pencil | Places a text box. Handwrite inside it and iPadOS **Scribble** converts it to text |
 | Text toolbar | Display, H1, H2, H3, H4, Subtitle, Body, Body S, Caption, Overline + color role |
 | Finger tap on the empty artboard | Background color picker: Penta palette + exact hex (shows the token name, or flags off-system values) |

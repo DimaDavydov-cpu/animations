@@ -55,6 +55,30 @@
     return filled.filter(Boolean).length / bins;
   }
 
+  /* A single, straight, roughly level stroke = a line of text (wireframe convention). */
+  PS.recognizeLine = function (strokes) {
+    if (strokes.length !== 1) return null;
+    const pts = strokes[0];
+    if (pts.length < 4) return null;
+    const a = pts[0], b = pts[pts.length - 1];
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    if (len < 40) return null;
+    let minY = Infinity, maxY = -Infinity, minX = Infinity, maxX = -Infinity, L = 0;
+    for (let i = 0; i < pts.length; i++) {
+      minX = Math.min(minX, pts[i].x); maxX = Math.max(maxX, pts[i].x);
+      minY = Math.min(minY, pts[i].y); maxY = Math.max(maxY, pts[i].y);
+      if (i) L += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    }
+    const w = maxX - minX, h = maxY - minY;
+    if (h > Math.max(14, w * 0.1)) return null;        // roughly level
+    // straight: no point strays far from the chord (jitter-proof), and no back-and-forth
+    let dev = 0;
+    for (const q of pts) dev = Math.max(dev, Math.abs((b.x - a.x) * (a.y - q.y) - (a.x - q.x) * (b.y - a.y)) / len);
+    if (dev > Math.max(5, len * 0.04)) return null;
+    if (L / Math.max(len, 1) > 1.6) return null;
+    return { type: 'line', x1: minX, x2: maxX, y: (a.y + b.y) / 2 };
+  };
+
   PS.recognize = function (strokes) {
     const raw = strokes.flat();
     if (raw.length < 4) return { type: 'none', reason: 'tiny' };
