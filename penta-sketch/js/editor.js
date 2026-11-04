@@ -987,7 +987,9 @@
   viewportEl.addEventListener('scroll', () => positionInspector(), { passive: true });
 
   /* ─────────────── Selection, text toolbar, card panel ─────────────── */
+  /* Selecting (or tapping the already selected card again) always shows its panel. */
   function select(id) {
+    ui.panelHidden = false;
     ui.selectedId = id;
     renderElements();
     renderSelection();
@@ -1104,7 +1106,9 @@
     inspectorEl.innerHTML = '';
     panelEl.innerHTML = '';
     const el = ui.selectedId && byId(ui.selectedId);
-    panelEl.classList.toggle('is-open', !!el && el.type === 'card');
+    // a different element (e.g. a newly drawn card) brings the panel back
+    if ((el ? el.id : null) !== ui.panelFor) { if (el) ui.panelHidden = false; ui.panelFor = el ? el.id : null; }
+    panelEl.classList.toggle('is-open', !!el && el.type === 'card' && !ui.panelHidden);
     if (!el) { hideInspector(); return; }
     if (el.type === 'text') renderTextToolbar(el);
     else { hideInspector(); renderCardPanel(el); }
@@ -1148,7 +1152,8 @@
     if (parent) actions.appendChild(iconBtn(ICON_UP, 'Select parent card', () => select(parent.id)));
     actions.appendChild(iconBtn(ICON_DUP, 'Duplicate', () => duplicate(el.id)));
     actions.appendChild(iconBtn(ICON_TRASH, 'Delete', () => removeSelected()));
-    actions.appendChild(iconBtn(ICON_CLOSE, 'Close', () => select(null)));
+    // close hides the panel only: the card stays selected (handles, resize, drag)
+    actions.appendChild(iconBtn(ICON_CLOSE, 'Close panel', () => { ui.panelHidden = true; renderInspector(); }));
     head.append(title, actions);
     panelEl.appendChild(head);
 
