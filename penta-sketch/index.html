@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Penta Sketch">
+  <title>Penta Sketch</title>
+  <!-- Penta tokens + base components from this repo (single source of truth) -->
+  <link rel="stylesheet" href="../ds_penta.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <!-- ═══════════════ Top bar ═══════════════ -->
+  <header class="topbar">
+    <div class="topbar__group">
+      <strong class="topbar__title">Penta Sketch</strong>
+      <div class="segmented" role="tablist" aria-label="Tool">
+        <div class="button small gost" data-tool="draw"><button type="button" title="Draw (P)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.5 2.5l3 3L5 14H2v-3l8.5-8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Draw</button></div>
+        <div class="button small gost" data-tool="select"><button type="button" title="Select (V)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2l10 5.5-4.5 1L6.5 13 3 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Select</button></div>
+      </div>
+    </div>
+
+    <div class="topbar__group">
+      <div class="button small icon gost"><button type="button" id="undoBtn" title="Undo (Cmd+Z)" aria-label="Undo">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M6 4L2.5 7.5 6 11M3 7.5h7.5a4.5 4.5 0 010 9H8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button></div>
+      <div class="button small icon gost"><button type="button" id="redoBtn" title="Redo (Cmd+Shift+Z)" aria-label="Redo">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M12 4l3.5 3.5L12 11M15 7.5H7.5a4.5 4.5 0 000 9H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button></div>
+      <span class="topbar__divider"></span>
+      <select id="presetSelect" class="select-sm" aria-label="Artboard size">
+        <option value="desktop">Desktop 1440</option>
+        <option value="tablet">Tablet 834</option>
+        <option value="mobile">Mobile 390</option>
+      </select>
+      <div class="button small icon gost" id="gridToggleWrap"><button type="button" id="gridToggle" title="Layout grid (G)" aria-label="Toggle layout grid">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.8 2.5v13M11.2 2.5v13" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button></div>
+      <div class="button small icon gost"><button type="button" id="fitBtn" title="Fit to screen (0)" aria-label="Fit to screen">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 6.5v-4h4M15.5 6.5v-4h-4M2.5 11.5v4h4M15.5 11.5v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button></div>
+      <span class="zoom-label" id="zoomLabel">100%</span>
+    </div>
+
+    <div class="topbar__group">
+      <div class="button small icon gost menu-anchor"><button type="button" id="menuBtn" title="More" aria-label="More options" aria-haspopup="true">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><circle cx="4" cy="9" r="1.5"/><circle cx="9" cy="9" r="1.5"/><circle cx="14" cy="9" r="1.5"/></svg>
+      </button>
+        <div class="dropdown menu" id="menu">
+          <a href="#" data-action="save">Save project (.json)</a>
+          <a href="#" data-action="open">Open project…</a>
+          <a href="#" data-action="finger">Draw with finger: <b id="fingerState">Off</b></a>
+          <a href="#" data-action="help">How to use</a>
+          <a href="#" data-action="clear" class="danger">Clear artboard</a>
+        </div>
+      </div>
+      <div class="button small"><button type="button" id="exportBtn">Export HTML</button></div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ Canvas ═══════════════ -->
+  <main class="viewport" id="viewport">
+    <div class="world" id="world">
+      <div class="artboard" id="artboard">
+        <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
+        <div class="elements" id="elements"></div>
+        <svg class="ink" id="ink" aria-hidden="true"></svg>
+        <div class="selection" id="selection" aria-hidden="true"></div>
+      </div>
+      <div class="artboard-label" id="artboardLabel"></div>
+    </div>
+
+    <div class="empty-hint" id="emptyHint">
+      <p class="empty-hint__title">Sketch with Apple Pencil</p>
+      <ul>
+        <li><b>Draw a rectangle</b> to create a card</li>
+        <li><b>Tap with Pencil</b> to place text, then write in the box</li>
+        <li><b>Tap the background</b> with your finger to set its color</li>
+        <li><b>Finger</b> selects and moves · <b>two fingers</b> pan and zoom</li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- ═══════════════ Floating inspector ═══════════════ -->
+  <div class="inspector" id="inspector" role="toolbar" aria-label="Element properties"></div>
+
+  <!-- ═══════════════ Color picker ═══════════════ -->
+  <div class="popover color-popover" id="colorPopover" role="dialog" aria-label="Choose color">
+    <div class="color-popover__head">
+      <span class="color-popover__title" id="colorTitle">Background</span>
+      <div class="button small icon gost"><button type="button" id="colorClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button></div>
+    </div>
+    <div class="color-popover__current">
+      <span class="swatch swatch--lg" id="colorPreview"></span>
+      <div class="input hex-input">
+        <input type="text" id="hexInput" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="7" aria-label="Hex color">
+      </div>
+    </div>
+    <p class="color-popover__token" id="colorToken"></p>
+    <div class="color-popover__ramps" id="colorRamps"></div>
+  </div>
+
+  <!-- ═══════════════ Export modal ═══════════════ -->
+  <div class="scrim" id="exportScrim">
+    <div class="modal" role="dialog" aria-label="Export HTML">
+      <div class="modal__head">
+        <h3 class="modal__title">Export HTML</h3>
+        <div class="button small icon gost"><button type="button" id="exportClose" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button></div>
+      </div>
+      <p class="modal__sub">Standalone HTML using Penta tokens. Open it in any browser.</p>
+      <pre class="code" id="exportCode"></pre>
+      <div class="modal__actions">
+        <div class="button small border"><button type="button" id="copyBtn">Copy</button></div>
+        <div class="button small border"><button type="button" id="previewBtn">Open preview</button></div>
+        <div class="button small"><button type="button" id="downloadBtn">Download .html</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ Help modal ═══════════════ -->
+  <div class="scrim" id="helpScrim">
+    <div class="modal modal--sm" role="dialog" aria-label="How to use">
+      <div class="modal__head">
+        <h3 class="modal__title">How to use</h3>
+        <div class="button small icon gost"><button type="button" id="helpClose" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button></div>
+      </div>
+      <dl class="help">
+        <dt>Card</dt><dd>Draw a rectangle or square with Pencil. One stroke or several, then pause.</dd>
+        <dt>Text</dt><dd>Tap with Pencil where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
+        <dt>Edit text</dt><dd>Write over existing text with Pencil. Scratch out words to delete them (Scribble gestures).</dd>
+        <dt>Background</dt><dd>Tap the empty artboard with your finger to choose its color. Use the hex field for exact values.</dd>
+        <dt>Select / move</dt><dd>Finger tap selects, drag moves, corner handles resize. Two fingers pan and pinch to zoom.</dd>
+        <dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="fileInput" accept="application/json,.json" hidden>
+
+  <script src="js/tokens.js"></script>
+  <script src="js/ink.js"></script>
+  <script src="js/recognize.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
