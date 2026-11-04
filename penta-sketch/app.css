@@ -595,3 +595,17 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .ab-handle--e:hover::after, .ab-handle--e:active::after { background: var(--sel); }
 .ab-handle--e { width: calc(20px * var(--inv, 1)); }
 .ab-handle--e::after { top: calc(40vh * var(--inv, 1)); right: calc(5px * var(--inv, 1)); }
+
+/* several panel fields on one line */
+.field-row { display: grid; gap: 6px; }
+.field-row .field { min-width: 0; }
+.field-row .select-sm { width: 100%; min-width: 0; flex: 1 1 auto; padding-right: 22px; background-position: right 6px center; }
+
+/* panels scroll inside themselves when taller than the visible area */
+.floating-ui { overflow-y: auto; overscroll-behavior: contain; }
+.color-popover__ramps { max-height: none; }
+
+[hidden] { display: none !important; }
+
+.dark-ui .color-popover__head { justify-content: flex-start; gap: 6px; }
+.dark-ui .color-popover__head .color-popover__title { flex: 1; }

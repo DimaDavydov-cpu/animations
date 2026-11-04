@@ -223,11 +223,16 @@
 
   /* A top-level card whose edges sit on the grid is BOUND to those columns (sizeW 'cols'):
    * when the artboard width changes, it keeps spanning the same columns. -1 / n = bleed edge. */
+  const LINE_TOL = 2; // px: DOM measurements are sub-pixel, grid lines are rounded
+  const lineIndex = (v, arr) => arr.findIndex((l) => Math.abs(l - v) <= LINE_TOL);
   function bindToColumns(el) {
     if (!el || el.type !== 'card' || el.parent || el.sizeW === 'hug') return;
-    const L = gridLines(), x1 = el.x, x2 = el.x + el.w;
-    const start = x1 === 0 ? -1 : L.colStarts.indexOf(x1);
-    const end = x2 === doc.artboard.w ? L.n : L.colEnds.indexOf(x2);
+    const L = gridLines();
+    let x1 = el.x, x2 = el.x + el.w;
+    if (Math.abs(x1) <= LINE_TOL) x1 = 0;
+    if (Math.abs(x2 - doc.artboard.w) <= LINE_TOL) x2 = doc.artboard.w;
+    const start = x1 === 0 ? -1 : lineIndex(x1, L.colStarts);
+    const end = x2 === doc.artboard.w ? L.n : lineIndex(x2, L.colEnds);
     if (start !== -1 || x1 === 0) {
       if (end !== -1 && (start === -1 ? 0 : start) <= (end === L.n ? L.n - 1 : end) && !el.lockW) {
         el.sizeW = 'cols';
@@ -236,6 +241,25 @@
       }
     }
     if (el.sizeW === 'cols') el.sizeW = 'fixed';
+  }
+  /* If one edge of a top-level card sits on the grid, snap the other edge to the nearest
+   * column line too, so the card is a whole number of columns wide, then bind it. */
+  function snapToColumns(el) {
+    if (!el || el.type !== 'card' || el.parent || el.sizeW === 'hug' || el.lockW) return false;
+    const L = gridLines();
+    let x1 = el.x, x2 = el.x + el.w;
+    const si = lineIndex(x1, L.starts), ei = lineIndex(x2, L.ends);
+    if (si !== -1) x1 = el.x = L.starts[si];
+    if (ei !== -1) x2 = L.ends[ei];
+    el.w = x2 - x1;
+    const onStart = si !== -1, onEnd = ei !== -1;
+    if (!onStart && !onEnd) return false;
+    const near = (v, arr) => arr.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a));
+    if (onStart && !onEnd) { const ends = L.ends.filter((e) => e > x1); if (ends.length) el.w = near(x2, ends) - x1; }
+    if (onEnd && !onStart) { const starts = L.starts.filter((v) => v < x2); if (starts.length) { el.x = near(x1, starts); el.w = x2 - el.x; } }
+    if (el.sizeW === 'cols') el.sizeW = 'fixed';
+    bindToColumns(el);
+    return el.sizeW === 'cols';
   }
   function colSpanRect(col) {
     const L = gridLines(), n = L.n;
@@ -479,6 +503,12 @@
       const x1 = snapEdge(r.x, L.starts, gx), x2 = snapEdge(r.x + r.w, L.ends, gx);
       const y1 = snapEdge(r.y, L.ys, gy), y2 = snapEdge(r.y + r.h, L.ys, gy);
       if (x2 - x1 >= SNAP * 3) { x = x1; w = x2 - x1; }
+      if (gx.length) {
+        const tmp = { type: 'card', parent: null, x, w, sizeW: 'fixed' };
+        snapToColumns(tmp);
+        x = tmp.x; w = tmp.w;
+        gx.splice(0, gx.length, x, x + w);
+      }
       if (y2 - y1 >= SNAP * 3) { y = y1; h = y2 - y1; }
       createGuides = [gx, gy];
     }
@@ -850,7 +880,7 @@
         el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy);
         if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snap(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
-        if (el.type === 'card') { if (el.sizeW === 'cols') el.sizeW = 'fixed'; bindToColumns(el); }
+        if (el.type === 'card') { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
       }
       render();
       return;
@@ -860,7 +890,7 @@
       if (cancelled) { restore(g.before); return; }
       past.push(g.before); future = [];
       const rel = byId(g.orig.id);
-      if (rel && !rel.parent) { rel.lockW = false; bindToColumns(rel); }
+      if (rel && !rel.parent) { rel.lockW = false; if (rel.sizeW === 'cols') rel.sizeW = 'fixed'; snapToColumns(rel); bindToColumns(rel); }
       render();
     }
   }
@@ -945,12 +975,31 @@
     const s = document.createElement('select');
     s.className = 'select-sm';
     s.setAttribute('aria-label', label);
-    options.forEach((o) => { const op = document.createElement('option'); op.value = o.id; op.textContent = o.label; s.appendChild(op); });
+    options.forEach((o) => { const op = document.createElement('option'); op.value = o.id; op.textContent = o.long || o.label; if (o.long) op.label = o.long; s.appendChild(op); });
     s.value = value;
+    if (options.some((o) => o.long)) {
+      // show the short label while closed, the long one while choosing
+      const short = () => [...s.options].forEach((op, i) => { op.textContent = String(options[i].id) === String(s.value) ? options[i].label : options[i].long; });
+      short();
+      s.addEventListener('focus', () => [...s.options].forEach((op, i) => { op.textContent = options[i].long; }));
+      s.addEventListener('blur', short);
+      s.addEventListener('change', short);
+      const cur = options.find((o) => o.id === value);
+      if (cur) s.title = cur.long;
+    }
     s.addEventListener('change', () => onChange(s.value));
     return s;
   }
-  const spaceOptions = () => PS.SPACING.map((t) => ({ id: t, label: `${PS.spacePx(t)}  ·  ${t.replace('--', '')}` }));
+  // compact: the closed select shows px; the open list also names the Penta token
+  const spaceOptions = () => PS.SPACING.map((t) => ({ id: t, label: `${PS.spacePx(t)}`, long: `${PS.spacePx(t)} · ${t.replace('--', '')}` }));
+  /* several fields side by side in one row */
+  function fieldRow(...fields) {
+    const r = document.createElement('div');
+    r.className = 'field-row';
+    r.style.gridTemplateColumns = `repeat(${fields.length}, minmax(0, 1fr))`;
+    fields.forEach((f) => r.appendChild(f));
+    return r;
+  }
   function numberCtl(label, value, onCommit, disabled) {
     const wrap = document.createElement('div');
     wrap.className = 'input num-input';
@@ -1044,9 +1093,11 @@
     panelEl.appendChild(section('Stack',
       field('Direction', ...dirControls),
       ...gridCols,
-      field('Gap', selectCtl('Gap', spaceOptions(), L.gap, (v) => set(() => { L.gap = v; }))),
-      field('Padding left / right', selectCtl('Horizontal padding', spaceOptions(), L.padX, (v) => set(() => { L.padX = v; }))),
-      field('Padding top / bottom', selectCtl('Vertical padding', spaceOptions(), L.padY, (v) => set(() => { L.padY = v; }))),
+      fieldRow(
+        field('Gap', selectCtl('Gap', spaceOptions(), L.gap, (v) => set(() => { L.gap = v; }))),
+        field('Pad ↔', selectCtl('Padding left and right', spaceOptions(), L.padX, (v) => set(() => { L.padX = v; }))),
+        field('Pad ↕', selectCtl('Padding top and bottom', spaceOptions(), L.padY, (v) => set(() => { L.padY = v; }))),
+      ),
       field(L.dir === 'column' ? 'Align (horizontal)' : 'Align (vertical)', chips(PS.ALIGNS, L.align, (v) => set(() => { L.align = v; }))),
       ...(L.dir === 'grid' ? [] : [field(L.dir === 'row' ? 'Distribute (horizontal)' : 'Distribute (vertical)', chips(PS.JUSTIFIES, L.justify, (v) => set(() => { L.justify = v; })))]),
     ));
@@ -1109,9 +1160,11 @@
     fillName.textContent = el.fill.startsWith('--') ? el.fill.replace('--', '') : el.fill.toUpperCase();
     panelEl.appendChild(section('Appearance',
       field('Fill', fillBtn, fillName),
-      field('Border', selectCtl('Border', PS.BORDERS, el.border, (v) => set(() => { el.border = v; }))),
-      field('Radius', selectCtl('Corner radius', PS.RADII, el.radius, (v) => set(() => { el.radius = v; }))),
-      field('Elevation', selectCtl('Elevation', PS.ELEVATIONS, el.elevation, (v) => set(() => { el.elevation = v; }))),
+      fieldRow(
+        field('Border', selectCtl('Border', PS.BORDERS, el.border, (v) => set(() => { el.border = v; }))),
+        field('Radius', selectCtl('Corner radius', PS.RADII, el.radius, (v) => set(() => { el.radius = v; }))),
+        field('Elevation', selectCtl('Elevation', PS.ELEVATIONS, el.elevation, (v) => set(() => { el.elevation = v; }))),
+      ),
     ));
 
     const tip = document.createElement('p');
@@ -1133,9 +1186,7 @@
     const top = viewportEl.getBoundingClientRect().top;
     let y = r.top - ir.height - 16;
     if (y < top + 8) y = r.bottom + 16;
-    if (y + ir.height > window.innerHeight - 8) y = window.innerHeight - ir.height - 16;
-    const x = clamp(r.left + r.width / 2 - ir.width / 2, 8, window.innerWidth - ir.width - 8);
-    inspectorEl.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    placeBox(inspectorEl, r.left + r.width / 2 - ir.width / 2, y);
   }
 
   function removeSelected() {
@@ -1245,10 +1296,9 @@
     syncColorUI();
     if (colorPop.dataset.moved) return;
     const r = colorPop.getBoundingClientRect();
-    const x = clamp(cx - r.width / 2, 8, window.innerWidth - r.width - 8);
     let y = cy + 12;
-    if (y + r.height > window.innerHeight - 8) y = Math.max(8, cy - r.height - 12);
-    colorPop.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    if (y + r.height > window.innerHeight - 8) y = cy - r.height - 12;
+    placeBox(colorPop, cx - r.width / 2, y);
   }
   function closeColor() {
     colorPop.classList.remove('is-open');
@@ -1317,9 +1367,7 @@
     if (pop.dataset.moved) return;
     const r = $('artboardLabel').getBoundingClientRect();
     const pr = pop.getBoundingClientRect();
-    const x = clamp(r.left, 8, window.innerWidth - pr.width - 8);
-    const y = clamp(r.bottom + 8, 8, window.innerHeight - pr.height - 8);
-    pop.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+    placeBox(pop, r.right - pr.width, r.bottom + 8);
   }
   function closeArtboardEdit() {
     if (!ui.abEdit) return;
@@ -1444,6 +1492,28 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('is-open'), 2600);
   }
 
+  /* Popped-up controls always stay inside the visible area BELOW the top bar. */
+  function safeArea() {
+    const top = viewportEl.getBoundingClientRect().top + 8;
+    return { top, left: 8, right: window.innerWidth - 8, bottom: window.innerHeight - 8 };
+  }
+  function placeBox(box, x, y) {
+    const a = safeArea();
+    box.style.maxHeight = (a.bottom - a.top) + 'px';
+    const r = box.getBoundingClientRect();
+    x = clamp(x, a.left, Math.max(a.left, a.right - r.width));
+    y = clamp(y, a.top, Math.max(a.top, a.bottom - Math.min(r.height, a.bottom - a.top)));
+    box.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+  }
+  function reclampMoved() {
+    document.querySelectorAll('.floating-ui[data-moved]').forEach((b) => {
+      if (!b.offsetParent && getComputedStyle(b).display === 'none') return;
+      const r = b.getBoundingClientRect();
+      placeBox(b, r.left, r.top);
+    });
+  }
+  window.addEventListener('resize', reclampMoved);
+
   /* ─────────────── Movable controls ───────────────
    * Every popped-up control (card panel, text toolbar, color picker, artboard size)
    * can be dragged by its header / grip. It then stays where you put it. */
@@ -1457,11 +1527,7 @@
     const start = { x: e.clientX, y: e.clientY };
     box.classList.add('is-dragging-ui');
     Object.assign(box.style, { left: '0px', top: '0px', right: 'auto', bottom: 'auto', height: box.id === 'panel' ? r.height + 'px' : '' });
-    const place = (cx, cy) => {
-      const x = clamp(r.left + cx - start.x, 8 - r.width + 60, window.innerWidth - 60);
-      const y = clamp(r.top + cy - start.y, 8, window.innerHeight - 40);
-      box.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
-    };
+    const place = (cx, cy) => placeBox(box, r.left + cx - start.x, r.top + cy - start.y);
     place(e.clientX, e.clientY);
     box.dataset.moved = '1';
     const move = (ev) => place(ev.clientX, ev.clientY);

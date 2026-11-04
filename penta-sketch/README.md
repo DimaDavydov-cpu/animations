@@ -33,11 +33,11 @@ Without it the app falls back to Helvetica.
 
 ## Cards and the grid
 
-* A card whose edges snap onto the layout grid is **bound to those columns** (Width: Columns). When the artboard width changes it keeps spanning the same columns
+* When a card snaps to the layout grid with either edge, its width snaps to a **whole number of columns** and it is **bound** to them (Width: Columns). It is responsive: when the canvas width changes it follows the grid (e.g. 5 of 12 columns becomes the same share of 8)
 * Width **Fixed** keeps the px width whatever the artboard does. **Hug** fits the content
 * Inside a horizontal stack or a **Grid** stack, cards **Fill** by default and share the space. Set one to Fixed and it keeps its width while the others resize around it
 * To move an item with a finger: tap it to select it, then drag. A finger drag on anything else scrolls the page
-* Settings panels are dark, compact, and can be dragged by their header / grip
+* Settings panels are dark, compact, and can be dragged by their header / grip. They always stay inside the visible area below the top bar
 
 ## How to use
 
@@ -64,7 +64,7 @@ Shortcuts: Cmd+Z / Cmd+Shift+Z, Delete, Cmd+D duplicate, G grid, 0 fit, +/- zoom
 
 * Artboard presets: Desktop 1440, Tablet 834, Mobile 390, with the Penta 12 / 8 / 4 column grid overlay
 * Autosave in the browser. Save and open `.json` projects from the ••• menu
-* **Export HTML**: a standalone file with only the Penta tokens it uses. Copy it, download it or preview it
+* Export HTML is hidden for now (the code stays in `js/export.js`)
 
 ## Files
 
