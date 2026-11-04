@@ -344,8 +344,7 @@ button.swatch--btn { width: 36px; height: 36px; border-color: var(--border-prima
 
 /* ─────────────── Small screens ─────────────── */
 @media (max-width: 820px) {
-  .topbar__title, .zoom-label, .topbar__divider { display: none; }
-  .segmented .button.small button { padding: 10px; }
+  .topbar__divider { display: none; }
 }
 
 /* ═════════════ v2: stacks, card panel, artboard resize ═════════════ */
@@ -460,7 +459,6 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .world.is-full .ab-handles { display: none; }
 .zoom-label { cursor: pointer; }
 @media (max-width: 1100px) { .topbar__title { display: none; } }
-@media (max-width: 900px) { [data-preset] button svg { display: none; } }
 
 /* Scale control */
 .zoom-anchor { position: relative; }
@@ -659,3 +657,30 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 /* Canvas corners when it is not edge to edge: Penta radius-2xl (20px), constant on screen */
 .artboard { transition: border-radius var(--duration-base) var(--ease-default); }
 .world.is-inset .artboard { border-radius: calc(var(--radius-2xl) * var(--inv, 1)); }
+
+/* ═════════════ Top bar on narrow screens: never squash controls ═════════════
+   Controls keep their size; the groups share the free space between them.
+   On very small screens the width readout steps aside instead of squashing anything. */
+.topbar { gap: var(--space-2); }
+.topbar__group { flex: 0 0 auto; min-width: auto; }
+.topbar .button, .topbar .segmented, .topbar .zoom-anchor, .topbar .width-label, .topbar .menu-anchor { flex: 0 0 auto; }
+.topbar .segmented .button.small button,
+.topbar [data-preset] button,
+.topbar [data-tool] button { width: 36px; min-width: 36px; padding: 0; justify-content: center; }
+.topbar [data-preset] button svg, .topbar [data-tool] button svg { display: block; flex: none; }
+@media (max-width: 640px) {
+  .topbar { padding: 0 var(--space-1); gap: var(--space-1); }
+  .topbar__group { gap: 2px; }
+  .topbar .button.small.icon button { width: 32px; padding: 0; }
+}
+@media (max-width: 480px) {
+  .width-label { display: none; }
+}
+
+.menu .menu-grid { display: none; }
+@media (max-width: 440px) {
+  .topbar .segmented { padding: 2px; gap: 0; }
+  .topbar .segmented .button.small button, .topbar [data-preset] button, .topbar [data-tool] button { width: 32px; min-width: 32px; }
+  #gridToggleWrap { display: none; }      /* moves into the ••• menu */
+  .menu .menu-grid { display: flex; }
+}

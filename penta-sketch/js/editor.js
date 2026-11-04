@@ -336,6 +336,7 @@
     gridEl.style.gap = `${PS.GRID.gutter}px`;
     gridEl.classList.toggle('is-on', ui.grid);
     $('gridToggleWrap').classList.toggle('is-active', ui.grid);
+    $('gridState').textContent = ui.grid ? 'On' : 'Off';
     hintEl.classList.toggle('is-hidden', doc.elements.length > 0);
   }
 
@@ -1408,6 +1409,7 @@
     if (act === 'save') download('penta-sketch.json', snapDoc(), 'application/json');
     if (act === 'open') $('fileInput').click();
     if (act === 'help') $('helpScrim').classList.add('is-open');
+    if (act === 'grid') { ui.grid = !ui.grid; renderArtboard(); }
     if (act === 'finger') {
       ui.fingerDraws = !ui.fingerDraws;
       $('fingerState').textContent = ui.fingerDraws ? 'On' : 'Off';
