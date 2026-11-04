@@ -56,13 +56,13 @@
   }
 
   /* A single, straight, roughly level stroke = a line of text (wireframe convention). */
-  PS.recognizeLine = function (strokes) {
+  PS.recognizeLine = function (strokes, minLen = 40) {
     if (strokes.length !== 1) return null;
     const pts = strokes[0];
     if (pts.length < 4) return null;
     const a = pts[0], b = pts[pts.length - 1];
     const len = Math.hypot(b.x - a.x, b.y - a.y);
-    if (len < 40) return null;
+    if (len < minLen) return null;
     let minY = Infinity, maxY = -Infinity, minX = Infinity, maxX = -Infinity, L = 0;
     for (let i = 0; i < pts.length; i++) {
       minX = Math.min(minX, pts[i].x); maxX = Math.max(maxX, pts[i].x);
@@ -77,6 +77,23 @@
     if (dev > Math.max(5, len * 0.04)) return null;
     if (L / Math.max(len, 1) > 1.6) return null;
     return { type: 'line', x1: minX, x2: maxX, y: (a.y + b.y) / 2 };
+  };
+
+  /* A small rectangle with a short straight line inside it = a button (the line is its label).
+   * The rectangle may be several strokes; the line is one stroke lying inside it. */
+  PS.recognizeButton = function (strokes) {
+    if (strokes.length < 2) return null;
+    for (let i = 0; i < strokes.length; i++) {
+      const line = PS.recognizeLine([strokes[i]], 20);
+      if (!line) continue;
+      const rect = PS.recognize(strokes.filter((_, j) => j !== i));
+      if (rect.type !== 'rect') continue;
+      const inside = line.x1 >= rect.x + 3 && line.x2 <= rect.x + rect.w - 3 && line.y > rect.y + 0.2 * rect.h && line.y < rect.y + 0.8 * rect.h;
+      if (!inside) continue;
+      if (rect.h > 80 || rect.w > 400) return { type: 'bigshape', rect, line };   // too large for a button
+      return { type: 'button', rect, line };
+    }
+    return null;
   };
 
   PS.recognize = function (strokes) {

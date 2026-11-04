@@ -53,6 +53,7 @@ Without it the app falls back to Helvetica.
 | Draw a rectangle inside a card / around existing items | Nests a card in the stack / wraps those items in a new stack |
 | Finger tap on a card | Opens the **card panel**: direction, wrap, gap, padding, align, distribute, size (Fixed / Fill / Hug), fill, border, radius, elevation |
 | Draw a wide, short rectangle (up to ~72px tall, at least 3x wider than tall) | A small chooser asks: **Card** or **Input**. An input is a Penta text field (44px, hairline border); type its placeholder. On the canvas it snaps to whole grid columns and stays bound to them |
+| Draw a **small rectangle with a line inside** (the line is the label; draw both within a short pause) | Makes a **button**: solid dark gray with white text by default. The toolbar lets you pick **Solid / Outlined / Ghost** and **Small (36px) / Big (42px)**; write the label in it. A rectangle up to 40px tall starts Small, taller starts Big. Rectangle plus line that is larger than a button (over 80px tall or 400px wide) makes a card with that line as text |
 | Draw a straight horizontal line with Pencil | Adds a text box, inside a card or out on the canvas. On the canvas it snaps to whole grid columns (never fewer than two) and stays bound to them, so it follows the grid. Inside a card it joins the stack |
 | Tap with Pencil | Places a text box. Handwrite inside it and iPadOS **Scribble** converts it to text |
 | Text toolbar | Display, H1, H2, H3, H4, Subtitle, Body, Body S, Caption, Overline + color role |

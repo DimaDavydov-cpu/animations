@@ -752,3 +752,24 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .ab-knob.is-dragging::after { height: 72px; margin-top: -36px; }
 .viewport[data-tool="select"] { cursor: default; }
 .world.is-ab-edit .artboard { outline: calc(2px * var(--inv, 1)) solid var(--sel); }
+
+/* Button element (Penta button look from ds_penta.css: surface-inverse, white text, radius-md) */
+.el-text.is-button {
+  display: flex; align-items: center; justify-content: center;
+  box-sizing: border-box;
+  min-width: 64px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.el-text.is-button.btn-big { height: 42px; padding: 12px 16px; font-size: 16px; line-height: 18px; }
+.el-text.is-button.btn-small { height: 36px; padding: 10px 12px; font-size: 14px; line-height: 16px; }
+.el-text.is-button.btn-solid { background: var(--surface-inverse); color: var(--foreground-on-accent); }
+.el-text.is-button.btn-outline { background: var(--surface-primary); border-color: var(--foreground-primary); color: var(--foreground-primary); }
+.el-text.is-button.btn-ghost { background: transparent; color: var(--foreground-primary); }
+.el-text.is-button .el-text__edit { padding: 0; margin: 0; min-width: 0; width: 100%; text-align: center; cursor: text; }
+.el-text.is-button .el-text__edit:empty::before { content: attr(data-placeholder); color: inherit; opacity: .55; }
+.el-card .el-text.is-button { align-self: flex-start; }

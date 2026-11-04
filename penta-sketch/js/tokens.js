@@ -121,6 +121,9 @@
     { id: 'auto', label: 'Auto-fit', title: 'repeat(auto-fit, minmax(min, 1fr))' },
   ];
   PS.MIN_UNITS = ['px', '%', 'vw', 'vh', 'rem'];
+  /* Buttons: Penta default = solid dark (surface-inverse) with white text */
+  PS.BTN_STYLES = [{ id: 'solid', label: 'Solid' }, { id: 'outline', label: 'Outlined' }, { id: 'ghost', label: 'Ghost' }];
+  PS.BTN_SIZES = [{ id: 'small', label: 'Small', title: '36px (ds_penta .small)' }, { id: 'big', label: 'Big', title: '42px (ds_penta default)' }];
   PS.ALIGNS = [
     { id: 'flex-start', label: 'Start' },
     { id: 'center', label: 'Center' },

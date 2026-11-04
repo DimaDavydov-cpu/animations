@@ -80,6 +80,7 @@
     if (el.type !== 'card') {
       out.push(['min-width', '0']);
       if (el.variant === 'input' && parent.layout.dir === 'row') out.push(['flex', '1 1 0']);
+      if (el.variant === 'button') out.push(parent.layout.dir === 'grid' ? ['justify-self', 'start'] : ['align-self', 'flex-start']);
       return out;
     }
     if (parent.layout.dir === 'grid') {
@@ -109,7 +110,7 @@
   const toStyle = (pairs) => pairs.map(([k, v]) => `${k}: ${v}`).join('; ');
 
   function collectTokens(doc) {
-    const used = new Set(['--font-primary', '--grey-200', '--border-primary', '--radius-md', '--foreground-tertiary', '--surface-primary']);
+    const used = new Set(['--font-primary', '--grey-200', '--border-primary', '--radius-md', '--foreground-tertiary', '--surface-primary', '--surface-inverse', '--foreground-on-accent', '--foreground-primary']);
     const add = (t) => t && t.startsWith('--') && used.add(t);
     add(doc.artboard.bg);
     for (const el of doc.elements) {
@@ -142,6 +143,10 @@
         const style = toStyle([...PS.sizeCss(el, parent), ...PS.stackCss(el, kids.get(el.id) || []), ...PS.skinCss(el)]);
         const inner = render(el.id, depth + 1);
         return `${pad}<div class="card" style="${style}">${inner ? '\n' + inner + '\n' + pad : ''}</div>`;
+      }
+      if (el.variant === 'button') {
+        const st = toStyle([...PS.sizeCss(el, parent)]);
+        return `${pad}<button type="button" class="btn btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}" style="${st}">${esc(el.text || 'Button')}</button>`;
       }
       if (el.variant === 'input') {
         const st = toStyle([...PS.sizeCss(el, parent)]);
@@ -182,6 +187,12 @@ ${tokens}
     .artboard { position: relative; width: ${a.w}px; min-height: ${a.h}px; margin: 0 auto; overflow: hidden; background: ${PS.colorCss(a.bg)}; }
     .artboard h1, .artboard h2, .artboard h3, .artboard h4, .artboard h5, .artboard p, .artboard span { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; letter-spacing: 0; }
 ${levelCss}
+    .btn { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 64px; border: 1px solid transparent; border-radius: var(--radius-md); font-family: var(--font-primary); font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .btn-big { height: 42px; padding: 12px 16px; font-size: 16px; }
+    .btn-small { height: 36px; padding: 10px 12px; font-size: 14px; }
+    .btn-solid { background: var(--surface-inverse); color: var(--foreground-on-accent); }
+    .btn-outline { background: var(--surface-primary); border-color: var(--foreground-primary); color: var(--foreground-primary); }
+    .btn-ghost { background: transparent; color: var(--foreground-primary); }
     .input-box { height: 44px; padding: 12px 16px; border: 1px solid var(--border-primary); border-radius: var(--radius-md); background: var(--surface-primary); font: 16px/20px var(--font-primary); }
     .input-box::placeholder { color: var(--foreground-tertiary); }
   </style>

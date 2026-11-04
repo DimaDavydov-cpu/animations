@@ -13,6 +13,8 @@
 
   const STORAGE_KEY = 'penta-sketch:v1';
   const SNAP = PS.GRID.snap;
+  const colBound = (el) => !!el && (el.type === 'card' || (el.type === 'text' && el.w && el.variant !== 'button'));
+  const isBox = (el) => el.variant === 'input' || el.variant === 'button';   // text variants drawn as boxes
   const snap = (v) => Math.round(v / SNAP) * SNAP;
   /* Card heights snap to the 24px vertical rhythm (min one rhythm step) */
   const RHYTHM = 24;
@@ -196,12 +198,13 @@
           place(node, ch, el);
           while (node.children.length > ch.length) node.lastChild.remove();
         } else {
-          node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}`;
+          node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}${el.variant === 'button' ? ` is-button btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}` : ''}`;
           if (el.variant === 'input') node.firstChild.dataset.placeholder = 'Input';
+          if (el.variant === 'button') node.firstChild.dataset.placeholder = 'Button';
           node.classList.toggle('has-w', !!el.w && !parent);
-          node.classList.toggle('is-empty', !el.text && el.variant !== 'input');
+          node.classList.toggle('is-empty', !el.text && !isBox(el));
           const extra = parent ? [] : [['max-width', Math.max(48, doc.artboard.w - el.x) + 'px']];
-          applyCss(node, [...PS.sizeCss(el, parent), ...extra, ...PS.textColorCss(el)]);
+          applyCss(node, [...PS.sizeCss(el, parent), ...extra, ...(el.variant === 'button' ? [] : PS.textColorCss(el))]);
           const edit = node.firstChild;
           if (document.activeElement !== edit && edit.textContent !== el.text) edit.textContent = el.text;
         }
@@ -292,7 +295,7 @@
   const LINE_TOL = 2; // px: DOM measurements are sub-pixel, grid lines are rounded
   const lineIndex = (v, arr) => arr.findIndex((l) => Math.abs(l - v) <= LINE_TOL);
   function bindToColumns(el) {
-    if (!el || !(el.type === 'card' || (el.type === 'text' && el.w)) || el.parent || el.sizeW === 'hug') return;
+    if (!colBound(el) || el.parent || el.sizeW === 'hug') return;
     const L = gridLines();
     let x1 = el.x, x2 = el.x + el.w;
     if (Math.abs(x1) <= LINE_TOL) x1 = 0;
@@ -311,7 +314,7 @@
   /* If one edge of a top-level card sits on the grid, snap the other edge to the nearest
    * column line too, so the card is a whole number of columns wide, then bind it. */
   function snapToColumns(el) {
-    if (!el || !(el.type === 'card' || (el.type === 'text' && el.w)) || el.parent || el.sizeW === 'hug' || el.lockW) return false;
+    if (!colBound(el) || el.parent || el.sizeW === 'hug' || el.lockW) return false;
     const L = gridLines();
     let x1 = el.x, x2 = el.x + el.w;
     const si = lineIndex(x1, L.starts), ei = lineIndex(x2, L.ends);
@@ -338,7 +341,7 @@
   }
   function applyColumnBindings() {
     for (const el of doc.elements) {
-      if ((el.type === 'card' || (el.type === 'text' && el.w)) && !el.parent && el.sizeW === 'cols' && el.col) Object.assign(el, colSpanRect(el.col));
+      if (colBound(el) && !el.parent && el.sizeW === 'cols' && el.col) Object.assign(el, colSpanRect(el.col));
     }
   }
   function nearestLine(v, lines) {
@@ -567,6 +570,18 @@
     const { strokes, paths } = pending;
     pending = { strokes: [], paths: [], timer: null };
     if (!strokes.length) return;
+    const btn = PS.recognizeButton(strokes);
+    if (btn && btn.type === 'button') {          // small rectangle with a line inside
+      createButton(btn);
+      fadeInk(paths, 'is-absorbed');
+      return;
+    }
+    if (btn && btn.type === 'bigshape') {        // larger rectangle with a line inside: a card with that line as text
+      createCard(btn.rect);
+      createTextFromLine(btn.line);
+      fadeInk(paths, 'is-absorbed');
+      return;
+    }
     const res = PS.recognize(strokes);
     const line = res.type === 'rect' ? null : PS.recognizeLine(strokes);
     if (res.type === 'rect' && res.h <= 72 && res.w >= 3 * res.h) {
@@ -616,6 +631,27 @@
     else if (kind === 'input') { createInput(res); fadeInk(paths, 'is-absorbed'); }
     else fadeInk(paths);
   });
+
+  /* A button: a small rectangle with a line inside. Solid dark (Penta default) with white text;
+   * style (Solid / Outlined / Ghost) and size (Small 36px / Big 42px) are chosen in the toolbar. */
+  function createButton(b) {
+    blurEditing();
+    const r = b.rect;
+    const before = snapDoc();
+    const size = r.h <= 40 ? 'small' : 'big';
+    const H = size === 'small' ? 36 : 42;
+    const mid = { x: r.x + r.w / 2, y: r.y + r.h / 2 };
+    const parent = containerFor({ x: mid.x, y: mid.y, w: 0, h: 0 });
+    const el = { id: uid(), type: 'text', variant: 'button', btnStyle: 'solid', btnSize: size, parent: null, x: snap(r.x), y: snap(mid.y - H / 2), w: Math.max(64, snap(r.w)), text: '', level: 'body', color: 'primary' };
+    if (parent) { delete el.w; placeInto(el, parent, insertionIndex(parent, mid)); }
+    else doc.elements.push(el);
+    ui.selectedId = el.id;
+    ui.panelHidden = false;
+    render();
+    editSnapshot = before;
+    nodes.get(el.id).firstChild.focus();
+    toast('Button added. Write its label');
+  }
 
   /* An input is a Penta text field: a text element with variant 'input' (44px, hairline border).
    * Out on the canvas it snaps to whole grid columns and stays bound to them. */
@@ -805,7 +841,7 @@
     const el = node && byId(node.dataset.id);
     if (!el) return;
     el.text = e.target.innerText.replace(/\n$/, '');
-    node.classList.toggle('is-empty', !el.text && el.variant !== 'input');
+    node.classList.toggle('is-empty', !el.text && !isBox(el));
     renderSelection();
     positionInspector();
     clearTimeout(saveTimer);
@@ -820,7 +856,7 @@
     ui.editingId = null;
     if (el) {
       el.text = e.target.innerText.replace(/\n$/, '').replace(/ /g, ' ');
-      if (!el.text.trim() && el.variant !== 'input') {
+      if (!el.text.trim() && !isBox(el)) {
         doc.elements = doc.elements.filter((x) => x.id !== el.id);
         if (ui.selectedId === el.id) ui.selectedId = null;
       }
@@ -1148,7 +1184,7 @@
         else { el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy); }
         if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snapH(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
-        if (el.type === 'card' || (el.type === 'text' && el.w)) { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
+        if (colBound(el)) { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
       }
       render();
       return;
@@ -1338,7 +1374,10 @@
       mutate(() => { el.level = l.id; });
     }, `${l.size}/${l.line}`)));
     const g = (label, ...c) => { const d = document.createElement('div'); d.className = 'insp-group'; if (label) { const s = document.createElement('span'); s.className = 'insp-label'; s.textContent = label; d.appendChild(s); } c.forEach((x) => d.appendChild(x)); return d; };
-    if (el.variant === 'input') {
+    if (el.variant === 'button') {
+      inspectorEl.appendChild(g('Style', chips(PS.BTN_STYLES, el.btnStyle || 'solid', (v) => mutate(() => { el.btnStyle = v; }))));
+      inspectorEl.appendChild(g('Size', chips(PS.BTN_SIZES, el.btnSize || 'big', (v) => mutate(() => { el.btnSize = v; }))));
+    } else if (el.variant === 'input') {
       inspectorEl.appendChild(g('Type', chips([{ id: 'text', label: 'Text' }, { id: 'input', label: 'Input' }], 'input', (v) => { if (v === 'text') mutate(() => { delete el.variant; el.color = 'primary'; }); })));
     } else {
       inspectorEl.appendChild(g('Text', levels));
