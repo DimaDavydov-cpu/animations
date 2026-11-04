@@ -204,6 +204,59 @@
     };
     place(elementsEl, kids.get('') || [], null);
     for (const [id, node] of nodes) if (!seen.has(id)) { node.remove(); nodes.delete(id); }
+    applyResponsive();
+  }
+
+  /* ─────────────── Mobile reflow ───────────────
+   * On the 4-column (mobile) grid, cards bound to less than 5 of 12 columns that sit
+   * beside a "main" card (more than half of the grid) move under it, stacked in reading
+   * order at the main card's width; everything below moves down. Display only: the
+   * stored (wide) layout is unchanged, so Adaptive / iPad show the original. */
+  let responsive = new Map();
+  const spanShare = (el) => (el.sizeW === 'cols' && el.col ? ((el.col.end === el.col.of ? el.col.of - 1 : el.col.end) - (el.col.start === -1 ? 0 : el.col.start) + 1) / el.col.of : null);
+  function applyResponsive() {
+    responsive = new Map();
+    if (columnsFor(doc.artboard.w) !== 4) return;
+    const gap = PS.GRID.gutter;
+    const tops = childrenOf(null).map((el) => {
+      const n = nodes.get(el.id);
+      return { el, x: el.x, y: el.y, w: el.type === 'card' ? el.w : n.offsetWidth, h: el.type === 'card' && el.sizeH !== 'hug' ? el.h : n.offsetHeight, share: spanShare(el) };
+    });
+    const mains = tops.filter((t) => t.el.type === 'card' && t.share != null && t.share > 0.5);
+    const side = new Map(); // main id -> side items
+    const taken = new Set();
+    for (const m of mains.sort((a, b) => a.y - b.y)) {
+      const list = tops.filter((t) => t !== m && !taken.has(t.el.id) && t.el.type === 'card' && t.share != null && t.share < 5 / 12
+        && t.y < m.y + m.h && t.y + t.h > m.y);
+      list.sort((a, b) => a.y - b.y || a.x - b.x).forEach((t) => taken.add(t.el.id));
+      if (list.length) side.set(m.el.id, list);
+    }
+    // main cards use the full mobile content width (bleed edges stay bleed)
+    const G = gridLines();
+    const fullSpan = (el) => ({ x: el.col.start === -1 ? 0 : G.colStarts[0], w: (el.col.end === el.col.of ? doc.artboard.w : G.colEnds[G.n - 1]) - (el.col.start === -1 ? 0 : G.colStarts[0]) });
+    if (!mains.length) return;
+    let offset = 0;
+    for (const t of [...tops].sort((a, b) => a.y - b.y || a.x - b.x)) {
+      if (taken.has(t.el.id)) continue;
+      const y = t.y + offset;
+      const isMain = mains.includes(t);
+      if (isMain) responsive.set(t.el.id, { y, ...fullSpan(t.el) });
+      else if (offset) responsive.set(t.el.id, { y });
+      const list = side.get(t.el.id);
+      if (!list) continue;
+      const mx = fullSpan(t.el);
+      let cy = y + t.h + gap;
+      for (const s2 of list) { responsive.set(s2.el.id, { x: mx.x, w: mx.w, y: cy }); cy += s2.h + gap; }
+      offset += cy - (y + t.h);
+    }
+    for (const [id, o] of responsive) {
+      const n = nodes.get(id);
+      if (!n) continue;
+      n.style.top = o.y + 'px';
+      if (o.x != null) { n.style.left = o.x + 'px'; n.style.width = o.w + 'px'; }
+      n.classList.add('is-reflowed');
+    }
+    nodes.forEach((n, id) => { if (!responsive.has(id)) n.classList.remove('is-reflowed'); });
   }
 
   function columnsFor(w) { return w >= 1024 ? 12 : w >= 600 ? 8 : 4; }
@@ -883,7 +936,8 @@
       } else {
         const r = g.rect0;
         const wasChild = !!el.parent;
-        el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy);
+        if (responsive.has(el.id)) { el.x = Math.round(el.x + g.dx); el.y = Math.round(el.y + g.dy); }
+        else { el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy); }
         if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snap(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
         if (el.type === 'card') { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
