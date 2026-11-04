@@ -404,7 +404,10 @@
    * (100% / 75% / 50%), never by touch. Only the artboard WIDTH is a design decision:
    * Full screen = the screen's width, edge to edge; presets or a typed width otherwise.
    * The height is automatic: it fills the screen and grows with the content. */
-  const LABEL_BAND = 0; // no canvas title: the artboard starts at the top edge
+  /* The top bar floats over the canvas; at scroll 0 the canvas starts just below it,
+   * and scrolled content passes underneath the bar. */
+  const topbarEl = document.querySelector('.topbar');
+  const topInset = () => Math.ceil(topbarEl.getBoundingClientRect().bottom - viewportEl.getBoundingClientRect().top + 8);
   const ZOOMS = [1, 0.75, 0.5];
   const isFull = () => doc.artboard.preset === 'full';
   function sizeToViewport() {
@@ -415,12 +418,12 @@
     const a = doc.artboard;
     const sizer = $('scrollSizer');
     sizer.style.width = Math.max(viewportEl.clientWidth, Math.ceil(a.w * view.s + view.x * 2)) + 'px';
-    sizer.style.height = Math.ceil(LABEL_BAND + a.h * view.s) + 'px';
+    sizer.style.height = Math.ceil(topInset() + a.h * view.s) + 'px';
   }
   function updateAutoHeight() {
     let bottom = 0;
     for (const e of childrenOf(null)) { const rr = rectOf(e.id); bottom = Math.max(bottom, rr.y + rr.h); }
-    const h = Math.max(Math.floor((viewportEl.clientHeight - LABEL_BAND) / view.s), Math.ceil(bottom + 64));
+    const h = Math.max(Math.floor((viewportEl.clientHeight - topInset()) / view.s), Math.ceil(bottom + 64));
     if (h === doc.artboard.h) { updateScrollArea(); return; }
     doc.artboard.h = h;
     artboardEl.style.height = h + 'px';
@@ -434,7 +437,7 @@
     view.s = ui.zoom;
     worldEl.classList.toggle('is-full', isFull());
     view.x = a.w * view.s <= vw ? Math.round((vw - a.w * view.s) / 2) : 0;
-    view.y = LABEL_BAND;
+    view.y = topInset();
     applyView();
     updateAutoHeight();
   }
@@ -1183,7 +1186,7 @@
     if (!node) return;
     const r = node.getBoundingClientRect();
     const ir = inspectorEl.getBoundingClientRect();
-    const top = viewportEl.getBoundingClientRect().top;
+    const top = topbarEl.getBoundingClientRect().bottom;
     let y = r.top - ir.height - 16;
     if (y < top + 8) y = r.bottom + 16;
     placeBox(inspectorEl, r.left + r.width / 2 - ir.width / 2, y);
@@ -1494,7 +1497,7 @@
 
   /* Popped-up controls always stay inside the visible area BELOW the top bar. */
   function safeArea() {
-    const top = viewportEl.getBoundingClientRect().top + 8;
+    const top = topbarEl.getBoundingClientRect().bottom + 8;
     return { top, left: 8, right: window.innerWidth - 8, bottom: window.innerHeight - 8 };
   }
   function placeBox(box, x, y) {

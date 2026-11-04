@@ -632,3 +632,23 @@ button.artboard-label:hover { background-color: var(--grey-300); }
   background: var(--surface-primary);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
+
+
+/* ═════════════ Floating top bar ═════════════ */
+:root { --bar-gap: 8px; }
+.topbar {
+  inset: calc(var(--bar-gap) + env(safe-area-inset-top)) calc(var(--bar-gap) + env(safe-area-inset-right)) auto calc(var(--bar-gap) + env(safe-area-inset-left));
+  height: var(--topbar-h);
+  padding: 0 var(--space-2);
+  border-bottom: 0;
+  border-radius: var(--radius-xl);
+  /* PENTA-FALLBACK: no Penta token for translucent glass; 88% surface + 12px blur as requested */
+  background: color-mix(in srgb, var(--surface-primary) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-z2);
+}
+/* the canvas runs under the bar; the scroll area starts at the screen top */
+.viewport { inset: 0; }
+.panel { top: calc(var(--topbar-h) + env(safe-area-inset-top) + var(--bar-gap) * 2); }
+.panel.dark-ui { top: calc(var(--topbar-h) + env(safe-area-inset-top) + var(--bar-gap) * 2); }
