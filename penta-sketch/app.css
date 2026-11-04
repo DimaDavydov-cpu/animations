@@ -655,3 +655,7 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 
 /* Resolution switch: icon only */
 [data-preset] button { padding: 8px 10px; }
+
+/* Canvas corners when it is not edge to edge: Penta radius-2xl (20px), constant on screen */
+.artboard { transition: border-radius var(--duration-base) var(--ease-default); }
+.world.is-inset .artboard { border-radius: calc(var(--radius-2xl) * var(--inv, 1)); }

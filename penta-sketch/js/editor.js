@@ -436,6 +436,8 @@
     const a = doc.artboard, vw = viewportEl.clientWidth;
     view.s = ui.zoom;
     worldEl.classList.toggle('is-full', isFull());
+    // rounded corners whenever the canvas is not edge to edge (scaled down or narrower)
+    worldEl.classList.toggle('is-inset', view.s < 1 || a.w * view.s < vw - 1);
     view.x = a.w * view.s <= vw ? Math.round((vw - a.w * view.s) / 2) : 0;
     view.y = topInset();
     applyView();
