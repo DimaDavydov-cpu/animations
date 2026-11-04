@@ -642,11 +642,11 @@ button.artboard-label:hover { background-color: var(--grey-300); }
   padding: 0 var(--space-2);
   border-bottom: 0;
   border-radius: var(--radius-xl);
-  /* PENTA-FALLBACK: no Penta token for translucent glass; 88% surface + 12px blur as requested */
-  background: color-mix(in srgb, var(--surface-primary) 88%, transparent);
+  /* PENTA-FALLBACK: no Penta token for translucent glass; 50% surface + 12px blur as requested */
+  background: color-mix(in srgb, var(--surface-primary) 50%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  box-shadow: var(--shadow-z2);
+  box-shadow: none;
 }
 /* the canvas runs under the bar; the scroll area starts at the screen top */
 .viewport { inset: 0; }
