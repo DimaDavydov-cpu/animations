@@ -739,3 +739,16 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .el-text.is-input .el-text__edit:empty:focus { outline: none; min-height: 18px; }
 .el-text.is-input.has-w { box-sizing: border-box; }
 .el-card .el-text.is-input { align-self: stretch; }
+
+/* ═════════════ Top bar layout: start | centered resolution | end (undo, redo, menu) ═════════════
+   Side columns share the free space equally, so the middle group stays centered;
+   they never shrink below their content. */
+.topbar { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: center; }
+.topbar__group--start { justify-self: start; }
+.topbar__group--center { justify-self: center; }
+.topbar__group--end { justify-self: end; }
+@media (max-width: 380px) {
+  .topbar { gap: 2px; padding: 0 2px; }
+  .zoom-btn button svg { display: none; }
+  .topbar .zoom-btn button, .zoom-anchor #zoomBtn { padding: 0 4px; }
+}
