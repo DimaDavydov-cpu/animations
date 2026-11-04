@@ -187,7 +187,7 @@
         const ref = container.children[i];
         if (ref !== node) container.insertBefore(node, ref || null);
         if (el.type === 'card') {
-          applyCss(node, [...PS.sizeCss(el, parent), ...PS.stackCss(el, kids.get(el.id) || []), ...PS.skinCss(el)]);
+          applyCss(node, [...PS.sizeCss(el, parent), ...PS.stackCss(el, kids.get(el.id) || [], artboardUnitPx), ...PS.skinCss(el)]);
           const ch = kids.get(el.id) || [];
           place(node, ch, el);
           while (node.children.length > ch.length) node.lastChild.remove();
@@ -259,6 +259,12 @@
     nodes.forEach((n, id) => { if (!responsive.has(id)) n.classList.remove('is-reflowed'); });
   }
 
+  /* vw / vh inside the canvas mean the artboard's width / visible height, like in an iframe */
+  function artboardUnitPx(v, u) {
+    if (u === 'vw') return Math.round((doc.artboard.w * v) / 100);
+    const visibleH = Math.max(1, (viewportEl.clientHeight - topInset()) / view.s);
+    return Math.round((visibleH * v) / 100);
+  }
   function columnsFor(w) { return w >= 1024 ? 12 : w >= 600 ? 8 : 4; }
 
   /* ─────────────── Grid snapping ───────────────
@@ -420,7 +426,7 @@
       const L = el.layout;
       const badge = document.createElement('div');
       badge.className = 'sel-size';
-      badge.textContent = `${L.dir === 'grid' ? `▦ Grid ${L.cols || 2}` : L.dir === 'row' ? '→ Horizontal' : '↓ Vertical'} · gap ${PS.spacePx(L.gap)} · ${Math.round(r.w)} × ${Math.round(r.h)}`;
+      badge.textContent = `${L.dir === 'grid' ? (L.gridMode === 'auto' ? `▦ Auto-fit ≥ ${L.minVal || 200}${L.minUnit || 'px'}` : `▦ Grid ${L.cols || 2}`) : L.dir === 'row' ? '→ Horizontal' : '↓ Vertical'} · gap ${PS.spacePx(L.gap)} · ${Math.round(r.w)} × ${Math.round(r.h)}`;
       box.appendChild(badge);
       // padding visualisation
       const pad = document.createElement('div');
@@ -1136,7 +1142,7 @@
     const title = document.createElement('div');
     title.className = 'panel__titles';
     const count = childrenOf(el.id).length;
-    title.innerHTML = `${GRIP}<div class="panel__title">${parent ? 'Nested card' : 'Card'}</div><div class="panel__sub">${L.dir === 'grid' ? `Grid, ${L.cols || 2} columns` : L.dir === 'row' ? 'Horizontal stack' : 'Vertical stack'} · ${count} item${count === 1 ? '' : 's'}</div>`;
+    title.innerHTML = `${GRIP}<div class="panel__title">${parent ? 'Nested card' : 'Card'}</div><div class="panel__sub">${L.dir === 'grid' ? (L.gridMode === 'auto' ? `Auto-fit grid, min ${L.minVal || 200}${L.minUnit || 'px'}` : `Grid, ${L.cols || 2} columns`) : L.dir === 'row' ? 'Horizontal stack' : 'Vertical stack'} · ${count} item${count === 1 ? '' : 's'}</div>`;
     const actions = document.createElement('div');
     actions.className = 'panel__actions';
     if (parent) actions.appendChild(iconBtn(ICON_UP, 'Select parent card', () => select(parent.id)));
@@ -1149,7 +1155,25 @@
     // stack
     const dirControls = [chips(PS.DIRECTIONS, L.dir, (v) => set(() => { L.dir = v; if (v !== 'row') L.wrap = false; if (v === 'grid' && !L.cols) L.cols = 2; }))];
     if (L.dir === 'row') dirControls.push(chips([{ id: 'wrap', label: 'Wrap', title: 'Wrap items onto new rows' }], L.wrap ? 'wrap' : null, () => set(() => { L.wrap = !L.wrap; })));
-    const gridCols = L.dir === 'grid' ? [field('Grid columns', chips(PS.GRID_COLS.map((n) => ({ id: n, label: String(n) })), L.cols, (v) => set(() => { L.cols = v; })))] : [];
+    const gridCols = [];
+    if (L.dir === 'grid') {
+      const mode = L.gridMode || 'count';
+      const modeChips = chips(PS.GRID_MODES, mode, (v) => set(() => { L.gridMode = v; if (v === 'auto' && !L.minVal) { L.minVal = 200; L.minUnit = 'px'; } }));
+      if (mode === 'count') {
+        gridCols.push(field('Grid columns', modeChips, chips(PS.GRID_COLS.map((n) => ({ id: n, label: String(n) })), L.cols, (v) => set(() => { L.cols = v; }))));
+      } else {
+        const unitSel = selectCtl('Minimum unit', PS.MIN_UNITS.map((u) => ({ id: u, label: u })), L.minUnit || 'px', (v) => set(() => { L.minUnit = v; }));
+        unitSel.classList.add('unit-select');
+        const minInput = numberCtl('Minimum column width', L.minVal || 200, (v) => set(() => { L.minVal = v; }));
+        const inp = minInput.querySelector('input');
+        inp.step = 'any'; inp.min = '1';
+        const hint = document.createElement('span');
+        hint.className = 'field__hint';
+        hint.textContent = `minmax(${L.minVal || 200}${L.minUnit || 'px'}, 1fr) · as many columns as fit`;
+        gridCols.push(field('Grid columns', modeChips));
+        gridCols.push(field('Min column width (max 1fr)', minInput, unitSel, hint));
+      }
+    }
     panelEl.appendChild(section('Stack',
       field('Direction', ...dirControls),
       ...gridCols,
@@ -1608,7 +1632,8 @@
   renderSelection();
   // Full screen follows the screen (rotation, split view); not an undo step
   window.addEventListener('resize', () => {
-    if (isFull()) { sizeToViewport(); renderArtboard(); renderElements(); }
+    if (isFull()) sizeToViewport();
+    renderArtboard(); renderElements();
     fit();
     renderSelection();
   });

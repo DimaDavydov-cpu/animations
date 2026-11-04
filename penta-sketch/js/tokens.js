@@ -115,6 +115,12 @@
     { id: 'grid', label: 'Grid', icon: '▦' },
   ];
   PS.GRID_COLS = [2, 3, 4, 5, 6];
+  /* Grid stack column modes: a fixed count, or auto-fit with minmax(MIN, 1fr) */
+  PS.GRID_MODES = [
+    { id: 'count', label: 'Count' },
+    { id: 'auto', label: 'Auto-fit', title: 'repeat(auto-fit, minmax(min, 1fr))' },
+  ];
+  PS.MIN_UNITS = ['px', '%', 'vw', 'vh', 'rem'];
   PS.ALIGNS = [
     { id: 'flex-start', label: 'Start' },
     { id: 'center', label: 'Center' },

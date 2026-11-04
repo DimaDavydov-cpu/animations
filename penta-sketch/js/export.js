@@ -9,8 +9,21 @@
   /* Card as a flex stack: direction, gap, padding, alignment. */
   /* kids: the card's children in order (Grid uses them to build its column tracks:
    * a Fixed-width child keeps its px track, every other column shares the rest). */
-  PS.stackCss = function (el, kids = []) {
+  /* toPx(value, unit) lets the canvas resolve vw / vh against the artboard (it behaves
+   * like an iframe); the export leaves units as written. */
+  PS.stackCss = function (el, kids = [], toPx) {
     const L = el.layout;
+    if (L.dir === 'grid' && L.gridMode === 'auto') {
+      const v = L.minVal || 200, u = L.minUnit || 'px';
+      const min = toPx && (u === 'vw' || u === 'vh') ? `${toPx(v, u)}px` : `${v}${u}`;
+      return [
+        ['display', 'grid'],
+        ['grid-template-columns', `repeat(auto-fit, minmax(min(${min}, 100%), 1fr))`],
+        ['gap', `var(${L.gap})`],
+        ['padding', `var(${L.padY}) var(${L.padX})`],
+        ['align-items', L.align],
+      ];
+    }
     if (L.dir === 'grid') {
       const n = L.cols || 2;
       const tracks = [];

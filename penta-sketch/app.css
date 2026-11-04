@@ -690,3 +690,5 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .artboard { isolation: isolate; }
 .grid-overlay { z-index: 10; }
 .grid-overlay span { background: color-mix(in srgb, var(--grey-400) 50%, transparent); }
+
+.dark-ui .unit-select { flex: 0 0 64px !important; }
