@@ -558,3 +558,40 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .panel__titles { display: grid; grid-template-columns: auto 1fr; column-gap: 6px; align-items: center; }
 .panel__titles .grip { grid-row: span 2; }
 .is-dragging-ui { transition: none !important; opacity: 0.96; }
+
+
+/* ═════════════ v7: top-bar width readout, slim scale control, always-on resize handle ═════════════ */
+.viewport { overflow-x: hidden; } /* the canvas never scrolls sideways on its own */
+.width-label {
+  min-height: 0; max-height: none; height: 32px;
+  padding: 0 6px;
+  background: transparent;
+  border: 0;
+  color: var(--foreground-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.width-label:hover { background: var(--surface-secondary); }
+.zoom-anchor { display: flex; align-items: center; gap: 0; }
+.zoom-btn button, .zoom-anchor #zoomBtn {
+  min-width: 0;
+  padding: 0 6px;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--foreground-secondary);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-sm);
+}
+.zoom-btn button:hover { background: var(--surface-secondary); }
+.zoom-menu { left: auto; right: 0; }
+
+/* resize handle: always visible, inside the canvas's right edge */
+.ab-handles, .world.is-full .ab-handles { display: block; }
+.ab-handle--e { right: 0; width: calc(32px * var(--inv, 1)); }
+.ab-handle--e::after { left: auto; right: calc(6px * var(--inv, 1)); transform: translateY(-50%); background: var(--grey-600); }
+.ab-handle--e:hover::after, .ab-handle--e:active::after { background: var(--sel); }
+.ab-handle--e { width: calc(20px * var(--inv, 1)); }
+.ab-handle--e::after { top: calc(40vh * var(--inv, 1)); right: calc(5px * var(--inv, 1)); }

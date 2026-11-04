@@ -25,6 +25,9 @@
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2l10 5.5-4.5 1L6.5 13 3 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
 </button></div>
       </div>
+      <div class="button small icon gost" id="gridToggleWrap"><button type="button" id="gridToggle" title="Layout grid (G)" aria-label="Toggle layout grid">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.8 2.5v13M11.2 2.5v13" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button></div>
     </div>
 
     <div class="topbar__group">
@@ -46,11 +49,9 @@
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4.5" y="1.5" width="7" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
           Mobile</button></div>
       </div>
-      <div class="button small icon gost" id="gridToggleWrap"><button type="button" id="gridToggle" title="Layout grid (G)" aria-label="Toggle layout grid">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.8 2.5v13M11.2 2.5v13" stroke="currentColor" stroke-width="1.5"/></svg>
-      </button></div>
       <div class="zoom-anchor">
-        <div class="button small border"><button type="button" id="zoomBtn" title="Scale" aria-haspopup="true">100% <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <button type="button" class="width-label" id="artboardLabel" title="Canvas width. Tap to type a width or pick a preset"></button>
+        <div class="button small gost zoom-btn"><button type="button" id="zoomBtn" title="Scale" aria-haspopup="true">100% <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
         <div class="dropdown menu zoom-menu" id="zoomMenu">
           <a href="#" data-zoom="1">100%</a>
           <a href="#" data-zoom="0.75">75%</a>
@@ -85,7 +86,6 @@
         <svg class="ink" id="ink" aria-hidden="true"></svg>
         <div class="selection" id="selection" aria-hidden="true"></div>
       </div>
-      <button type="button" class="artboard-label" id="artboardLabel" title="Tap to change the artboard size"></button>
       <div class="ab-handles" id="abHandles" aria-hidden="true">
         <div class="ab-handle ab-handle--e" data-ab-handle="e" title="Drag to resize width"></div>
       </div>
@@ -98,7 +98,7 @@
         <li><b>Tap with Pencil</b> to place text, then write in the box</li>
         <li><b>Tap the background</b> with your finger to set its color</li>
         <li><b>Tap a card</b> with your finger to see its stack, size and style</li>
-        <li><b>Finger</b> drags items to reorder · <b>two fingers</b> pan</li>
+        <li><b>Finger</b>: tap an item to select it, then drag to move it · drag elsewhere to scroll</li>
       </ul>
     </div>
   </main>
@@ -186,7 +186,7 @@
         <dt>Edit text</dt><dd>Write over existing text with Pencil. Scratch out words to delete them (Scribble gestures).</dd>
         <dt>Background</dt><dd>Tap the empty artboard with your finger to choose its color. Use the hex field for exact values.</dd>
         <dt>Select / move</dt><dd>Finger tap selects. Drag an item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers pan.</dd>
-        <dt>Artboard width</dt><dd>Adaptive (default) uses your screen's width edge to edge. Pick iPad or Mobile in the top bar, or tap the artboard title to type an exact width or drag its right edge. Height is automatic.</dd><dt>Scale</dt><dd>Tap the percentage in the top bar to switch between 100%, 75% and 50%. Touch never changes the scale: two fingers only pan.</dd><dt>Grid snapping</dt><dd>Card edges snap to the layout grid's columns and margins when within 20 px. A red guide shows the line they snapped to.</dd>
+        <dt>Canvas width</dt><dd>Adaptive (default) uses the full available width. Drag the handle on the canvas's right edge to resize it, pick iPad or Mobile, or tap the width next to the scale (for example 1194 px) to type an exact width. Height is automatic.</dd><dt>Scale</dt><dd>Tap the percentage in the top bar to switch between 100%, 75% and 50%. Touch never changes the scale: two fingers only pan.</dd><dt>Grid snapping</dt><dd>Card edges snap to the layout grid's columns and margins when within 20 px. A red guide shows the line they snapped to.</dd>
         <dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>
       </dl>
     </div>

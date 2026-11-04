@@ -293,7 +293,8 @@
     inkEl.setAttribute('width', a.w);
     inkEl.setAttribute('height', a.h);
     const label = a.preset === 'custom' ? 'Custom' : PS.PRESETS[a.preset].label;
-    $('artboardLabel').textContent = `${label} · ${a.w} px`;
+    $('artboardLabel').textContent = `${a.w} px`;
+    $('artboardLabel').title = `${label} canvas width. Tap to type a width or pick a preset`;
     $('presetSelect').value = a.preset;
     document.querySelectorAll('[data-preset]').forEach((w) => {
       const on = w.dataset.preset === a.preset;
@@ -379,7 +380,7 @@
    * (100% / 75% / 50%), never by touch. Only the artboard WIDTH is a design decision:
    * Full screen = the screen's width, edge to edge; presets or a typed width otherwise.
    * The height is automatic: it fills the screen and grows with the content. */
-  const LABEL_BAND = 32;
+  const LABEL_BAND = 0; // no canvas title: the artboard starts at the top edge
   const ZOOMS = [1, 0.75, 0.5];
   const isFull = () => doc.artboard.preset === 'full';
   function sizeToViewport() {
@@ -605,7 +606,6 @@
     const role = roleFor(e);
     const editable = e.target.closest('.el-text__edit');
     const abHandle = e.target.closest('[data-ab-handle]');
-    if (e.target.closest('#artboardLabel')) { e.preventDefault(); openArtboardEdit(); return; }
     if (ui.abEdit && !abHandle) { closeArtboardEdit(); if (e.pointerType !== 'pen') return; }
 
     // Pencil / mouse on a text box: hand over to the browser (Scribble, caret).
@@ -638,7 +638,7 @@
     // artboard resize handles work with any input
     if (abHandle) {
       blurEditing();
-      gesture = { kind: 'artboard', id: e.pointerId, edge: abHandle.dataset.abHandle, start: pt, w0: doc.artboard.w, h0: doc.artboard.h, before: snapDoc(), moved: false };
+      gesture = { kind: 'artboard', id: e.pointerId, edge: abHandle.dataset.abHandle, start: pt, sx: e.clientX, w0: doc.artboard.w, h0: doc.artboard.h, before: snapDoc(), moved: false };
       return;
     }
 
@@ -725,9 +725,11 @@
     const pt = toArtboard(e.clientX, e.clientY);
     if (g.kind === 'artboard') {
       g.moved = true;
-      const w = g.edge.includes('e') ? snap(g.w0 + pt.x - g.start.x) : g.w0;
-      setArtboardSize(w);
-      renderArtboard(); renderElements(); renderSelection();
+      const maxW = Math.floor(viewportEl.clientWidth / view.s);
+      const w = clamp(snap(g.w0 + (2 * (e.clientX - g.sx)) / view.s), ARTBOARD_MIN, maxW);
+      if (w >= maxW && view.s === 1) { doc.artboard.preset = 'full'; doc.artboard.w = maxW; }
+      else setArtboardSize(w);
+      renderArtboard(); fit(); renderElements(); renderSelection();
       return;
     }
     if (g.kind === 'move') {
@@ -1326,6 +1328,7 @@
     $('artboardPop').classList.remove('is-open');
     document.activeElement && document.activeElement.blur && document.activeElement.blur();
   }
+  $('artboardLabel').addEventListener('click', () => (ui.abEdit ? closeArtboardEdit() : openArtboardEdit()));
   $('abClose').addEventListener('click', closeArtboardEdit);
   $('abDone').addEventListener('click', () => { commitSize(); closeArtboardEdit(); });
   const commitSize = () => {
