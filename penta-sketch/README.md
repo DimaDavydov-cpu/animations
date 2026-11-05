@@ -43,7 +43,7 @@ Without it the app falls back to Helvetica.
 * The **arrow (Select)** is the tool when the prototype opens, and it is the first button of the switch; tap the **pencil (Draw)** to sketch. In Select mode a Pencil drag on empty canvas shows a hint instead of drawing. Pencil can still write into text (Scribble) in either tool
 * **Finger mode is on by default**: in Draw mode a finger draws like Pencil (rectangles, lines, tap for text) and two fingers scroll the page. A finger tap on existing text still edits it. Use **Select** (or switch Finger mode off in the ••• menu) to select cards, pick colors and move things with a finger
 * To move an item with a finger: tap it to select it, then drag. A finger drag on anything else scrolls the page
-* Settings panels are dark, compact, and can be dragged by their header / grip. They always stay inside the visible area below the top bar
+* Settings panels are dark, compact, and can be dragged by their header / grip. They stay below the top bar. The card panel is as tall as its content (it scrolls inside itself only when taller than the screen), and when you drag a panel its body may slide below the bottom edge as long as its header stays fully visible, so the grip is always reachable
 
 ## How to use
 

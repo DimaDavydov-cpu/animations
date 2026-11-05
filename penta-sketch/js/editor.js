@@ -1361,6 +1361,7 @@
     if (!el) { hideInspector(); return; }
     if (el.type === 'text') { if (ui.panelHidden) hideInspector(); else renderTextToolbar(el); }
     else { hideInspector(); renderCardPanel(el); }
+    if (panelEl.dataset.moved && panelEl.classList.contains('is-open')) reclampOne(panelEl);
   }
 
   function renderTextToolbar(el) {
@@ -1850,19 +1851,31 @@
     const top = topbarEl.getBoundingClientRect().bottom + 8;
     return { top, left: 8, right: window.innerWidth - 8, bottom: window.innerHeight - 8 };
   }
-  function placeBox(box, x, y) {
+  /* loose = the user is placing it: the body may slide below the bottom edge as long as the
+   * header (the part you drag by) stays fully visible with a small margin. Otherwise the whole
+   * box must fit on screen. */
+  function placeBox(box, x, y, loose = false) {
     const a = safeArea();
     box.style.maxHeight = (a.bottom - a.top) + 'px';
     const r = box.getBoundingClientRect();
     x = clamp(x, a.left, Math.max(a.left, a.right - r.width));
-    y = clamp(y, a.top, Math.max(a.top, a.bottom - Math.min(r.height, a.bottom - a.top)));
+    let maxY = a.bottom - Math.min(r.height, a.bottom - a.top);
+    if (loose) {
+      const hd = box.querySelector('[data-drag-handle]');
+      const headerH = Math.min(r.height, Math.max(hd ? hd.getBoundingClientRect().height : 0, box.classList.contains('panel') ? 56 : 24));
+      maxY = Math.max(maxY, window.innerHeight - headerH - 16);
+    }
+    y = clamp(y, a.top, Math.max(a.top, maxY));
     box.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+  }
+  function reclampOne(b) {
+    const r = b.getBoundingClientRect();
+    placeBox(b, r.left, r.top, true);
   }
   function reclampMoved() {
     document.querySelectorAll('.floating-ui[data-moved]').forEach((b) => {
       if (!b.offsetParent && getComputedStyle(b).display === 'none') return;
-      const r = b.getBoundingClientRect();
-      placeBox(b, r.left, r.top);
+      reclampOne(b);
     });
   }
   window.addEventListener('resize', reclampMoved);
@@ -1879,8 +1892,8 @@
     const r = box.getBoundingClientRect();
     const start = { x: e.clientX, y: e.clientY };
     box.classList.add('is-dragging-ui');
-    Object.assign(box.style, { left: '0px', top: '0px', right: 'auto', bottom: 'auto', height: box.id === 'panel' ? r.height + 'px' : '' });
-    const place = (cx, cy) => placeBox(box, r.left + cx - start.x, r.top + cy - start.y);
+    Object.assign(box.style, { left: '0px', top: '0px', right: 'auto', bottom: 'auto' });
+    const place = (cx, cy) => placeBox(box, r.left + cx - start.x, r.top + cy - start.y, true);
     place(e.clientX, e.clientY);
     box.dataset.moved = '1';
     const move = (ev) => place(ev.clientX, ev.clientY);

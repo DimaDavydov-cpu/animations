@@ -362,7 +362,7 @@ button.swatch--btn { width: 36px; height: 36px; border-color: var(--border-prima
   position: fixed;
   top: calc(var(--topbar-h) + env(safe-area-inset-top) + var(--space-3));
   right: calc(var(--space-3) + env(safe-area-inset-right));
-  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  /* no bottom anchor: the panel is as tall as its content */
   z-index: 15;
   width: 320px;
   display: none;
@@ -773,3 +773,11 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .el-text.is-button .el-text__edit { padding: 0; margin: 0; min-width: 0; width: 100%; text-align: center; cursor: text; }
 .el-text.is-button .el-text__edit:empty::before { content: attr(data-placeholder); color: inherit; opacity: .55; }
 .el-card .el-text.is-button { align-self: flex-start; }
+
+/* Card panel: content-sized; it only scrolls inside itself when taller than the screen */
+.panel.dark-ui {
+  --panel-top: calc(var(--topbar-h) + env(safe-area-inset-top) + var(--bar-gap) * 2);
+  --panel-gap: calc(var(--space-3) + env(safe-area-inset-bottom));
+  max-height: calc(100vh - var(--panel-top) - var(--panel-gap));
+  max-height: calc(100dvh - var(--panel-top) - var(--panel-gap));
+}
