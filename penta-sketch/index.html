@@ -93,7 +93,7 @@
         <li><b>Arrow</b> (selected now): tap a card, text or the background for its settings (they open after a moment) · drag to move · scroll with a finger</li>
         <li>Tap the <b>pencil</b> to draw: a rectangle makes a card (a wide, short one asks Card or Input), a line makes text, a small rectangle with a line inside makes a button</li>
         <li><b>Finger mode</b> lets your finger draw too · two fingers scroll</li>
-        <li>Draw a <b>+</b>, or <b>double-tap</b> the page or a card, to add a card, stack, text, button, input, select or tabs</li>
+        <li>Draw a <b>+</b>, or <b>double-tap</b> the page or a card, to add a card, stack, text, button, input, select, tabs or an asset (library or your own image)</li>
         <li><b>Tap text</b> to edit it · drag across it to select</li>
       </ul>
     </div>
@@ -138,7 +138,20 @@
     <a href="#" role="menuitem" class="add-item" data-add="input"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="4.5" width="13" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 6.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Input</a>
     <a href="#" role="menuitem" class="add-item" data-add="select"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="4.5" width="13" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 7l1.5 1.5L12.5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Select</a>
     <a href="#" role="menuitem" class="add-item" data-add="tabs"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 12.5h13M3 9.5V6M7 9.5V6M3 12.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Tabs</a>
+    <a href="#" role="menuitem" class="add-item" data-add="asset"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="5.5" cy="6" r="1.3" fill="currentColor"/><path d="M2 12l3.8-3.6 2.7 2.4 2.2-2 3.3 3.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Asset</a>
   </div>
+
+  <!-- ═══════════════ Asset picker (library + upload) ═══════════════ -->
+  <div class="popover asset-picker dark-ui" id="assetPicker" role="dialog" aria-label="Assets">
+    <div class="asset-picker__head">
+      <span class="asset-picker__title">Assets</span>
+      <div class="button small icon gost"><button type="button" id="assetClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button></div>
+    </div>
+    <div class="asset-picker__body" id="assetBody"></div>
+  </div>
+  <input type="file" id="assetFile" accept="image/*" hidden>
 
   <!-- ═══════════════ Wide, short shape: card or input? ═══════════════ -->
   <div class="popover shape-choice dark-ui" id="shapeChoice" role="dialog" aria-label="What should this shape become?">
@@ -200,7 +213,7 @@
         <dt>Card</dt><dd>Draw a rectangle or square with Pencil. One stroke or several, then pause. Every card is a stack: what you add inside flows vertically or horizontally with a Penta gap and padding.</dd>
         <dt>Card properties</dt><dd>In Select mode (or with Finger mode off) tap a card. The panel shows direction, gap, padding, alignment, size (Fixed, Fill, Hug), fill, border, radius and elevation.</dd>
         <dt>Nesting</dt><dd>Draw a rectangle inside a card to nest one. Draw a rectangle around existing items to wrap them in a new stack.</dd>
-        <dt>Add menu</dt><dd>Draw a + with Pencil, or double-tap the page or a card. Pick Card, Stack (a borderless horizontal card with space-between), Text, Button, Input, Select or Tabs; it is created where you drew or tapped, inside the card under that point if there is one.</dd><dt>Button</dt><dd>Draw a small rectangle and a short line inside it, one after the other without pausing. You get a solid dark button; pick Solid, Outlined or Ghost and Small or Big in the toolbar, and write the label.</dd><dt>Text</dt><dd>Draw a straight horizontal line with Pencil (at least two grid columns wide on the canvas) or tap where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
+        <dt>Add menu</dt><dd>Draw a + with Pencil, or double-tap the page or a card. Pick Card, Stack (a borderless horizontal card with space-between), Text, Button, Input, Select or Tabs; it is created where you drew or tapped, inside the card under that point if there is one.</dd><dt>Assets</dt><dd>Add menu, then Asset: pick from the library (Fiverr logo, badges, icons, images) or upload an image from your device. Resize it like a card with the corner handles; the panel keeps the ratio or lets you set the height, and can replace the image.</dd><dt>Button</dt><dd>Draw a small rectangle and a short line inside it, one after the other without pausing. You get a solid dark button; pick Solid, Outlined or Ghost and Small or Big in the toolbar, and write the label.</dd><dt>Text</dt><dd>Draw a straight horizontal line with Pencil (at least two grid columns wide on the canvas) or tap where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
         <dt>Edit text</dt><dd>Write over existing text with Pencil. Scratch out words to delete them (Scribble gestures).</dd>
         <dt>Background</dt><dd>Tap the empty page background to choose its color (the panel opens a moment after the tap). Use the hex field for exact values.</dd>
         <dt>Select / move</dt><dd>In Select mode a finger tap selects; drag a selected item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers scroll the page.</dd>
@@ -217,6 +230,7 @@
   <script src="js/ink.js"></script>
   <script src="js/recognize.js"></script>
   <script src="js/export.js"></script>
+  <script src="js/assets.js"></script>
   <script src="js/editor.js"></script>
 </body>
 </html>

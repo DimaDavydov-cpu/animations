@@ -66,6 +66,29 @@
    * elements inside a card are flex children sized by Fixed / Fill / Hug. */
   PS.sizeCss = function (el, parent) {
     const out = [];
+    if (el.type === 'asset') {
+      // an image box that resizes like a card; the ratio is kept unless it is unlocked
+      const lock = el.lock !== false;
+      const ratio = el.ratio ? String(el.ratio) : '1';
+      if (!parent) {
+        out.push(['position', 'absolute'], ['left', el.x + 'px'], ['top', el.y + 'px'], ['width', el.w + 'px']);
+        out.push(lock ? ['aspect-ratio', ratio] : ['height', el.h + 'px']);
+        return out;
+      }
+      out.push(['position', 'relative'], ['min-width', '0']);
+      const dir = parent.layout.dir;
+      if (el.sizeW === 'fill') {
+        if (dir === 'row') out.push(['flex', '1 1 0']);
+        else if (dir === 'grid') out.push(['justify-self', 'stretch']);
+        else out.push(['align-self', 'stretch']);
+      } else {
+        out.push(['width', el.w + 'px'], ['flex-shrink', '0']);
+        out.push(dir === 'grid' ? ['justify-self', 'start'] : ['align-self', 'flex-start']);
+      }
+      out.push(lock ? ['aspect-ratio', ratio] : ['height', el.h + 'px']);
+      if (dir === 'row' && lock) out.push(['align-self', 'flex-start']);
+      return out;
+    }
     if (!parent) {
       out.push(['position', 'absolute'], ['left', el.x + 'px'], ['top', el.y + 'px']);
       if (el.type === 'text' && el.w) out.push(['width', el.w + 'px']);
@@ -139,6 +162,10 @@
     const render = (parentId, depth) => (kids.get(parentId) || []).map((el) => {
       const parent = el.parent ? index.get(el.parent) : null;
       const pad = '  '.repeat(depth);
+      if (el.type === 'asset') {
+        const st = toStyle([...PS.sizeCss(el, parent), ['object-fit', el.fit || 'contain'], ...(PS.RADII.find((r) => r.id === el.radius && r.token) ? [['border-radius', `var(${PS.RADII.find((r) => r.id === el.radius).token})`]] : [])]);
+        return `${pad}<img class="asset" src="${esc(PS.assetSrc ? PS.assetSrc(el) : '')}" alt="${esc(el.name || 'Asset')}" style="${st}">`;
+      }
       if (el.type === 'card') {
         const style = toStyle([...PS.sizeCss(el, parent), ...PS.stackCss(el, kids.get(el.id) || []), ...PS.skinCss(el)]);
         const inner = render(el.id, depth + 1);

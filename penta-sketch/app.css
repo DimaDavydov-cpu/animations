@@ -830,3 +830,28 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .dark-ui button.flex-ic[aria-pressed="true"] { background: var(--color-white); border-color: var(--color-white); color: var(--grey-1200); }
 .dark-ui button.flex-ic svg { width: 16px; height: 16px; display: block; }
 .flex-t svg { transform: rotate(90deg) scaleY(-1); }   /* row-drawn icon, transposed for a column stack */
+
+/* ═════════════ Assets ═════════════ */
+.el-asset { overflow: hidden; line-height: 0; }
+.el-asset img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+.panel__replace { margin-top: var(--space-1); }
+.panel__replace button { width: 100%; }
+
+/* Asset picker: library grid + upload */
+.asset-picker.is-open { display: flex; flex-direction: column; width: 336px; max-width: calc(100vw - 16px); padding: 0; z-index: 27; overflow: hidden; }
+.asset-picker__head { display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 6px 14px; }
+.asset-picker__title { font-size: 14px; font-weight: var(--weight-bold); }
+.asset-picker__body { overflow-y: auto; overscroll-behavior: contain; padding: 4px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.asset-picker__hint { margin: 0 0 4px; font-size: 11px; line-height: 16px; color: var(--foreground-secondary); }
+.asset-upload button { width: 100%; gap: 8px; }
+.asset-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 6px; }
+.dark-ui button.asset-tile {
+  min-height: 0; max-height: none; height: auto; padding: 5px; gap: 4px;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;
+  background: var(--grey-1100); border: 1px solid var(--grey-1000); border-radius: 8px;
+  color: var(--foreground-secondary); font-size: 10px; line-height: 12px; font-weight: var(--weight-regular); white-space: normal;
+}
+.dark-ui button.asset-tile:hover, .dark-ui button.asset-tile:focus-visible { background: var(--grey-1000); border-color: var(--grey-800); }
+.asset-tile .thumb { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; padding: 6px; overflow: hidden; border-radius: 4px; background: var(--grey-700); }   /* mid grey: shows dark and white artwork alike */
+.asset-tile .thumb img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.asset-tile .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }

@@ -13,7 +13,10 @@
 
   const STORAGE_KEY = 'penta-sketch:v1';
   const SNAP = PS.GRID.snap;
-  const colBound = (el) => !!el && (el.type === 'card' || (el.type === 'text' && el.w && el.variant !== 'button'));
+  const colBound = (el) => !!el && (el.type === 'card' || el.type === 'asset' || (el.type === 'text' && el.w && el.variant !== 'button'));
+  const boxLike = (el) => !!el && (el.type === 'card' || el.type === 'asset');   // things with resize handles
+  /* an asset with a locked ratio derives its height from its width */
+  const syncAssetH = (el) => { if (el && el.type === 'asset' && el.lock !== false && el.ratio) el.h = Math.max(24, Math.round(el.w / el.ratio)); };
   const isBox = (el) => ['input', 'button', 'select', 'tabs'].includes(el.variant);   // text variants drawn as boxes (not plain text)
   const snap = (v) => Math.round(v / SNAP) * SNAP;
   /* Card heights snap to the 24px vertical rhythm (min one rhythm step) */
@@ -164,7 +167,13 @@
     const node = document.createElement('div');
     node.dataset.id = el.id;
     if (el.type === 'card') node.className = 'el el-card';
-    else {
+    else if (el.type === 'asset') {
+      node.className = 'el el-asset';
+      const img = document.createElement('img');
+      img.draggable = false;
+      img.alt = el.name || 'Asset';
+      node.appendChild(img);
+    } else {
       const edit = document.createElement('div');
       edit.className = 'el-text__edit';
       edit.contentEditable = PLAINTEXT_OK ? 'plaintext-only' : 'true';
@@ -198,6 +207,15 @@
           const ch = kids.get(el.id) || [];
           place(node, ch, el);
           while (node.children.length > ch.length) node.lastChild.remove();
+        } else if (el.type === 'asset') {
+          node.className = 'el el-asset';
+          const img = node.firstChild;
+          const src = srcOf(el);
+          if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+          img.alt = el.name || 'Asset';
+          img.style.objectFit = el.fit || 'contain';
+          const rad = PS.RADII.find((x) => x.id === el.radius);
+          applyCss(node, [...PS.sizeCss(el, parent), ...(rad && rad.token ? [['border-radius', `var(${rad.token})`]] : [])]);
         } else {
           node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}${el.variant === 'select' ? ' is-input is-select' : ''}${el.variant === 'tabs' ? ' is-tabs' : ''}${el.variant === 'button' ? ` is-button btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}` : ''}`;
           if (el.variant === 'input') node.firstChild.dataset.placeholder = 'Input';
@@ -344,7 +362,7 @@
   }
   function applyColumnBindings() {
     for (const el of doc.elements) {
-      if (colBound(el) && !el.parent && el.sizeW === 'cols' && el.col) Object.assign(el, colSpanRect(el.col));
+      if (colBound(el) && !el.parent && el.sizeW === 'cols' && el.col) { Object.assign(el, colSpanRect(el.col)); syncAssetH(el); }
     }
   }
   function nearestLine(v, lines) {
@@ -450,6 +468,18 @@
         box.appendChild(f);
       }
     }
+    if (el.type === 'asset') {
+      for (const k of (el.parent ? ['se'] : ['nw', 'ne', 'sw', 'se'])) {
+        const hd = document.createElement('div');
+        hd.className = `handle handle--${k}`;
+        hd.dataset.handle = k;
+        box.appendChild(hd);
+      }
+      const badge = document.createElement('div');
+      badge.className = 'sel-size';
+      badge.textContent = `${el.name || 'Asset'} · ${Math.round(r.w)} × ${Math.round(r.h)}${el.lock !== false ? ' · ratio locked' : ''}`;
+      box.appendChild(badge);
+    }
     if (el.type === 'card') {
       const handles = el.parent ? ['se'] : ['nw', 'ne', 'sw', 'se'];
       for (const k of handles) {
@@ -472,6 +502,31 @@
     selectionEl.appendChild(box);
   }
 
+  /* ─────────────── Assets ───────────────
+   * Library assets (assets.js) are referenced by id and read from ../Assets. Uploaded images are kept in a
+   * separate store (and in localStorage), NOT in the document, so undo snapshots stay small. */
+  const STORE_ASSETS = 'penta-sketch:assets:v1';
+  const uploads = new Map();                  // 'up:xyz' -> { src (data URL), name, w, h }
+  let assetsSig = '';
+  const assetMeta = (id) => (id && id.startsWith('lib:') ? (() => { const a = PS.libraryAsset(id.slice(4)); return a ? { src: a.src, name: a.name, w: a.w, h: a.h } : null; })() : uploads.get(id) || null);
+  const srcOf = (el) => { const m = assetMeta(el.assetId); return m ? m.src : ''; };
+  PS.assetSrc = srcOf;
+  function usedUploads() {
+    const out = {};
+    doc.elements.forEach((e) => { if (e.type === 'asset' && uploads.has(e.assetId)) out[e.assetId] = uploads.get(e.assetId); });
+    return out;
+  }
+  function saveUploads() {
+    const sig = doc.elements.filter((e) => e.type === 'asset').map((e) => e.assetId).join('|');
+    if (sig === assetsSig) return;
+    assetsSig = sig;
+    try { localStorage.setItem(STORE_ASSETS, JSON.stringify(usedUploads())); } catch (e) { toast('This browser has no room to remember the uploaded image after a reload'); }
+  }
+  function loadUploads() {
+    try { const o = JSON.parse(localStorage.getItem(STORE_ASSETS) || '{}'); Object.keys(o).forEach((k) => uploads.set(k, o[k])); } catch (e) { /* ignore */ }
+    assetsSig = doc.elements.filter((e) => e.type === 'asset').map((e) => e.assetId).join('|');
+  }
+
   let saveTimer = null;
   function render(force) {
     renderArtboard();
@@ -486,6 +541,7 @@
   /* ─────────────── Persistence ─────────────── */
   function save() {
     try { localStorage.setItem(STORAGE_KEY, snapDoc()); } catch (e) { /* storage unavailable: app still works */ }
+    saveUploads();
   }
   function load() {
     try {
@@ -741,6 +797,7 @@
     else if (kind === 'input') createInput({ x: pt.x - 160, y: pt.y - 22, w: 320, h: 44 }, 'input');
     else if (kind === 'select') createInput({ x: pt.x - 160, y: pt.y - 22, w: 320, h: 44 }, 'select');
     else if (kind === 'tabs') addTabs(pt);
+    else if (kind === 'asset') openAssetPicker(pt);
   }
   addMenuEl.addEventListener('click', (e) => {
     const a = e.target.closest('[data-add]');
@@ -751,6 +808,130 @@
     if (pt) addElement(a.dataset.add, pt);
   });
   addMenuEl.addEventListener('pointerdown', (e) => e.preventDefault());   // keep focus where it is
+
+  /* ── Asset picker: the built-in library plus uploads from the device ── */
+  const pickerEl = $('assetPicker'), pickBody = $('assetBody'), assetFile = $('assetFile');
+  let pickCtx = null;
+  function buildPicker() {
+    pickBody.textContent = '';
+    const up = document.createElement('div');
+    up.className = 'button small asset-upload';
+    const ub = document.createElement('button');
+    ub.type = 'button';
+    ub.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 9.5V2M4 4.5L7 1.5l3 3M2 9v2.5h10V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Upload from device…';
+    ub.addEventListener('click', () => assetFile.click());
+    up.appendChild(ub);
+    pickBody.appendChild(up);
+    const hint = document.createElement('p');
+    hint.className = 'asset-picker__hint';
+    hint.textContent = 'PNG, JPG, SVG, GIF or WebP, up to 10 MB';
+    pickBody.appendChild(hint);
+    const group = (name, items) => {
+      if (!items.length) return;
+      const h = document.createElement('h4');
+      h.className = 'panel__heading';
+      h.textContent = name;
+      const grid = document.createElement('div');
+      grid.className = 'asset-grid';
+      items.forEach((it) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'asset-tile';
+        b.dataset.id = it.id;
+        b.title = it.name;
+        const th = document.createElement('span');
+        th.className = 'thumb';
+        const im = document.createElement('img');
+        im.src = it.src; im.alt = ''; im.draggable = false; im.loading = 'lazy';
+        th.appendChild(im);
+        const lb = document.createElement('span');
+        lb.className = 'lbl';
+        lb.textContent = it.name;
+        b.append(th, lb);
+        b.addEventListener('click', () => chooseAsset(it.id));
+        grid.appendChild(b);
+      });
+      pickBody.append(h, grid);
+    };
+    group('Uploaded', [...uploads.entries()].map(([id, m]) => ({ id, name: m.name, src: m.src })));
+    ['Brand', 'Icons', 'Images'].forEach((g) => group(g, PS.LIBRARY.filter((a) => a.group === g).map((a) => ({ id: 'lib:' + a.id, name: a.name, src: a.src }))));
+  }
+  function openAssetPicker(pt, replaceId) {
+    cancelPendingPanels();
+    dismissAdd();
+    pickCtx = { pt, replaceId };
+    buildPicker();
+    pickerEl.classList.add('is-open');
+    pickBody.scrollTop = 0;
+    placeBox(pickerEl, (window.innerWidth - pickerEl.getBoundingClientRect().width) / 2, topbarEl.getBoundingClientRect().bottom + 24);
+  }
+  function dismissAssetPicker() {
+    pickCtx = null;
+    pickerEl.classList.remove('is-open');
+  }
+  $('assetClose').addEventListener('click', dismissAssetPicker);
+  function chooseAsset(id) {
+    const m = assetMeta(id);
+    const ctx = pickCtx;
+    dismissAssetPicker();
+    if (!m || !ctx) return;
+    if (ctx.replaceId) {
+      const el = byId(ctx.replaceId);
+      if (el) mutate(() => { el.assetId = id; el.name = m.name; el.ratio = m.w / m.h; syncAssetH(el); });
+      return;
+    }
+    addAssetAt(id, m, ctx.pt);
+  }
+  function addAssetAt(id, m, pt) {
+    blurEditing();
+    const parent = containerFor({ x: pt.x, y: pt.y, w: 0, h: 0 });
+    const ratio = m.w / m.h;
+    const room = parent ? Math.max(48, rectOf(parent.id).w - 2 * PS.spacePx(parent.layout.padX)) : doc.artboard.w - 64;
+    const w = Math.max(24, Math.round(Math.min(m.w, 480, room)));
+    const el = { id: uid(), type: 'asset', parent: null, assetId: id, name: m.name, ratio, lock: true, fit: 'contain', radius: 'none', x: 0, y: 0, w, h: Math.max(24, Math.round(w / ratio)), sizeW: 'fixed', sizeH: 'fixed' };
+    mutate(() => {
+      if (parent) placeInto(el, parent, insertionIndex(parent, pt));
+      else {
+        el.x = Math.max(0, snap(pt.x - w / 2)); el.y = Math.max(0, snap(pt.y - el.h / 2));
+        doc.elements.push(el);
+      }
+      ui.selectedId = el.id;
+      ui.panelHidden = false;
+    });
+    toast(`${m.name} added. Drag a corner to resize it`);
+  }
+  async function readImageFile(f) {
+    if (!/^image\//.test(f.type) && !/\.(svg|png|jpe?g|gif|webp)$/i.test(f.name)) throw new Error('Choose an image file');
+    if (f.size > 10 * 1024 * 1024) throw new Error('That image is over 10 MB');
+    const name = f.name.replace(/\.[^.]+$/, '') || 'Image';
+    const dataUrl = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(new Error('Could not read that file')); fr.readAsDataURL(f); });
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('That file is not a readable image')); i.src = dataUrl; });
+    let w = img.naturalWidth, h = img.naturalHeight, src = dataUrl;
+    if (/svg/.test(f.type) || /\.svg$/i.test(f.name)) {
+      if (!w || !h) {
+        const vb = /viewBox="[\d.\-]+[ ,]+[\d.\-]+[ ,]+([\d.]+)[ ,]+([\d.]+)"/.exec(await f.text());
+        w = vb ? +vb[1] : 200; h = vb ? +vb[2] : 200;
+      }
+    } else if (Math.max(w, h) > 1600) {                 // keep stored images (and undo history) light
+      const k = 1600 / Math.max(w, h), c = document.createElement('canvas');
+      c.width = Math.round(w * k); c.height = Math.round(h * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      src = c.toDataURL(/jpe?g/.test(f.type) ? 'image/jpeg' : 'image/png', 0.9);
+      w = c.width; h = c.height;
+    }
+    return { src, name, w, h };
+  }
+  assetFile.addEventListener('change', async () => {
+    const f = assetFile.files[0];
+    assetFile.value = '';
+    if (!f) return;
+    try {
+      const m = await readImageFile(f);
+      const id = 'up:' + uid();
+      uploads.set(id, m);
+      chooseAsset(id);
+    } catch (err) { toast(err.message || 'Could not read that image'); }
+  });
 
   /* Double tap on the canvas opens the same menu. It is decided when the SECOND tap completes
    * without moving, so a press that turns into a drag is never mistaken for it. Text with content,
@@ -1053,6 +1234,7 @@
   dropMarker.className = 'drop-marker';
 
   function roleFor(e) {
+    if (ui.selectedId && e.target.closest && e.target.closest('[data-handle]')) return 'nav';   // resize handles work in any tool
     if (e.pointerType === 'pen') return ui.tool === 'select' ? 'nav' : 'draw';
     if (e.pointerType === 'mouse') return ui.tool === 'select' || spaceDown || e.button === 1 ? 'nav' : 'draw';
     // finger: draws in Draw mode, except on text (tap = edit / place caret) 
@@ -1070,6 +1252,7 @@
     closeMenu();
     dismissChoice();
     dismissAdd();
+    dismissAssetPicker();
     if (colorPop.classList.contains('is-open')) { closeColor(); if (e.pointerType !== 'pen') return; }
     const role = roleFor(e);
     const editable = e.target.closest('.el-text__edit');
@@ -1250,7 +1433,7 @@
       if (!g.target) {
         // landing on the artboard: snap to the layout grid, else to 8px
         const r = g.rect0, L = gridLines();
-        if (el.type === 'card') {
+        if (boxLike(el)) {
           sdx = snapSpan(r.x + dx, r.x + r.w + dx, L.starts, gx, L.ends) - r.x;
           sdy = snapSpan(r.y + dy, r.y + r.h + dy, L.ys, gy) - r.y;
         } else {
@@ -1274,16 +1457,31 @@
         if (g.handle.includes('e')) x2 = Math.max(snapEdge(o.x + o.w + dx, L.ends, gx), x1 + min);
         if (g.handle.includes('n')) y1 = Math.min(snapEdge(o.y + dy, L.ys, gy), y2 - min);
         if (g.handle.includes('s')) y2 = Math.max(snapEdge(o.y + o.h + dy, L.ys, gy), y1 + min);
-        // heights land on the 24px rhythm; the edge opposite the dragged handle stays put
-        const hh = snapH(y2 - y1);
-        if (g.handle.includes('n')) y1 = y2 - hh; else y2 = y1 + hh;
+        if (el.type === 'asset' && el.lock !== false) {
+          // ratio locked: the corner you drag sets the width (whichever way you pull), the height follows
+          const east = g.handle.includes('e'), south = g.handle.includes('s');
+          const wx = o.w + (east ? dx : -dx), wy = (o.h + (south ? dy : -dy)) * (el.ratio || 1);
+          const w = Math.max(min, Math.abs(dx) >= Math.abs(dy) * (el.ratio || 1) ? wx : wy);
+          if (east) x2 = snapEdge(x1 + w, L.ends, gx); else x1 = snapEdge(x2 - w, L.starts, gx);
+          const h2 = Math.max(min, Math.round((x2 - x1) / (el.ratio || 1)));
+          if (g.handle.includes('n')) y1 = y2 - h2; else y2 = y1 + h2;
+        } else {
+          // heights land on the 24px rhythm; the edge opposite the dragged handle stays put
+          const hh = snapH(y2 - y1);
+          if (g.handle.includes('n')) y1 = y2 - hh; else y2 = y1 + hh;
+        }
         Object.assign(el, { x: x1, y: y1, w: x2 - x1, h: y2 - y1, sizeW: el.sizeW === 'cols' ? 'cols' : 'fixed', sizeH: 'fixed' });
         if (el.sizeW === 'cols') { el.sizeW = 'fixed'; el.lockW = false; bindToColumns(el); }
         renderElements(); renderSelection(); hideInspector(); showGuides(gx, gy);
         return;
       } else {
-        if (Math.abs(dx) >= SNAP / 2) { el.w = Math.max(min, snap(o.w + dx)); el.sizeW = 'fixed'; }
-        if (Math.abs(dy) >= SNAP / 2) { el.h = snapH(o.h + dy); el.sizeH = 'fixed'; }
+        if (el.type === 'asset' && el.lock !== false) {
+          const w = Math.abs(dx) >= Math.abs(dy) * (el.ratio || 1) ? o.w + dx : (o.h + dy) * (el.ratio || 1);
+          el.w = Math.max(min, Math.round(w)); el.sizeW = 'fixed'; syncAssetH(el);
+        } else {
+          if (Math.abs(dx) >= SNAP / 2) { el.w = Math.max(min, snap(o.w + dx)); el.sizeW = 'fixed'; }
+          if (Math.abs(dy) >= SNAP / 2) { el.h = snapH(o.h + dy); el.sizeH = 'fixed'; }
+        }
       }
       renderElements(); renderSelection(); hideInspector();
     }
@@ -1364,6 +1562,7 @@
       if (g.target) {
         placeInto(el, g.target.card, g.target.index);
         if (el.type === 'text') { delete el.w; delete el.col; el.sizeW = 'fill'; }
+        if (el.type === 'asset' && el.sizeW === 'cols') el.sizeW = 'fixed';
         if (el.type === 'card') {
           // in a stack, cards share the space unless their width was set to Fixed
           if (!el.lockW || el.sizeW === 'cols') { el.sizeW = 'fill'; el.lockW = false; }
@@ -1375,8 +1574,9 @@
         if (responsive.has(el.id)) { el.x = Math.round(el.x + g.dx); el.y = Math.round(el.y + g.dy); }
         else { el.x = Math.round(r.x + g.dx); el.y = Math.round(r.y + g.dy); }
         if (el.type === 'card' && wasChild) { el.w = snap(r.w); el.h = snapH(r.h); el.sizeW = 'fixed'; el.sizeH = el.sizeH === 'hug' ? 'hug' : 'fixed'; }
+        if (el.type === 'asset' && wasChild) { el.w = Math.round(r.w); el.h = Math.round(r.h); el.sizeW = 'fixed'; }
         if (wasChild) placeInto(el, null, Infinity);
-        if (colBound(el)) { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); }
+        if (colBound(el)) { if (el.sizeW === 'cols') el.sizeW = 'fixed'; snapToColumns(el); bindToColumns(el); syncAssetH(el); }
       }
       render();
       return;
@@ -1386,7 +1586,11 @@
       if (cancelled) { restore(g.before); return; }
       past.push(g.before); future = [];
       const rel = byId(g.orig.id);
-      if (rel && !rel.parent) { rel.lockW = false; if (rel.sizeW === 'cols') rel.sizeW = 'fixed'; snapToColumns(rel); bindToColumns(rel); }
+      if (rel && !rel.parent) {
+        const bottom = rel.y + rel.h;
+        rel.lockW = false; if (rel.sizeW === 'cols') rel.sizeW = 'fixed'; snapToColumns(rel); bindToColumns(rel); syncAssetH(rel);
+        if (rel.type === 'asset' && rel.lock !== false && g.handle.includes('n')) rel.y = bottom - rel.h;   // a top handle keeps the bottom edge
+      }
       render();
     }
   }
@@ -1578,10 +1782,10 @@
     // a different element (e.g. a newly drawn card) brings the panel back
     if ((el ? el.id : null) !== ui.panelFor) { if (el) ui.panelHidden = false; ui.panelFor = el ? el.id : null; }
     if (el && ui.panelDeferred) { panelEl.classList.remove('is-open'); hideInspector(); return; }   // opens after the tap delay
-    panelEl.classList.toggle('is-open', !!el && el.type === 'card' && !ui.panelHidden);
+    panelEl.classList.toggle('is-open', !!el && boxLike(el) && !ui.panelHidden);
     if (!el) { hideInspector(); return; }
     if (el.type === 'text') { if (ui.panelHidden) hideInspector(); else renderTextToolbar(el); }
-    else { hideInspector(); renderCardPanel(el); }
+    else { hideInspector(); (el.type === 'asset' ? renderAssetPanel : renderCardPanel)(el); }
     if (panelEl.dataset.moved && panelEl.classList.contains('is-open')) reclampOne(panelEl);
   }
 
@@ -1682,6 +1886,79 @@
     });
     g.append(lab, row);
     return g;
+  }
+
+  function renderAssetPanel(el) {
+    const parent = el.parent ? byId(el.parent) : null;
+    const set = (fn) => mutate(() => { fn(); syncAssetH(el); });
+    const head = document.createElement('div');
+    head.className = 'panel__head';
+    head.dataset.dragHandle = '';
+    const title = document.createElement('div');
+    title.className = 'panel__titles';
+    title.innerHTML = `${GRIP}<div class="panel__title">Asset</div><div class="panel__sub"></div>`;
+    title.querySelector('.panel__sub').textContent = el.name || 'Image';
+    const actions = document.createElement('div');
+    actions.className = 'panel__actions';
+    if (parent) actions.appendChild(iconBtn(ICON_UP, 'Select parent card', () => select(parent.id)));
+    actions.appendChild(iconBtn(ICON_DUP, 'Duplicate', () => duplicate(el.id)));
+    actions.appendChild(iconBtn(ICON_TRASH, 'Delete', () => removeSelected()));
+    actions.appendChild(iconBtn(ICON_CLOSE, 'Close panel', () => { ui.panelHidden = true; renderInspector(); }));
+    head.append(title, actions);
+    panelEl.appendChild(head);
+
+    const r = rectOf(el.id);
+    const modes = parent ? [{ id: 'fixed', label: 'Fixed' }, { id: 'fill', label: 'Fill' }]
+      : [{ id: 'cols', label: 'Columns', title: 'Span layout-grid columns; resizes with the artboard' }, { id: 'fixed', label: 'Fixed' }];
+    const pick = (v) => set(() => {
+      el.lockW = v === 'fixed';
+      if (v === 'fixed') { el.w = Math.round(r.w); el.sizeW = 'fixed'; return; }
+      if (v === 'cols') {
+        const L2 = gridLines();
+        const near = (val, arr) => arr.reduce((a, b) => (Math.abs(b - val) < Math.abs(a - val) ? b : a));
+        el.x = near(el.x, L2.starts); const x2 = near(el.x + el.w, L2.ends.filter((e2) => e2 > el.x));
+        el.w = x2 - el.x; el.sizeW = 'fixed'; bindToColumns(el); return;
+      }
+      el.sizeW = v;
+    });
+    const widthCtl = [chips(modes, el.sizeW === 'fill' || el.sizeW === 'cols' ? el.sizeW : 'fixed', pick)];
+    if (el.sizeW === 'cols' && el.col) {
+      const L2 = gridLines();
+      const opts = [{ id: -1, label: 'Edge' }, ...L2.colStarts.map((_, i) => ({ id: i, label: String(i + 1) }))];
+      const optsEnd = [...L2.colEnds.map((_, i) => ({ id: i, label: String(i + 1) })), { id: L2.n, label: 'Edge' }];
+      const cur = colSpanRect(el.col);
+      const s0 = cur.x === 0 ? -1 : L2.colStarts.indexOf(cur.x), e0 = cur.x + cur.w === doc.artboard.w ? L2.n : L2.colEnds.indexOf(cur.x + cur.w);
+      const setSpan = (start, end) => set(() => { el.col = { start, end: Math.max(end, start === -1 ? 0 : start), of: L2.n }; });
+      widthCtl.push(selectCtl('From column', opts, s0, (v) => setSpan(+v, e0)), selectCtl('To column', optsEnd, e0, (v) => setSpan(s0, +v)));
+      const hint = document.createElement('span');
+      hint.className = 'field__hint';
+      hint.textContent = `${Math.round(el.w)} px · of ${L2.n} columns`;
+      widthCtl.push(hint);
+    } else {
+      widthCtl.push(numberCtl('Width in px', el.sizeW === 'fill' ? r.w : el.w, (v) => set(() => { el.w = Math.max(24, v); el.sizeW = 'fixed'; el.lockW = true; }), el.sizeW === 'fill'));
+    }
+    const locked = el.lock !== false;
+    panelEl.appendChild(section('Size',
+      field('Width', ...widthCtl),
+      field('Height', chips([{ id: 'lock', label: 'Keep ratio', title: 'Height follows the width' }, { id: 'free', label: 'Free' }], locked ? 'lock' : 'free',
+        (v) => set(() => { if (v === 'lock') el.lock = true; else { el.h = Math.round(r.h); el.lock = false; } })),
+      numberCtl('Height in px', locked ? r.h : el.h, (v) => set(() => { el.h = snapH(v); }), locked, RHYTHM)),
+    ));
+    const fitHint = document.createElement('span');
+    fitHint.className = 'field__hint';
+    fitHint.textContent = locked ? 'Fit only matters when the ratio is free' : '';
+    panelEl.appendChild(section('Appearance',
+      field('Fit', chips([{ id: 'contain', label: 'Contain' }, { id: 'cover', label: 'Cover' }, { id: 'fill', label: 'Stretch' }], el.fit || 'contain', (v) => set(() => { el.fit = v; })), fitHint),
+      fieldRow(field('Radius', selectCtl('Corner radius', PS.RADII, el.radius || 'none', (v) => set(() => { el.radius = v; })))),
+    ));
+    const rep2 = document.createElement('div');
+    rep2.className = 'button small border panel__replace';
+    const rb = document.createElement('button');
+    rb.type = 'button';
+    rb.textContent = 'Replace image…';
+    rb.addEventListener('click', () => openAssetPicker(null, el.id));
+    rep2.appendChild(rb);
+    panelEl.appendChild(rep2);
   }
 
   function renderCardPanel(el) {
@@ -1965,6 +2242,7 @@
     if (!e.target.closest('.menu-anchor')) closeMenu();
     if (!e.target.closest('.zoom-anchor')) $('zoomMenu').classList.remove('show');
     if (addMenuEl.classList.contains('is-open') && !addMenuEl.contains(e.target) && !viewportEl.contains(e.target)) dismissAdd();
+    if (pickerEl.classList.contains('is-open') && !pickerEl.contains(e.target) && !viewportEl.contains(e.target)) dismissAssetPicker();
   });
 
   /* ─────────────── Top bar ─────────────── */
@@ -2053,7 +2331,7 @@
     e.preventDefault();
     closeMenu();
     const act = a.dataset.action;
-    if (act === 'save') download('penta-sketch.json', snapDoc(), 'application/json');
+    if (act === 'save') download('penta-sketch.json', JSON.stringify({ ...doc, assets: usedUploads() }), 'application/json');
     if (act === 'open') $('fileInput').click();
     if (act === 'help') $('helpScrim').classList.add('is-open');
     if (act === 'grid') { ui.grid = !ui.grid; renderArtboard(); }
@@ -2073,6 +2351,7 @@
     try {
       const d = JSON.parse(await f.text());
       if (!d.artboard || !Array.isArray(d.elements)) throw new Error('bad file');
+      if (d.assets) { Object.keys(d.assets).forEach((k) => uploads.set(k, d.assets[k])); delete d.assets; }
       checkpoint();
       doc = migrate(d);
       ui.selectedId = null;
@@ -2124,7 +2403,7 @@
     if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); if (ui.selectedId) duplicate(ui.selectedId); return; }
     if (mod) return;
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeSelected(); }
-    else if (e.key === 'Escape') { dismissAdd(); dismissChoice(); closeArtboardEdit(); closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
+    else if (e.key === 'Escape') { dismissAssetPicker(); dismissAdd(); dismissChoice(); closeArtboardEdit(); closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
     else if (e.key === 'v' || e.key === 'V') setTool('select');
     else if (e.key === 'p' || e.key === 'P') setTool('draw');
     else if (e.key === 'g' || e.key === 'G') { ui.grid = !ui.grid; renderArtboard(); }
@@ -2205,6 +2484,7 @@
 
   /* ─────────────── Boot ─────────────── */
   load();
+  loadUploads();
   if (isFull()) sizeToViewport();
   buildRamps();
   setTool('select');
