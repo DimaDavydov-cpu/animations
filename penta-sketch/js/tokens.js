@@ -129,12 +129,15 @@
     { id: 'center', label: 'Center' },
     { id: 'flex-end', label: 'End' },
     { id: 'stretch', label: 'Stretch' },
+    { id: 'baseline', label: 'Baseline' },
   ];
   PS.JUSTIFIES = [
     { id: 'flex-start', label: 'Start' },
     { id: 'center', label: 'Center' },
     { id: 'flex-end', label: 'End' },
     { id: 'space-between', label: 'Between' },
+    { id: 'space-around', label: 'Around' },
+    { id: 'space-evenly', label: 'Evenly' },
   ];
   PS.SIZE_MODES = [
     { id: 'fixed', label: 'Fixed' },

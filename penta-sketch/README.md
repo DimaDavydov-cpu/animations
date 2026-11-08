@@ -41,8 +41,9 @@ Without it the app falls back to Helvetica.
 * **Mobile reflow** (4-column grid): cards narrower than 5 of 12 columns that sit beside a main card (more than half the grid) move under it, stacked in reading order at the main card's width, and the main card spans the full mobile width. Content below moves down. This is display only: Adaptive / iPad show the original layout
 * Closing the card panel or the text toolbar (×) keeps the item selected: you can still resize, drag or keep writing, and tapping it again (finger or Pencil) brings the controls back. Tap empty canvas to deselect
 * The **arrow (Select)** is the tool when the prototype opens, and it is the first button of the switch; tap the **pencil (Draw)** to sketch. In Select mode a Pencil drag on empty canvas shows a hint instead of drawing. Pencil can still write into text (Scribble) in either tool
+* **Palm rejection**: while Pencil is touching or hovering (and for half a second after), finger touches on the canvas are ignored, so a resting hand never draws into the shape you are making
 * **Finger mode is on by default**: in Draw mode a finger draws like Pencil (rectangles, lines, tap for text) and two fingers scroll the page. A finger tap on existing text still edits it. Use **Select** (or switch Finger mode off in the ••• menu) to select cards, pick colors and move things with a finger
-* In Select mode a single tap on the empty canvas opens the background color picker after a short wait (0.35s), so a second tap can make it a double tap (Add menu) instead
+* The double tap is decided when the second tap lifts without moving, so tapping a card and quickly dragging it is still a drag. A double tap on text with content, handles or the resize knob keeps its own behavior
 * To move an item with a finger: tap it to select it, then drag. A finger drag on anything else scrolls the page
 * Settings panels are dark, compact, and can be dragged by their header / grip. They stay below the top bar. The card panel is as tall as its content (it scrolls inside itself only when taller than the screen), and when you drag a panel its body may slide below the bottom edge as long as its header stays fully visible, so the grip is always reachable
 
@@ -50,16 +51,16 @@ Without it the app falls back to Helvetica.
 
 | Gesture | Result |
 |---|---|
-| Draw a rectangle or square with Pencil. It does not have to be closed: all four edges (top, right, bottom, left) are enough, in one stroke or several, then pause | Creates a Penta card. Every card is a flex **stack** (vertical by default, gap 16, padding 24) |
+| Draw a rectangle or square with Pencil. It does not have to be closed or neat: four straight-ish sides (top, right, bottom, left), each at least about a third drawn, are enough, in one stroke or several. Bulging sides, rounded corners, overshoot and gaps are fine; circles, triangles and three-sided shapes are not rectangles. If what you drew looks like part of a rectangle (an L, a U, two parallel sides) the app waits 1.3s instead of 0.7s for the rest | Creates a Penta card. Every card is a flex **stack** (vertical by default, gap 16, padding 24) |
 | Draw a rectangle inside a card / around existing items | Nests a card in the stack / wraps those items in a new stack |
 | Finger tap on a card | Opens the **card panel**: direction, wrap, gap, padding, align, distribute, size (Fixed / Fill / Hug), fill, border, radius, elevation |
 | Draw a wide, short rectangle (up to ~72px tall, at least 3x wider than tall) | A small chooser asks: **Card** or **Input**. An input is a Penta text field (44px, hairline border); type its placeholder. On the canvas it snaps to whole grid columns and stays bound to them |
 | Draw a **small rectangle with a line inside** (the line is the label; draw both within a short pause) | Makes a **button**: solid dark gray with white text by default. The toolbar lets you pick **Solid / Outlined / Ghost** and **Small (36px) / Big (42px)**; write the label in it. A rectangle up to 40px tall starts Small, taller starts Big. Rectangle plus line that is larger than a button (over 80px tall or 400px wide) makes a card with that line as text |
-| Draw a **+** with Pencil (two crossing straight strokes), or **double-tap** the canvas (anywhere except text with content, handles and the resize knob) | Opens the **Add** menu at that spot: **Card, Stack, Text, Button, Input, Select, Tabs**. The item is created there, inside the card under that point if there is one, otherwise out on the canvas bound to grid columns. **Stack** is a card with no border or radius (transparent, no padding), horizontal, space-between. **Select** is an input with a chevron. **Tabs** is a tab row: type the labels (comma separated) and pick the active tab in the toolbar |
+| Draw a **+** with Pencil (two crossing straight strokes), or **double-tap inside a card** | Opens the **Add** menu at that spot: **Card, Stack, Text, Button, Input, Select, Tabs**. The item is created there, inside the card under that point if there is one, otherwise out on the canvas bound to grid columns. **Stack** is a card with no border or radius (transparent, no padding), horizontal, space-between. **Select** is an input with a chevron. **Tabs** is a tab row: type the labels (comma separated) and pick the active tab in the toolbar |
 | Draw a straight horizontal line with Pencil | Adds a text box, inside a card or out on the canvas. On the canvas it snaps to whole grid columns (never fewer than two) and stays bound to them, so it follows the grid. Inside a card it joins the stack |
 | Tap with Pencil | Places a text box. Handwrite inside it and iPadOS **Scribble** converts it to text |
 | Text toolbar | Display, H1, H2, H3, H4, Subtitle, Body, Body S, Caption, Overline + color role |
-| Finger tap on the empty artboard | Background color picker: Penta palette + exact hex (shows the token name, or flags off-system values) |
+| **Double tap** the page background | Background color picker: Penta palette + exact hex (shows the token name, or flags off-system values). A single tap does nothing |
 | Finger drag an item | Reorders it in its stack, moves it into another card, or out onto the artboard |
 | Tap the artboard title (above its top-left corner) | Opens size editing: preset, exact W × H, and edge handles to drag. Size is not editable otherwise |
 | Draw / move / resize a card near the layout grid | Its edges snap to column edges, page margins and artboard edges within 20 px (red guide). Otherwise 8 px snapping |
@@ -76,6 +77,7 @@ Shortcuts: Cmd+Z / Cmd+Shift+Z, Delete, Cmd+D duplicate, G grid, 0 fit, +/- zoom
 ## Other features
 
 * **Card heights snap to the 24px rhythm** (minimum 24): when drawing, resizing with a handle, or typing a height in the panel. Hug and Fill heights follow their content / space
+* The card panel's flex controls are DevTools-style icon groups: `flex-direction` (row, column, grid), `flex-wrap`, `justify-content` (start, center, end, between, around, evenly) and `align-items` (start, center, end, stretch, baseline); icons turn with the direction
 * The layout grid overlay is **on by default** (toggle it with the grid button)
 * Layout grid overlay (grid toggle): Penta columns plus a light vertical rhythm, a faint line every 8px and a stronger one every 24px
 * Artboard presets: Desktop 1440, Tablet 834, Mobile 390, with the Penta 12 / 8 / 4 column grid overlay

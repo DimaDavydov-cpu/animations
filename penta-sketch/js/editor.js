@@ -13,7 +13,6 @@
 
   const STORAGE_KEY = 'penta-sketch:v1';
   const SNAP = PS.GRID.snap;
-  let colorTimer = null;          // the background color picker waits out the double-tap window
   const colBound = (el) => !!el && (el.type === 'card' || (el.type === 'text' && el.w && el.variant !== 'button'));
   const isBox = (el) => ['input', 'button', 'select', 'tabs'].includes(el.variant);   // text variants drawn as boxes (not plain text)
   const snap = (v) => Math.round(v / SNAP) * SNAP;
@@ -758,9 +757,19 @@
    * is dropped. */
   const tdown = new Map();
   let dblTap = null;
+  /* Palm rejection: while Pencil is touching (or hovering just above), finger touches are ignored,
+   * so a resting hand never draws into the group the Pencil is building. */
+  let penDown = false, lastPenAt = -1e9;
+  const penBusy = () => ui.palmReject !== false && (penDown || performance.now() - lastPenAt < 500);
+  ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'].forEach((n) => viewportEl.addEventListener(n, (e) => {
+    if (e.pointerType !== 'pen') return;
+    lastPenAt = performance.now();
+    if (n === 'pointerdown') penDown = true;
+    if (n === 'pointerup' || n === 'pointercancel') penDown = false;
+  }, true));
   viewportEl.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch' && penBusy()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    clearTimeout(colorTimer);
     const t = e.target;
     const own = t.closest && t.closest('[data-handle], [data-ab-handle], [data-move-frame]');
     const onText = t.closest && t.closest('.el-text:not(.is-empty)');
@@ -778,11 +787,13 @@
     if (now - d.t >= 350) { dblTap = null; return; }                 // a long press is not a tap
     if (dblTap && now - dblTap.t < 350 && Math.hypot(d.x - dblTap.x, d.y - dblTap.y) < 32) {
       dblTap = null;
-      setTimeout(() => clearTimeout(colorTimer), 0);                  // the color picker the tap would open is not wanted
       dismissChoice();
       closeColor();
       blurEditing();                                                  // an empty text box from the first tap disappears
-      openAddMenu(toArtboard(e.clientX, e.clientY));
+      const pt = toArtboard(e.clientX, e.clientY);
+      const a = doc.artboard;
+      if (containerFor({ x: pt.x, y: pt.y, w: 0, h: 0 })) openAddMenu(pt);                 // inside a card: add into it
+      else if (pt.x >= 0 && pt.y >= 0 && pt.x <= a.w && pt.y <= a.h) openColor({ kind: 'artboard' }, e.clientX, e.clientY);   // page background: its color
       return;
     }
     dblTap = { x: d.x, y: d.y, t: now };
@@ -1293,7 +1304,9 @@
       }
       pending.strokes.push(g.pts);
       pending.paths.push(g.path);
-      pending.timer = setTimeout(flushPending, 700);
+      // wait longer when this looks like the start of a rectangle (an L, a U, two parallel sides)
+      const done = PS.recognizePlus(pending.strokes) || PS.recognize(pending.strokes).type === 'rect' || PS.recognizeButton(pending.strokes);
+      pending.timer = setTimeout(flushPending, !done && PS.looksPartialRect(pending.strokes) ? 1300 : 700);
       return;
     }
     if (g.kind === 'tapOrPan') {
@@ -1302,11 +1315,7 @@
       const a = doc.artboard;
       const onArtboard = g.pt.x >= 0 && g.pt.y >= 0 && g.pt.x <= a.w && g.pt.y <= a.h;
       if (ui.selectedId || ui.editingId) { blurEditing(); select(null); return; }
-      if (onArtboard) {
-        clearTimeout(colorTimer);
-        const cx = e.clientX, cy = e.clientY;
-        colorTimer = setTimeout(() => openColor({ kind: 'artboard' }, cx, cy), 360);   // a second tap would be a double tap (Add menu)
-      }
+
       return;
     }
     if (g.kind === 'artboard') {
@@ -1575,6 +1584,56 @@
     positionInspector();
   }
 
+  /* ── flex property editor: icon groups like the browser DevTools flexbox editor ──
+   * Icons are drawn for the row orientation; in a column stack they are transposed (CSS), so
+   * justify-content / align-items always show the real direction. */
+  const FI = (inner) => `<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">${inner}</svg>`;
+  const box = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1" fill="currentColor"/>`;
+  const tick = (d) => `<path d="${d}" stroke="currentColor" stroke-width="1" opacity=".45"/>`;
+  const items3 = (xs) => tick('M.7 2v12M15.3 2v12') + xs.map((x) => box(x, 4, 2, 8)).join('');
+  const bars2 = (a, b) => tick('M1.5 .8h13M1.5 15.2h13') + box(4.5, a[0], 3, a[1]) + box(9.5, b[0], 3, b[1]);
+  const FLEX_ICONS = {
+    row: FI(box(2, 2.5, 4.5, 5.5) + box(9, 2.5, 4.5, 5.5) + '<path d="M2 12.5h11M10.4 10l3 2.5-3 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'),
+    grid: FI(box(2, 2, 5, 5) + box(9, 2, 5, 5) + box(2, 9, 5, 5) + box(9, 9, 5, 5)),
+    nowrap: FI(box(1.5, 4.5, 3.5, 7) + box(6.25, 4.5, 3.5, 7) + box(11, 4.5, 3.5, 7)),
+    wrap: FI(box(1.5, 2, 3.5, 5) + box(6.25, 2, 3.5, 5) + box(11, 2, 3.5, 5) + box(1.5, 9, 3.5, 5) + box(6.25, 9, 3.5, 5)),
+    'j-flex-start': FI(items3([1.5, 5, 8.5])),
+    'j-center': FI(items3([3.5, 7, 10.5])),
+    'j-flex-end': FI(items3([5, 8.5, 12])),
+    'j-space-between': FI(items3([1.5, 7, 12.5])),
+    'j-space-around': FI(items3([2.7, 7, 11.3])),
+    'j-space-evenly': FI(items3([3.25, 7, 10.75])),
+    'a-flex-start': FI(bars2([3, 9], [3, 5])),
+    'a-center': FI(bars2([3.5, 9], [5.5, 5])),
+    'a-flex-end': FI(bars2([4, 9], [8, 5])),
+    'a-stretch': FI(bars2([3, 10], [3, 10])),
+    'a-baseline': FI(tick('M1.5 14h13') + '<path d="M2 12.5L5 4l3 8.5M3.2 9.6h3.6M9.6 12.5L11.8 7l2.2 5.5M10.4 11h2.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'),
+  };
+  function flexGroup(key, prop, current, options, onPick, transpose) {
+    const g = document.createElement('div');
+    g.className = 'flex-group';
+    const lab = document.createElement('div');
+    lab.className = 'flex-group__label';
+    lab.innerHTML = `<span class="prop">${prop}</span><span class="val">: ${current}</span>`;
+    const row = document.createElement('div');
+    row.className = 'flex-icons';
+    options.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'flex-ic' + ((o.transpose !== undefined ? o.transpose : transpose) ? ' flex-t' : '');
+      b.dataset.key = key;
+      b.dataset.value = o.id;
+      b.title = `${prop}: ${o.id}`;
+      b.setAttribute('aria-label', `${prop}: ${o.id}`);
+      b.setAttribute('aria-pressed', o.id === current ? 'true' : 'false');
+      b.innerHTML = FLEX_ICONS[o.icon];
+      b.addEventListener('click', () => onPick(o.id));
+      row.appendChild(b);
+    });
+    g.append(lab, row);
+    return g;
+  }
+
   function renderCardPanel(el) {
     const L = el.layout;
     const parent = el.parent ? byId(el.parent) : null;
@@ -1599,8 +1658,15 @@
     panelEl.appendChild(head);
 
     // stack
-    const dirControls = [chips(PS.DIRECTIONS, L.dir, (v) => set(() => { L.dir = v; if (v !== 'row') L.wrap = false; if (v === 'grid' && !L.cols) L.cols = 2; }))];
-    if (L.dir === 'row') dirControls.push(chips([{ id: 'wrap', label: 'Wrap', title: 'Wrap items onto new rows' }], L.wrap ? 'wrap' : null, () => set(() => { L.wrap = !L.wrap; })));
+    const colDir = L.dir === 'column';
+    const dirGroup = flexGroup('direction', L.dir === 'grid' ? 'display' : 'flex-direction', L.dir, [
+      { id: 'row', icon: 'row', transpose: false },
+      { id: 'column', icon: 'row', transpose: true },
+      { id: 'grid', icon: 'grid', transpose: false },
+    ], (v) => set(() => { L.dir = v; if (v !== 'row') L.wrap = false; if (v === 'grid' && !L.cols) L.cols = 2; }));
+    const wrapGroup = L.dir === 'row' ? [flexGroup('wrap', 'flex-wrap', L.wrap ? 'wrap' : 'nowrap', [{ id: 'nowrap', icon: 'nowrap' }, { id: 'wrap', icon: 'wrap' }], (v) => set(() => { L.wrap = v === 'wrap'; }), false)] : [];
+    const justifyGroup = L.dir === 'grid' ? [] : [flexGroup('justify', 'justify-content', L.justify, PS.JUSTIFIES.map((o) => ({ id: o.id, icon: 'j-' + o.id })), (v) => set(() => { L.justify = v; }), colDir)];
+    const alignGroup = flexGroup('align', 'align-items', L.align, PS.ALIGNS.map((o) => ({ id: o.id, icon: 'a-' + o.id })), (v) => set(() => { L.align = v; }), colDir);
     const gridCols = [];
     if (L.dir === 'grid') {
       const mode = L.gridMode || 'count';
@@ -1621,15 +1687,16 @@
       }
     }
     panelEl.appendChild(section('Stack',
-      field('Direction', ...dirControls),
+      dirGroup,
+      ...wrapGroup,
       ...gridCols,
       fieldRow(
         field('Gap', selectCtl('Gap', spaceOptions(), L.gap, (v) => set(() => { L.gap = v; }))),
         field('Pad ↔', selectCtl('Padding left and right', spaceOptions(), L.padX, (v) => set(() => { L.padX = v; }))),
         field('Pad ↕', selectCtl('Padding top and bottom', spaceOptions(), L.padY, (v) => set(() => { L.padY = v; }))),
       ),
-      field(L.dir === 'column' ? 'Align (horizontal)' : 'Align (vertical)', chips(PS.ALIGNS, L.align, (v) => set(() => { L.align = v; }))),
-      ...(L.dir === 'grid' ? [] : [field(L.dir === 'row' ? 'Distribute (horizontal)' : 'Distribute (vertical)', chips(PS.JUSTIFIES, L.justify, (v) => set(() => { L.justify = v; })))]),
+      ...justifyGroup,
+      alignGroup,
     ));
 
     // size

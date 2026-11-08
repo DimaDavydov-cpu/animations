@@ -122,7 +122,7 @@
     return null;
   };
 
-  PS.recognize = function (strokes) {
+  const strictRect = function (strokes) {
     const raw = strokes.flat();
     if (raw.length < 4) return { type: 'none', reason: 'tiny' };
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -172,5 +172,96 @@
     const rw = (isNaN(x2) ? maxX : x2) - rx, rh = (isNaN(y2) ? maxY : y2) - ry;
     const score = (nearFrac + minCov + fill) / 3;
     return { type: 'rect', x: rx, y: ry, w: rw, h: rh, score, debug: { nearFrac, cov, fill, lengthRatio } };
+  };
+
+  /* ── loose rectangle: four straight-ish sides in four places, no closed loop needed ── */
+  function rdp(pts, eps) {
+    const keep = new Array(pts.length).fill(false);
+    keep[0] = keep[pts.length - 1] = true;
+    const stack = [[0, pts.length - 1]];
+    while (stack.length) {
+      const [a, b] = stack.pop();
+      const A = pts[a], B = pts[b];
+      const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy);
+      let maxD = 0, idx = -1;
+      for (let i = a + 1; i < b; i++) {
+        const q = pts[i];
+        const d = len < 2 ? Math.hypot(q.x - A.x, q.y - A.y) : Math.abs(dx * (A.y - q.y) - (A.x - q.x) * dy) / len;
+        if (d > maxD) { maxD = d; idx = i; }
+      }
+      if (maxD > eps && idx > 0) { keep[idx] = true; stack.push([a, idx], [idx, b]); }
+    }
+    return pts.filter((_, i) => keep[i]);
+  }
+  function segmentsOf(stroke, eps) {
+    const pts = resample(stroke, 3);
+    if (pts.length < 2) return [];
+    const poly = rdp(pts, eps);
+    const out = [];
+    for (let i = 1; i < poly.length; i++) {
+      const a = poly[i - 1], b = poly[i], len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (len >= 8) out.push({ a, b, len });
+    }
+    return out;
+  }
+  function unionLen(iv) {
+    iv.sort((p, q) => p[0] - q[0]);
+    let tot = 0, cs = null, ce = null;
+    for (const [s0, e0] of iv) {
+      if (cs === null) { cs = s0; ce = e0; }
+      else if (s0 > ce) { tot += ce - cs; cs = s0; ce = e0; }
+      else ce = Math.max(ce, e0);
+    }
+    return cs === null ? 0 : tot + (ce - cs);
+  }
+  function straightSides(strokes) {
+    const raw = strokes.flat();
+    if (raw.length < 4) return null;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of raw) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); }
+    const w = maxX - minX, h = maxY - minY;
+    const eps = Math.max(3, 0.03 * Math.max(w, h));
+    const segs = strokes.flatMap((st) => segmentsOf(st, eps));
+    const H = [], V = [];
+    let total = 0, aligned = 0;
+    for (const sg of segs) {
+      total += sg.len;
+      const dx = Math.abs(sg.b.x - sg.a.x), dy = Math.abs(sg.b.y - sg.a.y);
+      if (dx > dy * 2.5) { H.push(sg); aligned += sg.len; } else if (dy > dx * 2.5) { V.push(sg); aligned += sg.len; }
+    }
+    return { minX, minY, maxX, maxY, w, h, H, V, total, aligned };
+  }
+  function looseRect(strokes) {
+    const g = straightSides(strokes);
+    if (!g || g.w < 32 || g.h < 24 || !g.total) return null;
+    if (g.aligned / g.total < 0.6) return null;                 // mostly curves or diagonals: not a rectangle
+    const bandH = 0.3 * g.h, bandW = 0.3 * g.w;
+    const my = (s) => (s.a.y + s.b.y) / 2, mx = (s) => (s.a.x + s.b.x) / 2;
+    const top = g.H.filter((s) => my(s) - g.minY <= bandH), bot = g.H.filter((s) => g.maxY - my(s) <= bandH);
+    const left = g.V.filter((s) => mx(s) - g.minX <= bandW), right = g.V.filter((s) => g.maxX - mx(s) <= bandW);
+    const cov = (runs, axis, size) => unionLen(runs.map((s) => (axis === 'x' ? [Math.min(s.a.x, s.b.x), Math.max(s.a.x, s.b.x)] : [Math.min(s.a.y, s.b.y), Math.max(s.a.y, s.b.y)]))) / size;
+    const need = 0.35;                                            // each side only needs to be visible, not complete
+    if (cov(top, 'x', g.w) < need || cov(bot, 'x', g.w) < need || cov(left, 'y', g.h) < need || cov(right, 'y', g.h) < need) return null;
+    const wmean = (runs, f) => runs.reduce((sum, s) => sum + s.len * f(s), 0) / runs.reduce((sum, s) => sum + s.len, 0);
+    const y1 = wmean(top, my), y2 = wmean(bot, my), x1 = wmean(left, mx), x2 = wmean(right, mx);
+    if (x2 - x1 < 0.6 * g.w || y2 - y1 < 0.6 * g.h) return null;
+    return { type: 'rect', x: x1, y: y1, w: x2 - x1, h: y2 - y1, score: 0.5, loose: true };
+  }
+  PS.recognize = function (strokes) {
+    const r = strictRect(strokes);
+    if (r.type === 'rect') return r;
+    return looseRect(strokes) || r;
+  };
+
+  /* Does what is drawn so far look like PART of a rectangle (an L, a U, two parallel sides)?
+   * Then the app waits longer for the remaining strokes. */
+  PS.looksPartialRect = function (strokes) {
+    const g = straightSides(strokes);
+    if (!g || !g.total || g.aligned / g.total < 0.6) return false;
+    const long = (runs, min) => runs.filter((s) => s.len >= min);
+    const H = long(g.H, 25), V = long(g.V, 25);
+    if (H.length && V.length) return true;                                           // a corner or more
+    const spread = (runs, f) => runs.length >= 2 && Math.max(...runs.map(f)) - Math.min(...runs.map(f)) >= 24;
+    return spread(H, (s) => (s.a.y + s.b.y) / 2) || spread(V, (s) => (s.a.x + s.b.x) / 2);   // two parallel sides
   };
 })();

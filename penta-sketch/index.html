@@ -90,10 +90,10 @@
     <div class="empty-hint" id="emptyHint">
       <p class="empty-hint__title">Sketch with Apple Pencil</p>
       <ul>
-        <li><b>Arrow</b> (selected now): tap cards, text and the background · drag to move · scroll with a finger</li>
+        <li><b>Arrow</b> (selected now): tap cards and text · drag to move · scroll with a finger · <b>double-tap the background</b> for its color</li>
         <li>Tap the <b>pencil</b> to draw: a rectangle makes a card (a wide, short one asks Card or Input), a line makes text, a small rectangle with a line inside makes a button</li>
         <li><b>Finger mode</b> lets your finger draw too · two fingers scroll</li>
-        <li>Draw a <b>+</b> or <b>double-tap</b> to add a card, stack, text, button, input, select or tabs</li>
+        <li>Draw a <b>+</b>, or <b>double-tap inside a card</b>, to add a card, stack, text, button, input, select or tabs</li>
         <li><b>Tap text</b> to edit it · drag across it to select</li>
       </ul>
     </div>
@@ -122,7 +122,7 @@
     </select>
     <div class="size-fields" role="group" aria-label="Artboard size in pixels">
       <label class="size-fields__item"><span>W</span><div class="input num-input"><input type="number" id="abW" inputmode="numeric" min="320" max="4000" step="8" aria-label="Artboard width"></div></label>
-      <span class="size-fields__note">Height is automatic · minimum width 320</span>
+      <span class="size-fields__note">minimum 320</span>
     </div>
     <p class="ab-popover__tip">Or drag the handle on the artboard's right edge. Height is automatic.</p>
     <div class="button small"><button type="button" id="abDone">Done</button></div>
@@ -200,9 +200,9 @@
         <dt>Card</dt><dd>Draw a rectangle or square with Pencil. One stroke or several, then pause. Every card is a stack: what you add inside flows vertically or horizontally with a Penta gap and padding.</dd>
         <dt>Card properties</dt><dd>In Select mode (or with Finger mode off) tap a card. The panel shows direction, gap, padding, alignment, size (Fixed, Fill, Hug), fill, border, radius and elevation.</dd>
         <dt>Nesting</dt><dd>Draw a rectangle inside a card to nest one. Draw a rectangle around existing items to wrap them in a new stack.</dd>
-        <dt>Add menu</dt><dd>Draw a + with Pencil, or double-tap the canvas. Pick Card, Stack (a borderless horizontal card with space-between), Text, Button, Input, Select or Tabs; it is created where you drew or tapped, inside the card under that point if there is one.</dd><dt>Button</dt><dd>Draw a small rectangle and a short line inside it, one after the other without pausing. You get a solid dark button; pick Solid, Outlined or Ghost and Small or Big in the toolbar, and write the label.</dd><dt>Text</dt><dd>Draw a straight horizontal line with Pencil (at least two grid columns wide on the canvas) or tap where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
+        <dt>Add menu</dt><dd>Draw a + with Pencil, or double-tap inside a card. Pick Card, Stack (a borderless horizontal card with space-between), Text, Button, Input, Select or Tabs; it is created where you drew or tapped, inside the card under that point if there is one.</dd><dt>Button</dt><dd>Draw a small rectangle and a short line inside it, one after the other without pausing. You get a solid dark button; pick Solid, Outlined or Ghost and Small or Big in the toolbar, and write the label.</dd><dt>Text</dt><dd>Draw a straight horizontal line with Pencil (at least two grid columns wide on the canvas) or tap where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
         <dt>Edit text</dt><dd>Write over existing text with Pencil. Scratch out words to delete them (Scribble gestures).</dd>
-        <dt>Background</dt><dd>In Select mode (or with Finger mode off) tap the empty artboard to choose its color. Use the hex field for exact values.</dd>
+        <dt>Background</dt><dd>Double-tap the empty page background to choose its color. Use the hex field for exact values.</dd>
         <dt>Select / move</dt><dd>In Select mode a finger tap selects; drag a selected item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers scroll the page.</dd>
         <dt>Canvas width</dt><dd>Adaptive (default) uses the full available width. Drag the handle on the canvas's right edge to resize it, pick iPad or Mobile, or tap the width next to the scale (for example 1194 px) to type an exact width. Height is automatic.</dd><dt>Scale</dt><dd>Tap the percentage in the top bar to switch between 100%, 75% and 50%. Touch never changes the scale: two fingers only pan.</dd><dt>Grid snapping</dt><dd>Card edges snap to the layout grid's columns and margins when within 20 px. A red guide shows the line they snapped to.</dd>
         <dt>Arrow and pencil</dt><dd>The arrow (Select) is active when you open the prototype: tap to select, drag to move, tap the background for its color. Tap the pencil (Draw) to sketch with Pencil or, with Finger mode on, your finger.</dd><dt>Finger mode</dt><dd>On by default: in Draw mode your finger draws like Pencil, and two fingers scroll. Turn it off in the ••• menu to select and scroll with one finger.</dd><dt>Without Pencil</dt><dd>Mouse draws in Draw mode. Use Select mode (V) to select, move and pick the background color.</dd>

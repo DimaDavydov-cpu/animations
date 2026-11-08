@@ -419,9 +419,6 @@ button.artboard-label {
 }
 button.artboard-label:hover { background-color: var(--grey-300); }
 .world.is-ab-edit button.artboard-label { background-color: var(--sel); color: var(--foreground-on-accent); }
-/* handles only while editing the size */
-.world.is-ab-edit .world.is-ab-edit .artboard { outline: calc(2px * var(--inv, 1)) solid var(--sel); }
-.world.is-ab-edit 
 .ab-popover { width: 280px; padding: var(--space-4); display: none; flex-direction: column; gap: var(--space-3); }
 .ab-popover.is-open { display: flex; }
 .ab-popover .select-sm { width: 100%; }
@@ -815,3 +812,21 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .tabs-input { width: 200px; }
 .tabs-input input { min-height: 28px; height: 28px; padding: 0 8px; font-size: 12px; }
 .add-item::after { display: none; }   /* ds_penta's global link underline is not wanted in a menu */
+
+/* Flex property editor (DevTools-style icon groups) */
+.flex-group { display: flex; flex-direction: column; gap: 6px; }
+.flex-group__label { font-size: 12px; line-height: 16px; }
+/* PENTA-FALLBACK: property names use blue-500 like DevTools; tool chrome, not a functional state */
+.flex-group__label .prop { color: var(--blue-500); }
+.flex-group__label .val { color: var(--foreground-secondary); }
+.flex-icons { display: flex; flex-wrap: wrap; gap: 4px; }
+.dark-ui button.flex-ic {
+  min-height: 0; max-height: none; width: 30px; height: 28px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 4px; border: 1px solid var(--grey-1000);
+  background: var(--grey-1100); color: var(--foreground-primary);
+}
+.dark-ui button.flex-ic:hover { background: var(--grey-1000); }
+.dark-ui button.flex-ic[aria-pressed="true"] { background: var(--color-white); border-color: var(--color-white); color: var(--grey-1200); }
+.dark-ui button.flex-ic svg { width: 16px; height: 16px; display: block; }
+.flex-t svg { transform: rotate(90deg) scaleY(-1); }   /* row-drawn icon, transposed for a column stack */
