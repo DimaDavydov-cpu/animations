@@ -663,6 +663,7 @@
     return { x: r.left + view.x + pt.x * view.s - viewportEl.scrollLeft, y: r.top + view.y + pt.y * view.s - viewportEl.scrollTop };
   };
   function openAddMenu(pt) {
+    cancelPendingPanels();
     dismissChoice();
     closeColor();
     addAt = pt;
@@ -735,7 +736,7 @@
     const c = toClient(pt);
     if (kind === 'card') addBox(pt, false);
     else if (kind === 'stack') addBox(pt, true);
-    else if (kind === 'text') createTextAt(pt, c.x, c.y);
+    else if (kind === 'text') createTextAt(pt, c.x, c.y, false);
     else if (kind === 'button') createButton({ rect: { x: pt.x - 70, y: pt.y - 21, w: 140, h: 42 } });
     else if (kind === 'input') createInput({ x: pt.x - 160, y: pt.y - 22, w: 320, h: 44 }, 'input');
     else if (kind === 'select') createInput({ x: pt.x - 160, y: pt.y - 22, w: 320, h: 44 }, 'select');
@@ -770,6 +771,8 @@
   viewportEl.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'touch' && penBusy()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    clearTimeout(panelTimer);                                         // a new press cancels a panel that was about to open
+    if (ui.panelDeferred) { ui.panelDeferred = false; }
     const t = e.target;
     const own = t.closest && t.closest('[data-handle], [data-ab-handle], [data-move-frame]');
     const onText = t.closest && t.closest('.el-text:not(.is-empty)');
@@ -779,6 +782,7 @@
     const d = tdown.get(e.pointerId);
     if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 10) d.moved = true;
   }, true);
+  let dblPointerId = null;           // the pointer whose release completed a double tap (the main handler must skip it)
   const tapUp = (e) => {
     const d = tdown.get(e.pointerId);
     tdown.delete(e.pointerId);
@@ -787,13 +791,16 @@
     if (now - d.t >= 350) { dblTap = null; return; }                 // a long press is not a tap
     if (dblTap && now - dblTap.t < 350 && Math.hypot(d.x - dblTap.x, d.y - dblTap.y) < 32) {
       dblTap = null;
+      dblPointerId = e.pointerId;
+      cancelPendingPanels();                                          // no settings panel for a double tap, only the Add menu
       dismissChoice();
       closeColor();
       blurEditing();                                                  // an empty text box from the first tap disappears
+      ui.panelHidden = true;                                          // the tapped element's panel stays closed (a tap on it brings it back)
+      renderInspector();
       const pt = toArtboard(e.clientX, e.clientY);
       const a = doc.artboard;
-      if (containerFor({ x: pt.x, y: pt.y, w: 0, h: 0 })) openAddMenu(pt);                 // inside a card: add into it
-      else if (pt.x >= 0 && pt.y >= 0 && pt.x <= a.w && pt.y <= a.h) openColor({ kind: 'artboard' }, e.clientX, e.clientY);   // page background: its color
+      if (pt.x >= 0 && pt.y >= 0 && pt.x <= a.w && pt.y <= a.h) openAddMenu(pt);                // on a card or the page background
       return;
     }
     dblTap = { x: d.x, y: d.y, t: now };
@@ -915,7 +922,7 @@
     if (node) { node.classList.add('el--enter'); setTimeout(() => node.classList.remove('el--enter'), 400); }
   }
 
-  function createTextAt(pt, cx, cy) {
+  function createTextAt(pt, cx, cy, defer = true) {
     blurEditing();
     const under = document.elementFromPoint(cx, cy);
     const cardNode = under && under.closest && under.closest('.el-card');
@@ -927,6 +934,7 @@
     if (parent) placeInto(el, parent, insertionIndex(parent, pt));
     else doc.elements.push(el);
     ui.selectedId = el.id;
+    if (defer) holdPanels();                 // a tap-made text box shows its toolbar after the tap delay
     render();
     editSnapshot = before;
     nodes.get(el.id).firstChild.focus();
@@ -1001,6 +1009,7 @@
     if (editSnapshot == null) editSnapshot = snapDoc();
     ui.panelHidden = false;
     node.classList.add('is-editing');
+    if (!(inspectorEl.classList.contains('is-open') && inspectorEl.dataset.forId === node.dataset.id) && !ui.panelDeferred) holdPanels();
     renderElements();
     renderSelection();
     renderInspector();
@@ -1283,6 +1292,14 @@
   function endPointer(e, cancelled) {
     if (!pointers.has(e.pointerId)) return;
     pointers.delete(e.pointerId);
+    if (e.pointerId === dblPointerId) {                               // this release completed a double tap: nothing else may happen
+      dblPointerId = null;
+      if (gesture && gesture.kind === 'draw') gesture.path.remove();
+      if (gesture && gesture.elId && nodes.get(gesture.elId)) { const nd = nodes.get(gesture.elId); nd.classList.remove('is-dragging'); nd.style.transform = ''; }
+      gesture = null;
+      dropMarker.remove();
+      return;
+    }
     if (!gesture) return;
     if (gesture.kind === 'pinch') {
       if ([...pointers.values()].filter((p) => p.type === 'touch').length < 2) { gesture = null; pointers.clear(); }
@@ -1315,7 +1332,10 @@
       const a = doc.artboard;
       const onArtboard = g.pt.x >= 0 && g.pt.y >= 0 && g.pt.x <= a.w && g.pt.y <= a.h;
       if (ui.selectedId || ui.editingId) { blurEditing(); select(null); return; }
-
+      if (onArtboard) {
+        const cx = e.clientX, cy = e.clientY;
+        deferPanel(() => { if (!ui.selectedId && !addMenuEl.classList.contains('is-open')) openColor({ kind: 'artboard' }, cx, cy); });
+      }
       return;
     }
     if (g.kind === 'artboard') {
@@ -1333,8 +1353,8 @@
       if (!g.moved) {
         const now = performance.now();
         const el = byId(g.elId);
-        if (el.type === 'text' && !g.fromFrame && el.variant !== 'tabs') { select(g.elId); focusAtEnd(nodes.get(el.id).firstChild); }
-        else { blurEditing(); select(g.elId); }
+        if (el.type === 'text' && !g.fromFrame && el.variant !== 'tabs') { selectDeferred(g.elId); focusAtEnd(nodes.get(el.id).firstChild); }
+        else { blurEditing(); selectDeferred(g.elId); }
         lastTap = { id: g.elId, t: now };
         return;
       }
@@ -1408,8 +1428,36 @@
   viewportEl.addEventListener('scroll', () => positionInspector(), { passive: true });
 
   /* ─────────────── Selection, text toolbar, card panel ─────────────── */
+  /* Settings panels (card panel, text toolbar, background color panel) open a moment after a TAP,
+   * so a double tap goes straight to the Add menu without any settings panel flashing open. */
+  let panelTimer = null;
+  const panelDelay = () => (ui.panelDelay === undefined ? 380 : ui.panelDelay);
+  function deferPanel(fn) {
+    clearTimeout(panelTimer);
+    const d = panelDelay();
+    if (d > 0) panelTimer = setTimeout(fn, d); else fn();
+  }
+  function holdPanels() {                                    // hide the selected element's panel; show it after the delay
+    if (panelDelay() <= 0) return;
+    ui.panelDeferred = true;
+    deferPanel(() => { ui.panelDeferred = false; renderInspector(); });
+  }
+  function cancelPendingPanels() {
+    clearTimeout(panelTimer);
+    ui.panelDeferred = false;
+  }
+  function selectDeferred(id) {                              // selection frame now, panel after the delay
+    ui.panelHidden = false;
+    ui.selectedId = id;
+    if (panelDelay() > 0) ui.panelDeferred = true;
+    renderElements();
+    renderSelection();
+    renderInspector();
+    holdPanels();
+  }
   /* Selecting (or tapping the already selected card again) always shows its panel. */
   function select(id) {
+    cancelPendingPanels();
     ui.panelHidden = false;
     ui.selectedId = id;
     renderElements();
@@ -1529,6 +1577,7 @@
     const el = ui.selectedId && byId(ui.selectedId);
     // a different element (e.g. a newly drawn card) brings the panel back
     if ((el ? el.id : null) !== ui.panelFor) { if (el) ui.panelHidden = false; ui.panelFor = el ? el.id : null; }
+    if (el && ui.panelDeferred) { panelEl.classList.remove('is-open'); hideInspector(); return; }   // opens after the tap delay
     panelEl.classList.toggle('is-open', !!el && el.type === 'card' && !ui.panelHidden);
     if (!el) { hideInspector(); return; }
     if (el.type === 'text') { if (ui.panelHidden) hideInspector(); else renderTextToolbar(el); }
@@ -1537,6 +1586,7 @@
   }
 
   function renderTextToolbar(el) {
+    inspectorEl.dataset.forId = el.id;
     const grip = document.createElement('span');
     grip.innerHTML = GRIP;
     inspectorEl.appendChild(grip.firstChild);
