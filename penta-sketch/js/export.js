@@ -79,7 +79,7 @@
     out.push(['position', 'relative']);
     if (el.type !== 'card') {
       out.push(['min-width', '0']);
-      if (el.variant === 'input' && parent.layout.dir === 'row') out.push(['flex', '1 1 0']);
+      if ((el.variant === 'input' || el.variant === 'select' || el.variant === 'tabs') && parent.layout.dir === 'row') out.push(['flex', '1 1 0']);
       if (el.variant === 'button') out.push(parent.layout.dir === 'grid' ? ['justify-self', 'start'] : ['align-self', 'flex-start']);
       return out;
     }
@@ -110,7 +110,7 @@
   const toStyle = (pairs) => pairs.map(([k, v]) => `${k}: ${v}`).join('; ');
 
   function collectTokens(doc) {
-    const used = new Set(['--font-primary', '--grey-200', '--border-primary', '--radius-md', '--foreground-tertiary', '--surface-primary', '--surface-inverse', '--foreground-on-accent', '--foreground-primary']);
+    const used = new Set(['--font-primary', '--grey-200', '--border-primary', '--radius-md', '--foreground-tertiary', '--surface-primary', '--surface-inverse', '--foreground-on-accent', '--foreground-primary', '--border-secondary']);
     const add = (t) => t && t.startsWith('--') && used.add(t);
     add(doc.artboard.bg);
     for (const el of doc.elements) {
@@ -147,6 +147,15 @@
       if (el.variant === 'button') {
         const st = toStyle([...PS.sizeCss(el, parent)]);
         return `${pad}<button type="button" class="btn btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}" style="${st}">${esc(el.text || 'Button')}</button>`;
+      }
+      if (el.variant === 'select') {
+        const st = toStyle([...PS.sizeCss(el, parent)]);
+        return `${pad}<div class="input-box select-box" style="${st}">${esc(el.text || 'Select')}</div>`;
+      }
+      if (el.variant === 'tabs') {
+        const st = toStyle([...PS.sizeCss(el, parent)]);
+        const tabs = (el.tabs || []).map((t, i) => `<span class="tab${i === (el.active || 0) ? ' is-active' : ''}">${esc(t)}</span>`).join('');
+        return `${pad}<nav class="tabs" style="${st}">${tabs}</nav>`;
       }
       if (el.variant === 'input') {
         const st = toStyle([...PS.sizeCss(el, parent)]);
@@ -194,6 +203,10 @@ ${levelCss}
     .btn-outline { background: var(--surface-primary); border-color: var(--foreground-primary); color: var(--foreground-primary); }
     .btn-ghost { background: transparent; color: var(--foreground-primary); }
     .input-box { height: 44px; padding: 12px 16px; border: 1px solid var(--border-primary); border-radius: var(--radius-md); background: var(--surface-primary); font: 16px/20px var(--font-primary); }
+    .select-box { position: relative; padding-right: 40px; color: var(--foreground-tertiary); }
+    .tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--border-secondary); }
+    .tab { padding: 12px 0 10px; margin-bottom: -1px; border-bottom: 2px solid transparent; font: 600 16px/24px var(--font-primary); color: var(--foreground-secondary); }
+    .tab.is-active { color: var(--foreground-primary); border-bottom-color: var(--foreground-primary); }
     .input-box::placeholder { color: var(--foreground-tertiary); }
   </style>
 </head>

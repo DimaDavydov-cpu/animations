@@ -13,8 +13,9 @@
 
   const STORAGE_KEY = 'penta-sketch:v1';
   const SNAP = PS.GRID.snap;
+  let colorTimer = null;          // the background color picker waits out the double-tap window
   const colBound = (el) => !!el && (el.type === 'card' || (el.type === 'text' && el.w && el.variant !== 'button'));
-  const isBox = (el) => el.variant === 'input' || el.variant === 'button';   // text variants drawn as boxes
+  const isBox = (el) => ['input', 'button', 'select', 'tabs'].includes(el.variant);   // text variants drawn as boxes (not plain text)
   const snap = (v) => Math.round(v / SNAP) * SNAP;
   /* Card heights snap to the 24px vertical rhythm (min one rhythm step) */
   const RHYTHM = 24;
@@ -144,7 +145,8 @@
     else doc.elements.push(el);
   }
   function surfaceUnder(parentId) {
-    const p = parentId ? byId(parentId) : null;
+    let p = parentId ? byId(parentId) : null;
+    while (p && p.fill === 'transparent') p = p.parent ? byId(p.parent) : null;   // a transparent stack shows what is behind it
     return p ? p.fill : doc.artboard.bg;
   }
   function isDark(color) {
@@ -198,9 +200,11 @@
           place(node, ch, el);
           while (node.children.length > ch.length) node.lastChild.remove();
         } else {
-          node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}${el.variant === 'button' ? ` is-button btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}` : ''}`;
+          node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}${el.variant === 'select' ? ' is-input is-select' : ''}${el.variant === 'tabs' ? ' is-tabs' : ''}${el.variant === 'button' ? ` is-button btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}` : ''}`;
           if (el.variant === 'input') node.firstChild.dataset.placeholder = 'Input';
           if (el.variant === 'button') node.firstChild.dataset.placeholder = 'Button';
+          if (el.variant === 'select') node.firstChild.dataset.placeholder = 'Select';
+          if (el.variant === 'tabs') renderTabsView(el, node);
           node.classList.toggle('has-w', !!el.w && !parent);
           node.classList.toggle('is-empty', !el.text && !isBox(el));
           const extra = parent ? [] : [['max-width', Math.max(48, doc.artboard.w - el.x) + 'px']];
@@ -570,6 +574,12 @@
     const { strokes, paths } = pending;
     pending = { strokes: [], paths: [], timer: null };
     if (!strokes.length) return;
+    const plus = PS.recognizePlus(strokes);
+    if (plus) {                                   // a drawn "+": open the Add menu there
+      fadeInk(paths, 'is-absorbed');
+      openAddMenu({ x: plus.x, y: plus.y });
+      return;
+    }
     const btn = PS.recognizeButton(strokes);
     if (btn && btn.type === 'button') {          // small rectangle with a line inside
       createButton(btn);
@@ -632,6 +642,154 @@
     else fadeInk(paths);
   });
 
+  function renderTabsView(el, node) {
+    let v = node.querySelector('.tabs-view');
+    if (!v) { v = document.createElement('div'); v.className = 'tabs-view'; node.appendChild(v); }
+    v.textContent = '';
+    (el.tabs || []).forEach((t, i) => {
+      const sp = document.createElement('span');
+      sp.className = 'tab' + (i === (el.active || 0) ? ' is-active' : '');
+      sp.textContent = t;
+      v.appendChild(sp);
+    });
+  }
+
+  /* ─────────────── Add menu ───────────────
+   * Opens on a drawn "+" or a double tap. Items are created where the menu was opened,
+   * inside the card under that point when there is one, otherwise out on the canvas. */
+  const addMenuEl = $('addMenu');
+  let addAt = null;
+  const toClient = (pt) => {
+    const r = viewportEl.getBoundingClientRect();
+    return { x: r.left + view.x + pt.x * view.s - viewportEl.scrollLeft, y: r.top + view.y + pt.y * view.s - viewportEl.scrollTop };
+  };
+  function openAddMenu(pt) {
+    dismissChoice();
+    closeColor();
+    addAt = pt;
+    addMenuEl.classList.add('is-open');
+    const c = toClient(pt);
+    placeBox(addMenuEl, c.x + 10, c.y + 10);
+  }
+  function dismissAdd() {
+    if (!addAt && !addMenuEl.classList.contains('is-open')) return;
+    addAt = null;
+    addMenuEl.classList.remove('is-open');
+  }
+  /* default column span for things dropped out on the canvas (grid-bound, responsive) */
+  function colPlacement(px, span) {
+    const L = gridLines();
+    span = Math.max(1, Math.min(span, L.n));
+    let s0 = 0;
+    L.colStarts.forEach((v, i) => { if (Math.abs(v - px) < Math.abs(L.colStarts[s0] - px)) s0 = i; });
+    s0 = Math.min(s0, L.n - span);
+    const e0 = s0 + span - 1;
+    return { x: L.colStarts[s0], w: L.colEnds[e0] - L.colStarts[s0], col: { start: s0, end: e0, of: L.n }, n: L.n };
+  }
+  function addBox(pt, stack) {
+    blurEditing();
+    const parent = containerFor({ x: pt.x, y: pt.y, w: 0, h: 0 });
+    const card = {
+      id: uid(), type: 'card', parent: null, x: 0, y: snap(pt.y), w: 0, h: stack ? 96 : 192,
+      fill: stack ? 'transparent' : '--color-white', border: stack ? 'none' : 'secondary', radius: stack ? 'none' : 'lg', elevation: 'none',
+      layout: PS.defaultLayout(), sizeW: 'fixed', sizeH: 'fixed',
+    };
+    // Stack: a card without border or radius, horizontal, space-between
+    if (stack) Object.assign(card.layout, { dir: 'row', justify: 'space-between', align: 'center', padX: '--space-0', padY: '--space-0' });
+    mutate(() => {
+      if (parent) {
+        card.sizeW = 'fill'; card.h = stack ? 72 : 96;
+        placeInto(card, parent, insertionIndex(parent, pt));
+      } else {
+        const n = gridLines().n;
+        const cp = colPlacement(pt.x, stack ? Math.ceil(n / 2) : Math.ceil(n / 3));
+        Object.assign(card, { x: cp.x, w: cp.w, sizeW: 'cols', col: cp.col });
+        doc.elements.push(card);
+      }
+      ui.selectedId = card.id;
+      ui.panelHidden = false;
+    });
+    const node = nodes.get(card.id);
+    if (node) { node.classList.add('el--enter'); setTimeout(() => node.classList.remove('el--enter'), 400); }
+  }
+  function addTabs(pt) {
+    blurEditing();
+    const before = snapDoc();
+    const parent = containerFor({ x: pt.x, y: pt.y, w: 0, h: 0 });
+    const el = { id: uid(), type: 'text', variant: 'tabs', tabs: ['Tab 1', 'Tab 2', 'Tab 3'], active: 0, parent: null, x: 0, y: snap(pt.y), text: '', level: 'body', color: 'primary' };
+    if (parent) placeInto(el, parent, insertionIndex(parent, pt));
+    else {
+      const cp = colPlacement(pt.x, Math.ceil(gridLines().n / 2));
+      Object.assign(el, { x: cp.x, w: cp.w, sizeW: 'cols', col: cp.col });
+      doc.elements.push(el);
+    }
+    ui.selectedId = el.id;
+    ui.panelHidden = false;
+    render();
+    editSnapshot = null;
+    past.push(before); future = [];
+    const inp = inspectorEl.querySelector('.tabs-input input');
+    if (inp) { inp.focus(); inp.select(); }
+    toast('Tabs added. Type the labels, separated by commas');
+  }
+  function addElement(kind, pt) {
+    const c = toClient(pt);
+    if (kind === 'card') addBox(pt, false);
+    else if (kind === 'stack') addBox(pt, true);
+    else if (kind === 'text') createTextAt(pt, c.x, c.y);
+    else if (kind === 'button') createButton({ rect: { x: pt.x - 70, y: pt.y - 21, w: 140, h: 42 } });
+    else if (kind === 'input') createInput({ x: pt.x - 160, y: pt.y - 22, w: 320, h: 44 }, 'input');
+    else if (kind === 'select') createInput({ x: pt.x - 160, y: pt.y - 22, w: 320, h: 44 }, 'select');
+    else if (kind === 'tabs') addTabs(pt);
+  }
+  addMenuEl.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-add]');
+    if (!a) return;
+    e.preventDefault();
+    const pt = addAt;
+    dismissAdd();
+    if (pt) addElement(a.dataset.add, pt);
+  });
+  addMenuEl.addEventListener('pointerdown', (e) => e.preventDefault());   // keep focus where it is
+
+  /* Double tap on the canvas opens the same menu. It is decided when the SECOND tap completes
+   * without moving, so a press that turns into a drag is never mistaken for it. Text with content,
+   * handles and the resize knob keep their own behavior; an empty text box made by the first tap
+   * is dropped. */
+  const tdown = new Map();
+  let dblTap = null;
+  viewportEl.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    clearTimeout(colorTimer);
+    const t = e.target;
+    const own = t.closest && t.closest('[data-handle], [data-ab-handle], [data-move-frame]');
+    const onText = t.closest && t.closest('.el-text:not(.is-empty)');
+    tdown.set(e.pointerId, { x: e.clientX, y: e.clientY, t: performance.now(), moved: false, own: !!own, text: !!onText });
+  }, true);
+  viewportEl.addEventListener('pointermove', (e) => {
+    const d = tdown.get(e.pointerId);
+    if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 10) d.moved = true;
+  }, true);
+  const tapUp = (e) => {
+    const d = tdown.get(e.pointerId);
+    tdown.delete(e.pointerId);
+    if (!d || d.moved || d.own || d.text || e.type === 'pointercancel') return;
+    const now = performance.now();
+    if (now - d.t >= 350) { dblTap = null; return; }                 // a long press is not a tap
+    if (dblTap && now - dblTap.t < 350 && Math.hypot(d.x - dblTap.x, d.y - dblTap.y) < 32) {
+      dblTap = null;
+      setTimeout(() => clearTimeout(colorTimer), 0);                  // the color picker the tap would open is not wanted
+      dismissChoice();
+      closeColor();
+      blurEditing();                                                  // an empty text box from the first tap disappears
+      openAddMenu(toArtboard(e.clientX, e.clientY));
+      return;
+    }
+    dblTap = { x: d.x, y: d.y, t: now };
+  };
+  viewportEl.addEventListener('pointerup', tapUp, true);
+  viewportEl.addEventListener('pointercancel', tapUp, true);
+
   /* A button: a small rectangle with a line inside. Solid dark (Penta default) with white text;
    * style (Solid / Outlined / Ghost) and size (Small 36px / Big 42px) are chosen in the toolbar. */
   function createButton(b) {
@@ -655,12 +813,12 @@
 
   /* An input is a Penta text field: a text element with variant 'input' (44px, hairline border).
    * Out on the canvas it snaps to whole grid columns and stays bound to them. */
-  function createInput(r) {
+  function createInput(r, variant = 'input') {
     blurEditing();
     const before = snapDoc();
     const mid = { x: r.x + r.w / 2, y: r.y + r.h / 2 };
     const parent = containerFor({ x: mid.x, y: mid.y, w: 0, h: 0 });
-    const el = { id: uid(), type: 'text', variant: 'input', parent: null, x: 0, y: snap(mid.y - 22), text: '', level: 'body', color: 'secondary' };
+    const el = { id: uid(), type: 'text', variant, parent: null, x: 0, y: snap(mid.y - 22), text: '', level: 'body', color: 'secondary' };
     if (parent) placeInto(el, parent, insertionIndex(parent, mid));
     else {
       const L = gridLines(), gx = [];
@@ -675,7 +833,7 @@
     render();
     editSnapshot = before;
     nodes.get(el.id).firstChild.focus();
-    toast('Input added. Type its placeholder');
+    toast(variant === 'select' ? 'Select added. Type its placeholder' : 'Input added. Type its placeholder');
   }
 
   let createGuides = null;
@@ -891,6 +1049,7 @@
     if (e.button === 2) return;
     closeMenu();
     dismissChoice();
+    dismissAdd();
     if (colorPop.classList.contains('is-open')) { closeColor(); if (e.pointerType !== 'pen') return; }
     const role = roleFor(e);
     const editable = e.target.closest('.el-text__edit');
@@ -1143,7 +1302,11 @@
       const a = doc.artboard;
       const onArtboard = g.pt.x >= 0 && g.pt.y >= 0 && g.pt.x <= a.w && g.pt.y <= a.h;
       if (ui.selectedId || ui.editingId) { blurEditing(); select(null); return; }
-      if (onArtboard) openColor({ kind: 'artboard' }, e.clientX, e.clientY);
+      if (onArtboard) {
+        clearTimeout(colorTimer);
+        const cx = e.clientX, cy = e.clientY;
+        colorTimer = setTimeout(() => openColor({ kind: 'artboard' }, cx, cy), 360);   // a second tap would be a double tap (Add menu)
+      }
       return;
     }
     if (g.kind === 'artboard') {
@@ -1161,7 +1324,7 @@
       if (!g.moved) {
         const now = performance.now();
         const el = byId(g.elId);
-        if (el.type === 'text' && !g.fromFrame) { select(g.elId); focusAtEnd(nodes.get(el.id).firstChild); }
+        if (el.type === 'text' && !g.fromFrame && el.variant !== 'tabs') { select(g.elId); focusAtEnd(nodes.get(el.id).firstChild); }
         else { blurEditing(); select(g.elId); }
         lastTap = { id: g.elId, t: now };
         return;
@@ -1378,7 +1541,26 @@
     if (el.variant === 'button') {
       inspectorEl.appendChild(g('Style', chips(PS.BTN_STYLES, el.btnStyle || 'solid', (v) => mutate(() => { el.btnStyle = v; }))));
       inspectorEl.appendChild(g('Size', chips(PS.BTN_SIZES, el.btnSize || 'big', (v) => mutate(() => { el.btnSize = v; }))));
-    } else if (el.variant === 'input') {
+    } else if (el.variant === 'tabs') {
+      const wrap = document.createElement('div');
+      wrap.className = 'input tabs-input';
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = (el.tabs || []).join(', ');
+      inp.placeholder = 'Tab 1, Tab 2, Tab 3';
+      inp.setAttribute('aria-label', 'Tab labels, separated by commas');
+      inp.addEventListener('change', () => {
+        const list = inp.value.split(',').map((x) => x.trim()).filter(Boolean).slice(0, 6);
+        if (list.length < 2) { inp.value = el.tabs.join(', '); toast('Tabs need at least two labels'); return; }
+        mutate(() => { el.tabs = list; if ((el.active || 0) >= list.length) el.active = 0; });
+      });
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+      wrap.appendChild(inp);
+      inspectorEl.appendChild(g('Labels', wrap));
+      inspectorEl.appendChild(g('Active', chips((el.tabs || []).map((t, i) => ({ id: i, label: String(i + 1), title: t })), el.active || 0, (v) => mutate(() => { el.active = v; }))));
+    } else if (el.variant === 'input' || el.variant === 'select') {
+      inspectorEl.appendChild(g('Type', chips([{ id: 'text', label: 'Text' }, { id: 'input', label: 'Input' }, { id: 'select', label: 'Select' }], el.variant, (v) => mutate(() => { if (v === 'text') { delete el.variant; el.color = 'primary'; } else el.variant = v; }))));
+    } else if (false) {
       inspectorEl.appendChild(g('Type', chips([{ id: 'text', label: 'Text' }, { id: 'input', label: 'Input' }], 'input', (v) => { if (v === 'text') mutate(() => { delete el.variant; el.color = 'primary'; }); })));
     } else {
       inspectorEl.appendChild(g('Text', levels));
@@ -1665,6 +1847,7 @@
     if (colorPop.classList.contains('is-open') && !colorPop.contains(e.target) && !viewportEl.contains(e.target) && !e.target.closest('.swatch--btn')) closeColor();
     if (!e.target.closest('.menu-anchor')) closeMenu();
     if (!e.target.closest('.zoom-anchor')) $('zoomMenu').classList.remove('show');
+    if (addMenuEl.classList.contains('is-open') && !addMenuEl.contains(e.target) && !viewportEl.contains(e.target)) dismissAdd();
   });
 
   /* ─────────────── Top bar ─────────────── */
@@ -1824,7 +2007,7 @@
     if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); if (ui.selectedId) duplicate(ui.selectedId); return; }
     if (mod) return;
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeSelected(); }
-    else if (e.key === 'Escape') { dismissChoice(); closeArtboardEdit(); closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
+    else if (e.key === 'Escape') { dismissAdd(); dismissChoice(); closeArtboardEdit(); closeColor(); select(null); document.querySelectorAll('.scrim').forEach((s) => s.classList.remove('is-open')); }
     else if (e.key === 'v' || e.key === 'V') setTool('select');
     else if (e.key === 'p' || e.key === 'P') setTool('draw');
     else if (e.key === 'g' || e.key === 'G') { ui.grid = !ui.grid; renderArtboard(); }

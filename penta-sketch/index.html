@@ -93,6 +93,7 @@
         <li><b>Arrow</b> (selected now): tap cards, text and the background · drag to move · scroll with a finger</li>
         <li>Tap the <b>pencil</b> to draw: a rectangle makes a card (a wide, short one asks Card or Input), a line makes text, a small rectangle with a line inside makes a button</li>
         <li><b>Finger mode</b> lets your finger draw too · two fingers scroll</li>
+        <li>Draw a <b>+</b> or <b>double-tap</b> to add a card, stack, text, button, input, select or tabs</li>
         <li><b>Tap text</b> to edit it · drag across it to select</li>
       </ul>
     </div>
@@ -125,6 +126,18 @@
     </div>
     <p class="ab-popover__tip">Or drag the handle on the artboard's right edge. Height is automatic.</p>
     <div class="button small"><button type="button" id="abDone">Done</button></div>
+  </div>
+
+  <!-- ═══════════════ Add menu (a drawn "+" or a double tap) ═══════════════ -->
+  <div class="popover add-menu dark-ui" id="addMenu" role="menu" aria-label="Add">
+    <div class="add-menu__title">Add</div>
+    <a href="#" role="menuitem" class="add-item" data-add="card"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>Card</a>
+    <a href="#" role="menuitem" class="add-item" data-add="stack"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4v8M14 4v8M5.5 5.5h5v5h-5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Stack</a>
+    <a href="#" role="menuitem" class="add-item" data-add="text"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4V3h10v1M8 3v10M6 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Text</a>
+    <a href="#" role="menuitem" class="add-item" data-add="button"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="4.5" width="13" height="7" rx="2" fill="currentColor"/></svg>Button</a>
+    <a href="#" role="menuitem" class="add-item" data-add="input"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="4.5" width="13" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 6.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Input</a>
+    <a href="#" role="menuitem" class="add-item" data-add="select"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="4.5" width="13" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 7l1.5 1.5L12.5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Select</a>
+    <a href="#" role="menuitem" class="add-item" data-add="tabs"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 12.5h13M3 9.5V6M7 9.5V6M3 12.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Tabs</a>
   </div>
 
   <!-- ═══════════════ Wide, short shape: card or input? ═══════════════ -->
@@ -187,7 +200,7 @@
         <dt>Card</dt><dd>Draw a rectangle or square with Pencil. One stroke or several, then pause. Every card is a stack: what you add inside flows vertically or horizontally with a Penta gap and padding.</dd>
         <dt>Card properties</dt><dd>In Select mode (or with Finger mode off) tap a card. The panel shows direction, gap, padding, alignment, size (Fixed, Fill, Hug), fill, border, radius and elevation.</dd>
         <dt>Nesting</dt><dd>Draw a rectangle inside a card to nest one. Draw a rectangle around existing items to wrap them in a new stack.</dd>
-        <dt>Button</dt><dd>Draw a small rectangle and a short line inside it, one after the other without pausing. You get a solid dark button; pick Solid, Outlined or Ghost and Small or Big in the toolbar, and write the label.</dd><dt>Text</dt><dd>Draw a straight horizontal line with Pencil (at least two grid columns wide on the canvas) or tap where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
+        <dt>Add menu</dt><dd>Draw a + with Pencil, or double-tap the canvas. Pick Card, Stack (a borderless horizontal card with space-between), Text, Button, Input, Select or Tabs; it is created where you drew or tapped, inside the card under that point if there is one.</dd><dt>Button</dt><dd>Draw a small rectangle and a short line inside it, one after the other without pausing. You get a solid dark button; pick Solid, Outlined or Ghost and Small or Big in the toolbar, and write the label.</dd><dt>Text</dt><dd>Draw a straight horizontal line with Pencil (at least two grid columns wide on the canvas) or tap where the text goes, then handwrite inside the box. iPadOS Scribble converts it. Pick H1, H2, H3, body… in the toolbar.</dd>
         <dt>Edit text</dt><dd>Write over existing text with Pencil. Scratch out words to delete them (Scribble gestures).</dd>
         <dt>Background</dt><dd>In Select mode (or with Finger mode off) tap the empty artboard to choose its color. Use the hex field for exact values.</dd>
         <dt>Select / move</dt><dd>In Select mode a finger tap selects; drag a selected item to reorder it in its stack, into another card, or out onto the artboard. Corner handles resize. Two fingers scroll the page.</dd>

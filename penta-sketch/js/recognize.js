@@ -56,6 +56,32 @@
   }
 
   /* A single, straight, roughly level stroke = a line of text (wireframe convention). */
+  /* A "+" drawn with two strokes: one horizontal, one vertical, crossing near both middles. */
+  PS.recognizePlus = function (strokes) {
+    if (strokes.length !== 2) return null;
+    const info = strokes.map((pts) => {
+      if (pts.length < 4) return null;
+      const a = pts[0], b = pts[pts.length - 1];
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (len < 20 || len > 260) return null;
+      let dev = 0;
+      for (const q of pts) dev = Math.max(dev, Math.abs((b.x - a.x) * (a.y - q.y) - (a.x - q.x) * (b.y - a.y)) / len);
+      if (dev > Math.max(5, len * 0.06)) return null;            // straight
+      const dx = Math.abs(b.x - a.x), dy = Math.abs(b.y - a.y);
+      const orient = dx > dy * 3 ? 'h' : dy > dx * 3 ? 'v' : null;
+      if (!orient) return null;
+      return { orient, len, x1: Math.min(a.x, b.x), x2: Math.max(a.x, b.x), y1: Math.min(a.y, b.y), y2: Math.max(a.y, b.y), my: (a.y + b.y) / 2, mx: (a.x + b.x) / 2 };
+    });
+    if (!info[0] || !info[1] || info[0].orient === info[1].orient) return null;
+    const h = info.find((i) => i.orient === 'h'), v = info.find((i) => i.orient === 'v');
+    const ratio = h.len / v.len;
+    if (ratio < 0.45 || ratio > 2.2) return null;
+    const inX = v.mx > h.x1 + 0.25 * h.len && v.mx < h.x2 - 0.25 * h.len;   // vertical crosses the horizontal near its middle
+    const inY = h.my > v.y1 + 0.25 * v.len && h.my < v.y2 - 0.25 * v.len;
+    if (!inX || !inY) return null;
+    return { type: 'plus', x: v.mx, y: h.my };
+  };
+
   PS.recognizeLine = function (strokes, minLen = 40) {
     if (strokes.length !== 1) return null;
     const pts = strokes[0];

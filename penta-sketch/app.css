@@ -781,3 +781,37 @@ button.artboard-label:hover { background-color: var(--grey-300); }
   max-height: calc(100vh - var(--panel-top) - var(--panel-gap));
   max-height: calc(100dvh - var(--panel-top) - var(--panel-gap));
 }
+
+/* ═════════════ Add menu ═════════════ */
+.add-menu.is-open { display: flex; flex-direction: column; min-width: 184px; padding: 6px; z-index: 26; }
+.add-menu__title { padding: 6px 10px 8px; font-size: 11px; font-weight: var(--weight-bold); letter-spacing: 0.5px; text-transform: uppercase; color: var(--foreground-secondary); }
+.add-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; min-height: 40px;
+  border-radius: var(--radius-md);
+  color: var(--foreground-primary); text-decoration: none; font-size: 14px; font-weight: var(--weight-semibold);
+}
+.add-item svg { flex: none; color: var(--foreground-secondary); }
+.add-item:hover, .add-item:active { background: var(--grey-1100); }
+.add-item:hover svg { color: var(--foreground-primary); }
+
+/* Select: an input with a chevron */
+.el-text.is-select { padding-right: 40px; }
+.el-text.is-select::after {
+  content: ""; position: absolute; right: 14px; top: 50%; width: 14px; height: 14px; margin-top: -7px; pointer-events: none;
+  background: no-repeat center / 14px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5.25l4 4 4-4' stroke='%23222325' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Tabs. PENTA-FALLBACK: ds_penta.css has no tabs component; built from its tokens. */
+.el-text.is-tabs { display: block; box-sizing: border-box; border-bottom: 1px solid var(--border-secondary); }
+.el-text.is-tabs > .el-text__edit { display: none; }
+.tabs-view { display: flex; gap: 24px; overflow: hidden; }
+.tabs-view .tab {
+  padding: 12px 0 10px; margin-bottom: -1px; border-bottom: 2px solid transparent;
+  font-size: 16px; line-height: 24px; font-weight: var(--weight-semibold); white-space: nowrap;
+  color: var(--foreground-secondary);
+}
+.tabs-view .tab.is-active { color: var(--foreground-primary); border-bottom-color: var(--foreground-primary); }
+.tabs-input { width: 200px; }
+.tabs-input input { min-height: 28px; height: 28px; padding: 0 8px; font-size: 12px; }
+.add-item::after { display: none; }   /* ds_penta's global link underline is not wanted in a menu */
