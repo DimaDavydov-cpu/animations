@@ -173,7 +173,11 @@
       }
       if (el.variant === 'button') {
         const st = toStyle([...PS.sizeCss(el, parent)]);
-        return `${pad}<button type="button" class="btn btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}" style="${st}">${esc(el.text || 'Button')}</button>`;
+        const content = el.btnContent || 'label';
+        const src = el.btnIcon && PS.assetSrc ? PS.assetSrc({ assetId: el.btnIcon }) : '';
+        const icon = content !== 'label' && src ? `<span class="btn-icon" style="--icon: url('${esc(src)}')"></span>` : '';
+        const label = content === 'icon' ? '' : esc(el.text || 'Button');
+        return `${pad}<button type="button" class="btn btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'} btn-c-${content}" style="${st}"${content === 'icon' ? ' aria-label="' + esc(el.text || 'Button') + '"' : ''}>${content === 'label-icon' ? label + icon : icon + label}</button>`;
       }
       if (el.variant === 'select') {
         const st = toStyle([...PS.sizeCss(el, parent)]);
@@ -224,6 +228,12 @@ ${tokens}
     .artboard h1, .artboard h2, .artboard h3, .artboard h4, .artboard h5, .artboard p, .artboard span { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; letter-spacing: 0; }
 ${levelCss}
     .btn { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 64px; border: 1px solid transparent; border-radius: var(--radius-md); font-family: var(--font-primary); font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .btn-icon { flex: none; width: 20px; height: 20px; background-color: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+    .btn-small .btn-icon { width: 16px; height: 16px; }
+    .btn-c-icon { padding: 0; min-width: 0; }
+    .btn-c-icon.btn-big { width: 42px; } .btn-c-icon.btn-small { width: 36px; }
+    .btn-c-icon-label, .btn-c-label-icon { gap: 8px; }
+    .btn-c-icon-label .btn-icon { order: -1; }
     .btn-big { height: 42px; padding: 12px 16px; font-size: 16px; }
     .btn-small { height: 36px; padding: 10px 12px; font-size: 14px; }
     .btn-solid { background: var(--surface-inverse); color: var(--foreground-on-accent); }

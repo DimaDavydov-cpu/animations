@@ -855,3 +855,16 @@ button.artboard-label:hover { background-color: var(--grey-300); }
 .asset-tile .thumb { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; padding: 6px; overflow: hidden; border-radius: 4px; background: var(--grey-700); }   /* mid grey: shows dark and white artwork alike */
 .asset-tile .thumb img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 .asset-tile .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+
+/* Button icon: the icon image used as a mask, painted in the button's text color */
+.btn-icon { flex: none; width: 20px; height: 20px; background-color: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; pointer-events: none; }
+.el-text.is-button.btn-small .btn-icon { width: 16px; height: 16px; }
+.el-text.is-button.btn-c-icon { padding: 0; min-width: 0; }
+.el-text.is-button.btn-c-icon.btn-big { width: 42px; }
+.el-text.is-button.btn-c-icon.btn-small { width: 36px; }
+.el-text.is-button.btn-c-icon .el-text__edit { display: none; }           /* the label stays in the data, hidden */
+.el-text.is-button.btn-c-icon-label, .el-text.is-button.btn-c-label-icon { gap: 8px; }
+.el-text.is-button.btn-c-icon-label .btn-icon { order: -1; }
+.el-text.is-button.btn-c-icon-label .el-text__edit, .el-text.is-button.btn-c-label-icon .el-text__edit { width: auto; flex: 0 1 auto; }
+.icon-pick button { gap: 6px; }
+.icon-pick__preview { width: 14px; height: 14px; }

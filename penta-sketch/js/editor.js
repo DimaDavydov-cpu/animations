@@ -217,9 +217,9 @@
           const rad = PS.RADII.find((x) => x.id === el.radius);
           applyCss(node, [...PS.sizeCss(el, parent), ...(rad && rad.token ? [['border-radius', `var(${rad.token})`]] : [])]);
         } else {
-          node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}${el.variant === 'select' ? ' is-input is-select' : ''}${el.variant === 'tabs' ? ' is-tabs' : ''}${el.variant === 'button' ? ` is-button btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'}` : ''}`;
+          node.className = `el el-text t-${PS.level(el.level).id}${el.variant === 'input' ? ' is-input' : ''}${el.variant === 'select' ? ' is-input is-select' : ''}${el.variant === 'tabs' ? ' is-tabs' : ''}${el.variant === 'button' ? ` is-button btn-${el.btnStyle || 'solid'} btn-${el.btnSize || 'big'} btn-c-${el.btnContent || 'label'}` : ''}`;
           if (el.variant === 'input') node.firstChild.dataset.placeholder = 'Input';
-          if (el.variant === 'button') node.firstChild.dataset.placeholder = 'Button';
+          if (el.variant === 'button') { node.firstChild.dataset.placeholder = 'Button'; renderBtnIcon(el, node); }
           if (el.variant === 'select') node.firstChild.dataset.placeholder = 'Select';
           if (el.variant === 'tabs') renderTabsView(el, node);
           node.classList.toggle('has-w', !!el.w && !parent);
@@ -511,20 +511,22 @@
   const assetMeta = (id) => (id && id.startsWith('lib:') ? (() => { const a = PS.libraryAsset(id.slice(4)); return a ? { src: a.src, name: a.name, w: a.w, h: a.h } : null; })() : uploads.get(id) || null);
   const srcOf = (el) => { const m = assetMeta(el.assetId); return m ? m.src : ''; };
   PS.assetSrc = srcOf;
+  /* every image id the document points at: asset elements and button icons */
+  const assetRefs = () => doc.elements.flatMap((e) => (e.type === 'asset' ? [e.assetId] : e.btnIcon ? [e.btnIcon] : []));
   function usedUploads() {
     const out = {};
-    doc.elements.forEach((e) => { if (e.type === 'asset' && uploads.has(e.assetId)) out[e.assetId] = uploads.get(e.assetId); });
+    assetRefs().forEach((id) => { if (uploads.has(id)) out[id] = uploads.get(id); });
     return out;
   }
   function saveUploads() {
-    const sig = doc.elements.filter((e) => e.type === 'asset').map((e) => e.assetId).join('|');
+    const sig = assetRefs().join('|');
     if (sig === assetsSig) return;
     assetsSig = sig;
     try { localStorage.setItem(STORE_ASSETS, JSON.stringify(usedUploads())); } catch (e) { toast('This browser has no room to remember the uploaded image after a reload'); }
   }
   function loadUploads() {
     try { const o = JSON.parse(localStorage.getItem(STORE_ASSETS) || '{}'); Object.keys(o).forEach((k) => uploads.set(k, o[k])); } catch (e) { /* ignore */ }
-    assetsSig = doc.elements.filter((e) => e.type === 'asset').map((e) => e.assetId).join('|');
+    assetsSig = assetRefs().join('|');
   }
 
   let saveTimer = null;
@@ -697,6 +699,24 @@
     else fadeInk(paths);
   });
 
+  /* Button icon: a mask of the icon image painted in the button's own text color, so any single-color
+   * icon follows Solid / Outlined / Ghost. It sits after the label in the DOM; CSS order puts it first. */
+  function renderBtnIcon(el, node) {
+    let ic = node.querySelector('.btn-icon');
+    if ((el.btnContent || 'label') === 'label' || !el.btnIcon) { if (ic) ic.remove(); return; }
+    if (!ic) { ic = document.createElement('span'); ic.className = 'btn-icon'; ic.setAttribute('aria-hidden', 'true'); node.appendChild(ic); }
+    const m = assetMeta(el.btnIcon);
+    ic.style.setProperty('--icon', m ? `url("${m.src}")` : 'none');
+  }
+  /* an icon-only button is square (the size's height); other contents get their label width back */
+  function btnApply(el) {
+    const H = (el.btnSize || 'big') === 'small' ? 36 : 42;
+    if ((el.btnContent || 'label') === 'icon') {
+      if (el.w && el.wLabel === undefined) el.wLabel = el.w;
+      if (el.w !== undefined || el.wLabel !== undefined) el.w = H;
+    } else if (el.wLabel !== undefined) { el.w = el.wLabel; delete el.wLabel; }
+  }
+
   function renderTabsView(el, node) {
     let v = node.querySelector('.tabs-view');
     if (!v) { v = document.createElement('div'); v.className = 'tabs-view'; node.appendChild(v); }
@@ -854,12 +874,13 @@
       pickBody.append(h, grid);
     };
     group('Uploaded', [...uploads.entries()].map(([id, m]) => ({ id, name: m.name, src: m.src })));
-    ['Brand', 'Icons', 'Images'].forEach((g) => group(g, PS.LIBRARY.filter((a) => a.group === g).map((a) => ({ id: 'lib:' + a.id, name: a.name, src: a.src }))));
+    (pickCtx && pickCtx.iconFor ? ['Icons'] : ['Brand', 'Icons', 'Images']).forEach((g) => group(g, PS.LIBRARY.filter((a) => a.group === g).map((a) => ({ id: 'lib:' + a.id, name: a.name, src: a.src }))));
   }
-  function openAssetPicker(pt, replaceId) {
+  function openAssetPicker(pt, replaceId, opts = {}) {
     cancelPendingPanels();
     dismissAdd();
-    pickCtx = { pt, replaceId };
+    pickCtx = { pt, replaceId, iconFor: opts.iconFor || null };
+    pickerEl.querySelector('.asset-picker__title').textContent = pickCtx.iconFor ? 'Choose an icon' : 'Assets';
     buildPicker();
     pickerEl.classList.add('is-open');
     pickBody.scrollTop = 0;
@@ -875,6 +896,11 @@
     const ctx = pickCtx;
     dismissAssetPicker();
     if (!m || !ctx) return;
+    if (ctx.iconFor) {                                    // picking an icon for a button
+      const b = byId(ctx.iconFor);
+      if (b) mutate(() => { b.btnIcon = id; if ((b.btnContent || 'label') === 'label') { b.btnContent = 'icon'; } btnApply(b); });
+      return;
+    }
     if (ctx.replaceId) {
       const el = byId(ctx.replaceId);
       if (el) mutate(() => { el.assetId = id; el.name = m.name; el.ratio = m.w / m.h; syncAssetH(el); });
@@ -1803,7 +1829,28 @@
     const g = (label, ...c) => { const d = document.createElement('div'); d.className = 'insp-group'; if (label) { const s = document.createElement('span'); s.className = 'insp-label'; s.textContent = label; d.appendChild(s); } c.forEach((x) => d.appendChild(x)); return d; };
     if (el.variant === 'button') {
       inspectorEl.appendChild(g('Style', chips(PS.BTN_STYLES, el.btnStyle || 'solid', (v) => mutate(() => { el.btnStyle = v; }))));
-      inspectorEl.appendChild(g('Size', chips(PS.BTN_SIZES, el.btnSize || 'big', (v) => mutate(() => { el.btnSize = v; }))));
+      inspectorEl.appendChild(g('Size', chips(PS.BTN_SIZES, el.btnSize || 'big', (v) => mutate(() => { el.btnSize = v; btnApply(el); }))));
+      inspectorEl.appendChild(g('Content', chips(PS.BTN_CONTENT, el.btnContent || 'label', (v) => mutate(() => {
+        el.btnContent = v;
+        if (v !== 'label' && !el.btnIcon) el.btnIcon = 'lib:star';
+        btnApply(el);
+      }))));
+      if ((el.btnContent || 'label') !== 'label') {
+        const wrap = document.createElement('div');
+        wrap.className = 'button small border icon-pick';
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.title = 'Choose the icon';
+        b.setAttribute('aria-label', 'Choose the icon');
+        const prev = document.createElement('span');
+        prev.className = 'btn-icon icon-pick__preview';
+        const m = assetMeta(el.btnIcon);
+        prev.style.setProperty('--icon', m ? `url("${m.src}")` : 'none');
+        b.append(prev, document.createTextNode(' Icon…'));
+        b.addEventListener('click', () => openAssetPicker(null, null, { iconFor: el.id }));
+        wrap.appendChild(b);
+        inspectorEl.appendChild(g(null, wrap));
+      }
     } else if (el.variant === 'tabs') {
       const wrap = document.createElement('div');
       wrap.className = 'input tabs-input';

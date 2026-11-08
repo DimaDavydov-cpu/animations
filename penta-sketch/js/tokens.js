@@ -123,6 +123,13 @@
   PS.MIN_UNITS = ['px', '%', 'vw', 'vh', 'rem'];
   /* Buttons: Penta default = solid dark (surface-inverse) with white text */
   PS.BTN_STYLES = [{ id: 'solid', label: 'Solid' }, { id: 'outline', label: 'Outlined' }, { id: 'ghost', label: 'Ghost' }];
+  /* Button content: a text label, an icon-only (square) button, or both with the icon before / after */
+  PS.BTN_CONTENT = [
+    { id: 'label', label: 'Label' },
+    { id: 'icon', label: 'Icon', title: 'Icon-only: a square button' },
+    { id: 'icon-label', label: 'Icon + label' },
+    { id: 'label-icon', label: 'Label + icon' },
+  ];
   PS.BTN_SIZES = [{ id: 'small', label: 'Small', title: '36px (ds_penta .small)' }, { id: 'big', label: 'Big', title: '42px (ds_penta default)' }];
   PS.ALIGNS = [
     { id: 'flex-start', label: 'Start' },
